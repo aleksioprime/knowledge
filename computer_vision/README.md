@@ -10,10 +10,10 @@
 pip install numpy
 ```
 
-- [Массив Numpy](array.md)
-- [Создание массива](fill.md)
-- [Индексация](knowledge/computer_vision/numpy/indexing.md)
-- [Математические операции](math.md)
+- [Массив Numpy](numpy/array.md)
+- [Создание массива](numpy/fill.md)
+- [Индексация](numpy/indexing.md)
+- [Математические операции](numpy/math.md)
 ## OpenCV
 
 OpenCV (Open Source Computer Vision Library) — это библиотека для компьютерного зрения и обработки изображений, которая была разработана компанией Intel и затем выпущена в открытый доступ. OpenCV предоставляет мощные инструменты для работы с изображениями и видео, такие как детектирование объектов, распознавание лиц, анализ движения и многое другое. Библиотека широко используется в научных исследованиях, разработке приложений и в области машинного обучения.
@@ -24,7 +24,7 @@ OpenCV (Open Source Computer Vision Library) — это библиотека д�
 pip install opencv-contrib-python
 ```
 
-- [Работа с изображением](read_image.md)
-- [Адресация в изображении](image_addressing.md)
-- [Работа с цветами](color_processing.md)
-- [Работа с видеопотоком](video_stream.md)
+- [Работа с изображением](opencv/read_image.md)
+- [Адресация в изображении](opencv/image_addressing.md)
+- [Работа с цветами](opencv/color_processing.md)
+- [Работа с видеопотоком](opencv/video_stream.md)
