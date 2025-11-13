@@ -27,8 +27,8 @@ services:
 
   # FastAPI приложение
   api:
-    build: ./app
-    container_name: test_locust_app
+    build: ./api
+    container_name: test_locust_api
     depends_on:
       postgres:
         condition: service_healthy

@@ -5,7 +5,7 @@
 
 from datetime import datetime, timezone
 from jose import jwt
-from .config import settings
+from src.app.config import settings
 
 
 def create_access_token(data: dict) -> str:

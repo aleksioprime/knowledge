@@ -5,9 +5,9 @@
 
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
-from .api import router
-from .db import init_db
-from .init_db import init_test_data
+from src.app.api import router
+from src.app.db import init_db
+from src.app.init_db import init_test_data
 
 
 @asynccontextmanager

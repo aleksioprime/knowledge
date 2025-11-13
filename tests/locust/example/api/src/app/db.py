@@ -5,7 +5,7 @@
 
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import declarative_base
-from .config import settings
+from src.app.config import settings
 
 # Используем асинхронный DSN из конфигурации
 DATABASE_URL = settings.db.dsn

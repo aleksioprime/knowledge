@@ -7,9 +7,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from . import crud, schemas, security
-from .db import get_db
-from .dependencies import get_current_user
+from src.app import crud, schemas, security
+from src.app.db import get_db
+from src.app.dependencies import get_current_user
 
 router = APIRouter()
 
@@ -80,6 +80,23 @@ async def delete_item(
     if not deleted:
         raise HTTPException(status_code=404, detail="Item not found")
     return {"message": "Item deleted successfully"}
+
+
+@router.put("/items/{item_id}", response_model=schemas.Item)
+async def update_item(
+    item_id: int,
+    item_update: schemas.ItemUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    """
+    Обновить элемент по ID.
+    Требуется авторизация
+    """
+    updated_item = await crud.update_item(db, item_id, item_update)
+    if not updated_item:
+        raise HTTPException(status_code=404, detail="Item not found")
+    return updated_item
 
 
 @router.post("/items/delete-batch")

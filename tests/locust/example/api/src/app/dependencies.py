@@ -8,9 +8,9 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 from jose import jwt, JWTError
 
-from .config import settings
-from .db import get_db
-from . import crud, models
+from src.app.config import settings
+from src.app.db import get_db
+from src.app import crud, models
 
 # OAuth2 схема для получения токена из заголовка Authorization
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")

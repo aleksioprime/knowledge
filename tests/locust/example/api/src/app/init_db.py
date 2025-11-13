@@ -4,8 +4,8 @@
 """
 
 from sqlalchemy import select
-from .db import AsyncSessionLocal
-from . import models
+from src.app.db import AsyncSessionLocal
+from src.app import models
 
 
 async def init_test_data():

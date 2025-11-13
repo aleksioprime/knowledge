@@ -57,6 +57,15 @@ class ItemCreate(ItemBase):
     pass
 
 
+class ItemUpdate(BaseModel):
+    """
+    Схема для обновления элемента.
+    Все поля опциональны - обновляются только переданные поля
+    """
+    name: str | None = None
+    price: float | None = None
+
+
 class Item(ItemBase):
     """
     Схема элемента для возврата из API.

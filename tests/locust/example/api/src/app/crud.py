@@ -5,7 +5,7 @@
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from . import models, schemas
+from src.app import models, schemas
 
 
 async def get_user_by_username(db: AsyncSession, username: str) -> models.User | None:
@@ -69,6 +69,28 @@ async def delete_item(db: AsyncSession, item_id: int) -> bool:
     await db.delete(db_item)
     await db.commit()
     return True
+
+
+async def update_item(db: AsyncSession, item_id: int, item_update: schemas.ItemUpdate) -> models.Item | None:
+    """
+    Обновить элемент в базе данных по ID
+    """
+    result = await db.execute(
+        select(models.Item).where(models.Item.id == item_id)
+    )
+    db_item = result.scalar_one_or_none()
+
+    if db_item is None:
+        return None
+
+    # Обновляем только те поля, которые были переданы
+    update_data = item_update.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(db_item, field, value)
+
+    await db.commit()
+    await db.refresh(db_item)
+    return db_item
 
 
 async def delete_items_by_ids(db: AsyncSession, item_ids: list[int]) -> dict[str, int]:

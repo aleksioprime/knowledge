@@ -33,11 +33,11 @@ class WebsiteUser(HttpUser):
     def on_stop(self):
         """
         Метод выполняется один раз при остановке каждого пользователя.
-        Удаляет все оставшиеся неудаленные items с помощью массового удаления.
+        Удаляет все созданные items с помощью массового удаления.
         """
+        # Удаляем созданные items
         if self.created_items:
             try:
-                # Используем новый API массового удаления
                 response = self.client.post(
                     "/api/items/delete-batch",
                     json={"item_ids": self.created_items}
@@ -86,3 +86,18 @@ class WebsiteUser(HttpUser):
             # Удаляем последний созданный item
             item_id = self.created_items.pop()
             self.client.delete(f"/api/items/{item_id}")
+
+    @task
+    def update_item(self):
+        """
+        Задача: обновить случайный элемент из созданных.
+        Выполняется с весом 1 (стандартный)
+        """
+        if self.created_items:
+            # Обновляем случайный item (последний в списке)
+            item_id = self.created_items[-1]
+            # Обновляем только цену
+            self.client.put(
+                f"/api/items/{item_id}",
+                json={"price": 200.50}
+            )

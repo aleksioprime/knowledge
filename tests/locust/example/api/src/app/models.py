@@ -5,7 +5,7 @@
 
 from datetime import datetime, timezone
 from sqlalchemy import Column, Integer, String, Boolean, Float, DateTime
-from .db import Base
+from src.app.db import Base
 
 
 class User(Base):
@@ -23,15 +23,7 @@ class User(Base):
 
 class Item(Base):
     """
-    Модель элемента в базе данных.
-
-    Attributes:
-        id: Уникальный идентификатор элемента
-        name: Название элемента
-        price: Цена элемента
-        owner_id: ID владельца элемента (ссылка на пользователя)
-        created_at: Дата и время создания элемента (с timezone)
-        updated_at: Дата и время последнего обновления элемента (с timezone)
+    Модель элемента в базе данных
     """
     __tablename__ = "items"
 
