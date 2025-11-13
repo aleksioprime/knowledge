@@ -3,16 +3,13 @@
 Содержит схемы для сериализации и десериализации данных API.
 """
 
-from pydantic import BaseModel
+from datetime import datetime
+from pydantic import BaseModel, ConfigDict
 
 
 class Token(BaseModel):
     """
-    Схема ответа с JWT токеном.
-
-    Attributes:
-        access_token: JWT токен доступа
-        token_type: Тип токена (обычно "bearer")
+    Схема ответа с JWT токеном
     """
     access_token: str
     token_type: str
@@ -20,11 +17,7 @@ class Token(BaseModel):
 
 class UserBase(BaseModel):
     """
-    Базовая схема пользователя с общими полями.
-
-    Attributes:
-        username: Имя пользователя
-        full_name: Полное имя пользователя (опционально)
+    Базовая схема пользователя с общими полями
     """
     username: str
     full_name: str | None = None
@@ -45,8 +38,7 @@ class User(UserBase):
     """
     id: int
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ItemBase(BaseModel):
@@ -68,10 +60,11 @@ class ItemCreate(ItemBase):
 class Item(ItemBase):
     """
     Схема элемента для возврата из API.
-    Включает ID и ID владельца
+    Включает ID, ID владельца и временные метки
     """
     id: int
     owner_id: int | None = None
+    created_at: datetime
+    updated_at: datetime
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)

@@ -2,42 +2,17 @@
 
 Минималистичный пример приложения для нагрузочного тестирования с использованием Locust, FastAPI и PostgreSQL.
 
-## Структура проекта
-
-```
-example/
-├── app/                    # FastAPI приложение
-│   ├── src/               # Исходный код приложения
-│   │   ├── api.py        # API маршруты
-│   │   ├── config.py     # Конфигурация
-│   │   ├── crud.py       # CRUD операции
-│   │   ├── db.py         # Подключение к БД
-│   │   ├── dependencies.py  # Зависимости FastAPI
-│   │   ├── init_db.py    # Инициализация тестовых данных
-│   │   ├── main.py       # Главный файл приложения
-│   │   ├── models.py     # Модели SQLAlchemy
-│   │   ├── schemas.py    # Pydantic схемы
-│   │   └── security.py   # JWT аутентификация
-│   ├── Dockerfile
-│   └── requirements.txt
-├── locust/                # Locust тесты
-│   ├── locustfile.py     # Сценарии нагрузочного тестирования
-│   ├── Dockerfile
-│   └── requirements.txt
-└── docker-compose.yaml    # Конфигурация Docker Compose
-```
-
-## Запуск
+## Запуск проекта
 
 ```bash
 # Запуск всех сервисов
-docker-compose up --build
+docker-compose -p test-locust up --build -d
 
 # Остановка сервисов
-docker-compose down
+docker-compose -p test-locust down
 
 # Полная очистка (включая volumes)
-docker-compose down -v
+docker-compose -p test-locust down -v
 ```
 
 ## Доступ к сервисам
@@ -50,7 +25,7 @@ docker-compose down -v
 ## Тестовые данные
 
 При запуске автоматически создается тестовый пользователь:
-- Username: `user1`
+- Username: `user_test`
 - Password: `password`
 
 ## API эндпоинты
@@ -62,7 +37,7 @@ docker-compose down -v
 
 ## Использование Locust
 
-1. Откройте http://localhost:8089
+1. Откройте http://localhost:7003
 2. Укажите количество пользователей и скорость их появления
 3. Запустите тест
 4. Наблюдайте за результатами в реальном времени

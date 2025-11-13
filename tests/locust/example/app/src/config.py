@@ -10,7 +10,7 @@ class DBSettings(BaseSettings):
     name: str = Field(alias='DB_NAME', default='database')
     user: str = Field(alias='DB_USER', default='admin')
     password: str = Field(alias='DB_PASSWORD', default='123qwe')
-    host: str = Field(alias='DB_HOST', default='127.0.0.1')
+    host: str = Field(alias='DB_HOST', default='postgres')
     port: int = Field(alias='DB_PORT', default=5432)
 
     @property
@@ -36,18 +36,12 @@ class JWTSettings(BaseSettings):
     )
     algorithm: str = Field(alias='JWT_ALGORITHM', default='HS256')
     access_token_expire_time: timedelta = Field(default=timedelta(minutes=15))
-    refresh_token_expire_time: timedelta = Field(default=timedelta(days=10))
 
 
 class Settings(BaseSettings):
     """
     Основные настройки приложения
     """
-    # Настройки проекта
-    PROJECT_NAME: str = "Locust Test API"
-    API_PREFIX: str = "/api"
-
-    # Вложенные настройки
     jwt: JWTSettings = JWTSettings()
     db: DBSettings = DBSettings()
 

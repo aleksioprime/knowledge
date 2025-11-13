@@ -3,7 +3,8 @@
 Содержит определения таблиц для пользователей и элементов.
 """
 
-from sqlalchemy import Column, Integer, String, Boolean, Float
+from datetime import datetime, timezone
+from sqlalchemy import Column, Integer, String, Boolean, Float, DateTime
 from .db import Base
 
 
@@ -30,3 +31,9 @@ class Item(Base):
     name = Column(String, index=True)
     price = Column(Float)
     owner_id = Column(Integer)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(
+        DateTime,
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc)
+    )

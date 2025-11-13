@@ -17,20 +17,20 @@ def init_test_data():
     try:
         # Проверяем, существует ли уже тестовый пользователь
         existing_user = db.query(models.User).filter(
-            models.User.username == "user1"
+            models.User.username == "user_test"
         ).first()
 
         if not existing_user:
             # Создаем тестового пользователя
             test_user = models.User(
-                username="user1",
+                username="user_test",
                 full_name="Test User",
                 hashed_password="password",  # В учебном примере пароль в открытом виде
                 disabled=False
             )
             db.add(test_user)
             db.commit()
-            print("Тестовый пользователь создан: username=user1, password=password")
+            print("Тестовый пользователь создан: username=user_test, password=password")
         else:
             print("Тестовый пользователь уже существует")
 

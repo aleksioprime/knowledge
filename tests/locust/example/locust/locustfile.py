@@ -20,7 +20,7 @@ class WebsiteUser(HttpUser):
         # Выполняем авторизацию
         r = self.client.post(
             "/api/auth/login",
-            data={"username": "user1", "password": "password"},
+            data={"username": "user_test", "password": "password"},
         )
         # Получаем токен из ответа
         token = r.json()["access_token"]
