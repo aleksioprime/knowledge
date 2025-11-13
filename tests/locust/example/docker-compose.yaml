@@ -1,0 +1,56 @@
+services:
+  # База данных PostgreSQL
+  postgres:
+    image: postgres:15
+    container_name: test_locust_postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: testdb
+    volumes:
+      - postgres_volume:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Adminer для управления базой данных
+  adminer:
+    image: adminer
+    container_name: test_locust_adminer
+    ports:
+      - "7001:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # FastAPI приложение
+  api:
+    build: ./app
+    container_name: test_locust_app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "7002:8000"
+
+  # Locust master для управления нагрузочным тестированием
+  locust-master:
+    build: ./locust
+    container_name: test_locust_master
+    ports:
+      - "8089:8089"
+    command: locust -f locustfile.py --master --web-host 0.0.0.0 --host http://api:8000
+    depends_on:
+      - api
+
+  # Locust worker для выполнения тестов
+  locust-worker:
+    build: ./locust
+    command: locust -f locustfile.py --worker --master-host locust-master --host http://api:8000
+    depends_on:
+      - locust-master
+
+volumes:
+  postgres_volume:

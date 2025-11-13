@@ -10,7 +10,7 @@
 pip install numpy
 ```
 
-- [Массив Numpy](numpy/array.md)
+- [Массив Numpy](./numpy/array.md)
 - [Создание массива](numpy/fill.md)
 - [Индексация](numpy/indexing.md)
 - [Математические операции](numpy/math.md)
