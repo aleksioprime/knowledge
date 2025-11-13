@@ -19,7 +19,7 @@ docker-compose -p test-locust down -v
 
 - **API**: http://localhost:7002
 - **API документация**: http://localhost:7002/docs
-- **Locust веб-интерфейс**: http://localhost:8089
+- **Locust веб-интерфейс**: http://localhost:7003
 - **Adminer (управление БД)**: http://localhost:7001
 
 ## Тестовые данные
@@ -34,6 +34,7 @@ docker-compose -p test-locust down -v
 - `GET /api/profile` - Получить профиль пользователя
 - `GET /api/items` - Получить список элементов
 - `POST /api/items` - Создать новый элемент
+- `DELETE /api/items` - Удалить элемент
 
 ## Использование Locust
 

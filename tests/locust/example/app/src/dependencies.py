@@ -5,7 +5,7 @@
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from jose import jwt, JWTError
 
 from .config import settings
@@ -16,9 +16,9 @@ from . import crud, models
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
 
-def get_current_user(
+async def get_current_user(
     token: str = Depends(oauth2_scheme),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ) -> models.User:
     """
     Получить текущего аутентифицированного пользователя по JWT токену
@@ -43,7 +43,7 @@ def get_current_user(
         raise credentials_exception
 
     # Получаем пользователя из базы данных
-    user = crud.get_user_by_username(db, username)
+    user = await crud.get_user_by_username(db, username)
     if not user:
         raise credentials_exception
 

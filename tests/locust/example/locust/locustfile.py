@@ -17,6 +17,9 @@ class WebsiteUser(HttpUser):
         Метод выполняется один раз при запуске каждого пользователя.
         Выполняет авторизацию и сохраняет токен для последующих запросов.
         """
+        # Список для отслеживания созданных items
+        self.created_items = []
+
         # Выполняем авторизацию
         r = self.client.post(
             "/api/auth/login",
@@ -26,6 +29,24 @@ class WebsiteUser(HttpUser):
         token = r.json()["access_token"]
         # Добавляем токен в заголовки для всех последующих запросов
         self.client.headers.update({"Authorization": f"Bearer {token}"})
+
+    def on_stop(self):
+        """
+        Метод выполняется один раз при остановке каждого пользователя.
+        Удаляет все оставшиеся неудаленные items с помощью массового удаления.
+        """
+        if self.created_items:
+            try:
+                # Используем новый API массового удаления
+                response = self.client.post(
+                    "/api/items/delete-batch",
+                    json={"item_ids": self.created_items}
+                )
+                if response.status_code == 200:
+                    result = response.json()
+                    print(f"Batch delete: {result['deleted']} items deleted, {result['not_found']} not found")
+            except Exception as e:
+                print(f"Failed to batch delete items: {e}")
 
     @task
     def profile(self):
@@ -49,4 +70,19 @@ class WebsiteUser(HttpUser):
         Задача: создать новый элемент.
         Выполняется с весом 1 (стандартный)
         """
-        self.client.post("/api/items", json={"name": "Test", "price": 100})
+        response = self.client.post("/api/items", json={"name": "Test", "price": 100})
+        if response.status_code == 200:
+            # Сохраняем ID созданного item для последующего удаления
+            item_data = response.json()
+            self.created_items.append(item_data["id"])
+
+    @task
+    def delete_item(self):
+        """
+        Задача: удалить случайный элемент из созданных.
+        Выполняется с весом 1 (стандартный)
+        """
+        if self.created_items:
+            # Удаляем последний созданный item
+            item_id = self.created_items.pop()
+            self.client.delete(f"/api/items/{item_id}")

@@ -1,36 +1,47 @@
 """
 Модуль для работы с базой данных.
-Настройка подключения к PostgreSQL и создание сессий.
+Настройка асинхронного подключения к PostgreSQL и создание сессий.
 """
 
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
+from sqlalchemy.orm import declarative_base
 from .config import settings
 
-# Формируем URL для подключения к PostgreSQL
-DATABASE_URL = (
-    f"postgresql://{settings.db.user}:"
-    f"{settings.db.password}@{settings.db.host}:"
-    f"{settings.db.port}/{settings.db.name}"
+# Используем асинхронный DSN из конфигурации
+DATABASE_URL = settings.db.dsn
+
+# Создаем асинхронный движок SQLAlchemy
+engine = create_async_engine(DATABASE_URL, echo=False)
+
+# Создаем фабрику асинхронных сессий
+AsyncSessionLocal = async_sessionmaker(
+    engine,
+    class_=AsyncSession,
+    expire_on_commit=False,
+    autocommit=False,
+    autoflush=False,
 )
-
-# Создаем движок SQLAlchemy
-engine = create_engine(DATABASE_URL, echo=False)
-
-# Создаем фабрику сессий
-SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
 
 # Базовый класс для моделей
 Base = declarative_base()
 
 
-def get_db():
+async def get_db():
     """
-    Генератор сессий базы данных для использования с FastAPI Depends.
+    Асинхронный генератор сессий базы данных для использования с FastAPI Depends.
     Автоматически закрывает сессию после использования
     """
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+    async with AsyncSessionLocal() as session:
+        try:
+            yield session
+        finally:
+            await session.close()
+
+
+async def init_db():
+    """
+    Инициализация базы данных.
+    Создает все таблицы, определенные в моделях.
+    """
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)

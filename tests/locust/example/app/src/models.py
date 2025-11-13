@@ -23,7 +23,15 @@ class User(Base):
 
 class Item(Base):
     """
-    Модель элемента в базе данных
+    Модель элемента в базе данных.
+
+    Attributes:
+        id: Уникальный идентификатор элемента
+        name: Название элемента
+        price: Цена элемента
+        owner_id: ID владельца элемента (ссылка на пользователя)
+        created_at: Дата и время создания элемента (с timezone)
+        updated_at: Дата и время последнего обновления элемента (с timezone)
     """
     __tablename__ = "items"
 
@@ -31,9 +39,12 @@ class Item(Base):
     name = Column(String, index=True)
     price = Column(Float)
     owner_id = Column(Integer)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc)
+    )
     updated_at = Column(
-        DateTime,
+        DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
         onupdate=lambda: datetime.now(timezone.utc)
     )

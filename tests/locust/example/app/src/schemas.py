@@ -68,3 +68,10 @@ class Item(ItemBase):
     updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class ItemDeleteBatch(BaseModel):
+    """
+    Схема для массового удаления элементов по списку ID
+    """
+    item_ids: list[int]
