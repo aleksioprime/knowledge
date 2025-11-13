@@ -6,13 +6,13 @@
 
 ```bash
 # Запуск всех сервисов
-docker-compose -p test-locust up --build -d
+docker-compose -p example-locust up --build -d
 
 # Остановка сервисов
-docker-compose -p test-locust down
+docker-compose -p example-locust down
 
 # Полная очистка (включая volumes)
-docker-compose -p test-locust down -v
+docker-compose -p example-locust down -v
 ```
 
 ## Доступ к сервисам
