@@ -57,43 +57,62 @@ testpaths = "tests"
 
 ```python
 def test_add():
-    assert 1 + 1 == 2, "Сложение выполнено неправильно"
+    assert 1 + 1 == 2
 ```
 
 ### Запуск тестов
+
 ```sh
-pytest                          # Запустит все тесты
-pytest -k "test_read_receipts"  # Запустит только этот тест
-pytest -k "TestReceipts"        # Запустит все тесты внутри класса TestReceipts
-pytest -k "read"                # Запустит все тесты, где есть 'read' в названии
+pytest                          # Все тесты
+pytest tests/test_app.py        # Конкретный файл
+pytest tests/                   # Все тесты в директории
+pytest -v                       # Подробный вывод
+pytest -s                       # Показать print
+pytest -x                       # Остановиться на первой ошибке
+pytest -k "test_user"           # Только тесты с "test_user" в названии
+pytest -m slow                  # Только тесты с маркировкой @pytest.mark.slow
+pytest --lf                     # Запустить только упавшие тесты
+pytest --ff                     # Сначала упавшие, потом остальные
 ```
 
 ### Ассерты
+
 ```python
-# Числа
+# Равенство
 assert 1 == 1
+assert "hello" == "hello"
+
+# Неравенство
 assert 1 != 2
-assert 5 < 10
+
+# Сравнения
+assert 5 > 3
+assert 2 < 10
+assert 5 >= 5
+
+# Принадлежность
+assert "a" in "abc"
+assert 3 in [1, 2, 3]
+assert "key" in {"key": "value"}
 
 # Строки
-assert "test" == "test"
-assert "test" in "this is a test string"
-assert "test str".startswith("t")
+assert "test".startswith("t")
+assert "hello".endswith("o")
 
-# Списки
-numbers = [1, 2, 3, 4, 5]
-assert len(numbers) == 5
-assert 3 in numbers
+# Булевы значения
+assert True
+assert not False
 
-# Объекты и классы
-class User:
-    def __init__(self, name):
-        self.name = name
+# None
+assert value is None
+assert value is not None
 
-user = User("Anton")
-assert user.name == "Anton"
-assert isinstance(user, User)
-assert hasattr(user, 'name')
+# Типы
+assert isinstance(5, int)
+assert isinstance("text", str)
+
+# Атрибуты
+assert hasattr(obj, "name")
 ```
 
 ### Проверка ошибок
@@ -104,9 +123,22 @@ def test_error():
         int("hello")
 ```
 
+### Проверка исключений
+
 ```python
-with pytest.raises(ValueError, match="invalid literal"):
-    int("hello")
+import pytest
+
+def test_error():
+    with pytest.raises(ValueError):
+        int("hello")
+
+def test_error_message():
+    with pytest.raises(ValueError, match="invalid literal"):
+        int("hello")
+
+def test_zero_division():
+    with pytest.raises(ZeroDivisionError):
+        1 / 0
 ```
 
 ### Группировка тестов
@@ -118,9 +150,6 @@ class TestMath:
 
     def test_sub(self):
         assert 5 - 3 == 2
-
-    def test_mul(self):
-        assert 3 * 4 == 12
 ```
 
 Преимущества групппировки:
@@ -128,7 +157,7 @@ class TestMath:
 - Общие фикстуры только для тестов класса
 - Применение маркеров на уровне класса
 
-### Паттерн ААА(три А)
+### Паттерн AAA (Arrange-Act-Assert)
 
 Структура юнит теста:
 - arrange(подготовка): Подготовка тестовых данных
@@ -136,21 +165,17 @@ class TestMath:
 - assert(проверка): Проверка результатов
 
 ```python
-class TestFindElemIndex:
-    """Тесты функции find_elem_index с применением AAA подхода"""
-    TEST_TEXT = "abcdef"
+def test_user_creation():
+    # Arrange - подготовка данных
+    name = "Alice"
+    age = 30
 
-    def test_find_existing_element(self):
-        """Нахождение существующего элемента"""
-        # Arrange
-        search_element = "c"
-        expected_index = 2
+    # Act - выполнение действия
+    user = User(name, age)
 
-        # Act
-        result = find_elem_index(self.TEST_TEXT, search_element)
-
-        # Assert
-        assert result == expected_index
+    # Assert - проверка результата
+    assert user.name == "Alice"
+    assert user.age == 30
 ```
 
 ### Параметризация
@@ -158,13 +183,21 @@ class TestFindElemIndex:
 ```python
 import pytest
 
-@pytest.mark.parametrize("x,y,res", [
+@pytest.mark.parametrize("x, y, expected", [
     (1, 2, 3),
-    (10, 5, 15),
-    (-1, 1, 0)
+    (5, 5, 10),
+    (-1, 1, 0),
 ])
-def test_add(x, y, res):
-    assert x + y == res
+def test_add(x, y, expected):
+    assert x + y == expected
+```
+
+**Множественная параметризация:**
+```python
+@pytest.mark.parametrize("x", [1, 2])
+@pytest.mark.parametrize("y", [3, 4])
+def test_multiply(x, y):
+    assert x * y > 0  # Будет 4 теста: 1*3, 1*4, 2*3, 2*4
 ```
 
 ### Методология TDD
@@ -189,198 +222,235 @@ Test-Driven Development (TDD) — это методология разработ
 import pytest
 
 @pytest.fixture
-def sample():
-    return {"x": 10, "y": 20}
+def user():
+    return {"name": "Alice", "age": 30}
+
+def test_user_name(user):
+    assert user["name"] == "Alice"
 ```
 
-Использование:
+**Фикстура с setup/teardown:**
 ```python
-def test_sum(sample):
-    assert sample["x"] + sample["y"] == 30
+@pytest.fixture
+def database():
+    db = connect_db()  # Setup
+    yield db           # Предоставление ресурса
+    db.close()         # Teardown
 ```
 
 ### Области видимости (scope) фикстур
 
-- function (по умолчанию) — новая фикстура для каждого теста.
-- class — одна фикстура на весь класс тестов.
-- module — одна фикстура на модуль (файл с тестами).
-- package — одна фикстура на пакет (директорию с тестами).
-- session — одна фикстура на все тесты в запуске.
-
 Порядок скоупов: session → package → module → class → function
 
-- session - дорогие ресурсы (БД, API-клиенты) (db_connection, config)
-- module - общие данные для всех тестов в файле (test_data, mock_service)
-- class - общие зависимости для методов класса (api_client, auth_header)
-- function - изолированные данные для каждого теста (clean_db, temp_file)
+- session - одна фикстура на все тесты в запуске, дорогие ресурсы (БД, API-клиенты) (db_connection, config)
+- module - одна фикстура на модуль (файл с тестами), общие данные для всех тестов в файле (test_data, mock_service)
+- class - одна фикстура на весь класс тестов, общие зависимости для методов класса (api_client, auth_header)
+- function - новая фикстура для каждого теста, изолированные данные (clean_db, temp_file)
 
-### Использование conftest.py
+```python
+@pytest.fixture(scope="function")  # По умолчанию - новая для каждого теста
+def user():
+    return User()
 
-Файл, содержащий общие фикстуры для директории, используется для:
-- Упрощение тестов: фикстуры из conftest.py автоматически доступны во всех тестах без явного импорта
-- Переиспользование кода: общие настройки (например, подключение к БД, создание тестовых данных) можно вынести в conftest.py и использовать в разных тестах
-- Гибкость: можно переопределять фикстуры для конкретных тестов или папок, поддерживает область видимости (scope="session", scope="module", scope="function")
+@pytest.fixture(scope="class")  # Одна на класс
+def db_connection():
+    return connect()
 
+@pytest.fixture(scope="module")  # Одна на файл
+def app_config():
+    return load_config()
+
+@pytest.fixture(scope="session")  # Одна на весь запуск
+def database():
+    return init_db()
+```
+
+### Файл conftest.py
+
+Файл с общими фикстурами, доступными во всех тестах без импорта.
+
+**conftest.py:**
 ```python
 import pytest
 
 @pytest.fixture
-def db_conn():
-    return "connection"
+def api_client():
+    return Client("http://api.example.com")
 ```
 
+**test_api.py:**
 ```python
-def test_db(db_conn):
-    assert db_conn == "connection"
+def test_get_users(api_client):  # Фикстура доступна автоматически
+    response = api_client.get("/users")
+    assert response.status == 200
+```
+
+**Расположение:**
+- `tests/conftest.py` - фикстуры для всех тестов
+- `tests/api/conftest.py` - только для тестов в `api/`
+
+### Встроенные фикстуры
+
+**tmp_path** - временная директория:
+```python
+def test_file(tmp_path):
+    file = tmp_path / "test.txt"
+    file.write_text("content")
+    assert file.read_text() == "content"
+```
+
+**capsys** - захват stdout/stderr:
+```python
+def test_print(capsys):
+    print("Hello")
+    captured = capsys.readouterr()
+    assert "Hello" in captured.out
+```
+
+**monkeypatch** - подмена объектов:
+```python
+def test_env(monkeypatch):
+    monkeypatch.setenv("API_KEY", "test_key")
+    assert os.getenv("API_KEY") == "test_key"
+```
+
+**request** - информация о тесте:
+```python
+@pytest.fixture
+def setup(request):
+    print(f"Running: {request.node.name}")
 ```
 
 ### Маркировки
+
 Маркировки отмечают тесты специальными характеристиками
 
-Пример:
+**Встроенные маркировки:**
+```python
+import pytest
+
+@pytest.mark.skip(reason="Не реализовано")
+def test_future_feature():
+    pass
+
+@pytest.mark.skipif(sys.version_info < (3, 10), reason="Требуется Python 3.10+")
+def test_new_syntax():
+    pass
+
+@pytest.mark.xfail(reason="Известный баг")
+def test_known_issue():
+    assert False
+```
+
+**Пользовательские маркировки:**
 ```python
 @pytest.mark.slow
-def test_x():
-    ...
+def test_long_operation():
+    time.sleep(5)
+
+@pytest.mark.integration
+def test_api_call():
+    pass
 ```
+
+**Запуск:**
 ```sh
-# Запуск только slow-тестов
-pytest -m slow
+pytest -m slow                        # Только медленные тесты
+pytest -m "not slow"                  # Все кроме медленных
+pytest -m "slow and integration"      # С обеими маркировками
 ```
 
-Пропуск тестов:
-```python
-@pytest.mark.skip(reason="Not implemented")
-def test_old():
-    ...
-```
-
-Условный пропуск:
-```python
-@pytest.mark.skipif(sys.platform == "win32", reason="No Windows support")
-def test_linux():
-    ...
-```
-
-Ожидаемый провал:
-```python
-@pytest.mark.xfail
-def test_fail():
-    assert False
+**Регистрация в pytest.ini:**
+```ini
+[pytest]
+markers =
+    slow: медленные тесты
+    integration: интеграционные тесты
 ```
 
 ### Тестовые двойники
 
-- Стабы (Stubs) - простые заглушки, возвращающие предопределенные данные (когда нужно просто проигнорировать внешний вызов - например, функция, которая всегда возвращает успешный ответ)
-- Фейки (Fakes) - упрощенные, но рабочие реализации (когда нужно имитировать реальное поведение без сложностей - наример: in-memory база данных вместо реальной)
-- Моки (Mocks) - объекты с предопределенными ожиданиями (когда важно проверить взаимодействие - например, проверка, что был вызван метод post с определенными параметрами)
-
+**Стабы (Stubs)** - заглушки с фиксированными данными:
 ```python
-# Пример стаба
-def get_user_from_db_stub(user_id):
-    return {"id": user_id, "name": "Test User"}
-
-# Использование
 def test_greeting(monkeypatch):
+    def stub_get_user(user_id):
+        return {"name": "Alice"}
 
-    def stub(user_id):
-        return {"id": user_id, "name": "Alice"}
-
-    monkeypatch.setattr("app.services.get_user", stub)
-
-    from app.main import greeting
+    monkeypatch.setattr("app.get_user", stub_get_user)
     assert greeting(1) == "Hello, Alice!"
 ```
 
+**Фейки (Fakes)** - упрощенные рабочие реализации:
 ```python
-# Пример фейковой базы
-class FakeUserRepository:
+class FakeDB:
     def __init__(self):
-        self.users = {}
+        self.data = {}
 
-    def add(self, user):
-        self.users[user["id"]] = user
+    def save(self, key, value):
+        self.data[key] = value
 
-    def get(self, user_id):
-        return self.users.get(user_id)
+    def get(self, key):
+        return self.data.get(key)
 
-# Использование
-def test_user_repo():
-    repo = FakeUserRepository()
-    repo.add({"id": 1, "name": "Bob"})
-
-    assert repo.get(1)["name"] == "Bob"
+def test_db():
+    db = FakeDB()
+    db.save("user1", {"name": "Bob"})
+    assert db.get("user1")["name"] == "Bob"
 ```
 
+**Моки (Mocks)** - проверка взаимодействия:
 ```python
-# Пример использования мока
-from unittest.mock import MagicMock
+from unittest.mock import Mock, MagicMock
 
-def test_payment():
-    payment_service = MagicMock()
-    payment_service.pay.return_value = True
+def test_api_call():
+    api = Mock()
+    api.get.return_value = {"status": "ok"}
 
-    result = payment_service.pay(100)
+    result = api.get("/users")
 
-    assert result is True
-    payment_service.pay.assert_called_once_with(100)
+    assert result["status"] == "ok"
+    api.get.assert_called_once_with("/users")
 ```
 
-### Покрытие
+**Использование patch:**
+```python
+from unittest.mock import patch
 
-pytest-cov - это плагин для pytest, который позволяет измерять покрытие кода тестами (code coverage). Он интегрируется с инструментом coverage.py и предоставляет удобный способ проверки, какая часть вашего кода выполняется тестами.
+@patch("requests.get")
+def test_fetch_data(mock_get):
+    mock_get.return_value.json.return_value = {"data": "test"}
+
+    result = fetch_data()
+    assert result["data"] == "test"
+```
+
+### Покрытие кода (Coverage)
 
 ```sh
-# Установка плагина
+# Установка
 pip install pytest-cov
 
-# Запуск с измерением покрытия
-pytest --cov=app
+# Запуск с покрытием
+pytest --cov=app                    # Базовый отчет
+pytest --cov=app --cov-report=html  # HTML отчет
+pytest --cov=app --cov-report=term-missing  # Показать пропущенные строки
 ```
 
-Можно включить в `pytest.init`
-```
-; Дополнительные опции (-v — подробный вывод)
-addopts = -v --cov=app
-```
-
-Пример содержимого `.coveragerc`
-```
-[run]
-branch = True
-
-# Regexes для пропуска файлов и директорий
-omit =
-    */migrations/*
-    */settings.py
-
-[report]
-# Падение при недостаточном покрытии
-fail_under = 50
-# Пропуск в отчете файлов со 100% покрытием
-skip_covered = True
+**Конфигурация в pytest.ini:**
+```ini
+[pytest]
+addopts = --cov=app --cov-report=term-missing
 ```
 
-Пример конфигурирования `pyproject.toml`:
-```
+**Конфигурация в pyproject.toml:**
+```toml
 [tool.pytest.ini_options]
-addopts = "-v --cov=src --cov-config=.coveragerc"
-python_files = "test*.py"
-testpaths = "src"
+addopts = "--cov=app --cov-report=term-missing"
 
 [tool.coverage.run]
-branch = true
-omit = [
-    "*/__init__.py",
-    "*/migrations/*",
-    "*/settings.py",
-]
+omit = ["*/tests/*", "*/migrations/*"]
 
 [tool.coverage.report]
-fail_under = 50
+fail_under = 80
 skip_covered = true
 ```
-
-Дополнительные настройки:
-- --cov-config=.coveragerc (использовать настройки из файла `.coveragerc`)
-- --cov-report=term-missing (специально подсвечивает строки кода, не выполненные во время тестов)
