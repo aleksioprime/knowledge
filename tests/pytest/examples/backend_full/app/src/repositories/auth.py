@@ -4,7 +4,7 @@ from uuid import UUID
 
 from sqlalchemy import select
 
-from src.models.user import User, Role
+from src.models.user import User
 from src.repositories.base import BaseSQLRepository
 
 
@@ -21,15 +21,3 @@ class AuthRepository(BaseAuthRepository, BaseSQLRepository):
         query = select(User).filter_by(username=username)
         result = await self.session.scalars(query)
         return result.one_or_none()
-
-    async def get_roles_by_user(self, user_id: UUID) -> List[str]:
-        """
-        Получает список ролей по ID пользователя
-        """
-        query = (
-            select(Role.name)
-            .join(Role.users)
-            .filter(User.id == user_id)
-        )
-        result = await self.session.execute(query)
-        return result.scalars().all()
