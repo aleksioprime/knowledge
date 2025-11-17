@@ -1,10 +1,9 @@
 #!/bin/sh
-
 set -e
 
 echo "Ожидание базы данных..."
 while ! nc -z "$DB_HOST" "$DB_PORT"; do
-    sleep 0.1
+    sleep 0.2
 done
 echo "PostgreSQL доступен!"
 

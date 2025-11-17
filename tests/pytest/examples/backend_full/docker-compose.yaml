@@ -1,0 +1,52 @@
+x-app: &app
+  env_file:
+    - .env
+  restart: always
+
+services:
+  postgres:
+    image: postgres:14
+    container_name: example-pytest-postgres
+    platform: linux/amd64
+    <<: *app
+    volumes:
+      - postgres_volume:/var/lib/postgresql/data/
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:6
+    container_name: example-pytest-redis
+    platform: linux/amd64
+    <<: *app
+    volumes:
+      - redis_volume:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: ./app
+    container_name: example-pytest-app
+    <<: *app
+    volumes:
+      - ./app:/app/
+    ports:
+      - "7011:8000"
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    command: ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+
+volumes:
+  postgres_volume:
+  redis_volume:

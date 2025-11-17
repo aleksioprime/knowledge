@@ -1,23 +1,25 @@
 FROM python:3.12.11-slim-bullseye
 
-WORKDIR /usr/src/app
-
-ENV PYTHONPATH=/usr/src/app:$PYTHONPATH
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
-
-RUN apt-get update && apt-get install -y netcat tzdata && \
-    rm -rf /var/lib/apt/lists/*
-
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH="/app:${PYTHONPATH}"
 ENV TZ=Europe/Moscow
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-RUN pip install --upgrade pip
-COPY ./requirements.txt ./
-RUN pip install -r ./requirements.txt
+WORKDIR /app
 
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        tzdata \
+        netcat-openbsd \
+    && rm -rf /var/lib/apt/lists/* \
+    && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime \
+    && echo $TZ > /etc/timezone
+
+COPY requirements.txt ./
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
+
+COPY --chmod=755 entrypoint.sh /app/entrypoint.sh
 COPY . .
 
-RUN chmod +x /usr/src/app/entrypoint.sh
-
-ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
+ENTRYPOINT ["/app/entrypoint.sh"]

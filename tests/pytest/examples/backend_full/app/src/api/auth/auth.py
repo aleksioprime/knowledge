@@ -1,7 +1,7 @@
 """
-Модуль с эндпоинтами API для аутентификации и управления сессиями пользователей
+API эндпоинты для аутентификации пользователей.
+Содержит методы для входа, выхода и обновления токенов.
 """
-
 from typing import Annotated
 
 from fastapi import APIRouter, Depends
@@ -18,8 +18,8 @@ router = APIRouter()
 
 @router.post(
     path='/login/',
-    summary='Выполняет вход в аккаунт',
-    description='Авторизирует пользователя, выдает новые jwt токены',
+    summary='Вход в аккаунт',
+    description='Авторизует пользователя и выдает пару JWT токенов (access и refresh)',
     response_model=TokenSchema,
     status_code=status.HTTP_200_OK,
 )
@@ -28,7 +28,8 @@ async def login(
         service: Annotated[AuthService, Depends(get_auth_service)],
 ) -> TokenSchema:
     """
-    Авторизует пользователя и выдает новые jwt токены
+    Аутентифицирует пользователя по логину и паролю.
+    Возвращает пару токенов для авторизованного доступа к API.
     """
     token_pair: TokenSchema = await service.login(body)
     return token_pair
@@ -36,8 +37,8 @@ async def login(
 
 @router.post(
     path='/logout/',
-    summary='Выполняет выход из аккаунта',
-    description='Помечает access токен отозванным, а refresh токен удаляет из базы',
+    summary='Выход из аккаунта',
+    description='Отзывает токены пользователя, делая их недействительными',
     status_code=status.HTTP_200_OK,
 )
 async def logout(
@@ -45,16 +46,16 @@ async def logout(
         service: Annotated[AuthService, Depends(get_auth_service)],
 ):
     """
-    Выполняет выход из аккаунта пользователя, отзывает токены
+    Выполняет выход пользователя из системы.
+    Помечает refresh токен как отозванный в Redis.
     """
-
     await service.logout(tokens)
 
 
 @router.post(
     path='/refresh/',
-    summary='Выдает новый access-токен',
-    description='Выдает новый access-токен по предоставленному refresh-токену',
+    summary='Обновление access токена',
+    description='Выдает новый access токен на основе валидного refresh токена',
     response_model=AccessTokenSchema,
     status_code=status.HTTP_200_OK,
 )
@@ -63,8 +64,8 @@ async def refresh_tokens(
         service: Annotated[AuthService, Depends(get_auth_service)],
 ) -> AccessTokenSchema:
     """
-    Выдает новый access-токен по предоставленному refresh-токену
+    Обновляет access токен используя refresh токен.
+    Используется когда access токен истек, а refresh еще валиден.
     """
-
     token_pair = await service.refresh(token.refresh_token)
     return token_pair

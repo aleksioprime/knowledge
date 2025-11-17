@@ -1,3 +1,7 @@
+"""
+Pydantic схемы для аутентификации.
+Используются для валидации данных входящих запросов и JWT токенов.
+"""
 from uuid import UUID
 from pydantic import BaseModel, Field
 
@@ -5,17 +9,16 @@ from pydantic import BaseModel, Field
 class AuthSchema(BaseModel):
     """
     Схема для аутентификации пользователя.
-    Определяет поля, необходимые для входа в систему
+    Принимает логин и пароль при входе в систему.
     """
-
     username: str = Field(..., description="Логин пользователя")
     password: str = Field(..., description="Пароль пользователя")
 
 
 class UserJWT(BaseModel):
     """
-    Схема для представления данных пользователя в JWT
+    Схема для представления данных пользователя внутри JWT токена.
+    Содержит минимально необходимую информацию для авторизации.
     """
     id: UUID = Field(..., description="Уникальный идентификатор пользователя")
-    roles: list = Field(..., description="Список ролей пользователя")
-    is_superuser: bool = Field(False, description="Суперпользователь")
+    is_admin: bool = Field(False, description="Флаг суперпользователя")

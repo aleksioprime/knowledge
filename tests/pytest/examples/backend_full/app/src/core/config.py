@@ -1,11 +1,16 @@
-from pydantic_settings import BaseSettings
+"""
+Модуль конфигурации приложения.
+Содержит настройки для базы данных, JWT и общие параметры проекта.
+"""
+from datetime import timedelta
 
+from pydantic_settings import BaseSettings
 from pydantic import Field
 
 
 class DBSettings(BaseSettings):
     """
-    Конфигурация для настроек базы данных
+    Настройки для подключения к PostgreSQL базе данных
     """
     name: str = Field(alias='DB_NAME', default='database')
     user: str = Field(alias='DB_USER', default='admin')
@@ -16,18 +21,26 @@ class DBSettings(BaseSettings):
 
     @property
     def _base_url(self) -> str:
-        """ Формирует базовый URL для подключения к базе данных """
+        """Формирует базовый URL для подключения к базе данных"""
         return f"{self.user}:{self.password}@{self.host}:{self.port}/{self.name}"
 
     @property
     def dsn(self) -> str:
-        """ Формирует DSN строку для подключения к базе данных с использованием asyncpg """
+        """Формирует DSN строку для асинхронного подключения через asyncpg"""
         return f"postgresql+asyncpg://{self._base_url}"
+
+
+class RedisSettings(BaseSettings):
+    """
+    Настройки для подключения к Redis серверу
+    """
+    host: str = Field(alias='REDIS_HOST', default='127.0.0.1')
+    port: int = Field(alias='REDIS_PORT', default=6379)
 
 
 class JWTSettings(BaseSettings):
     """
-    Конфигурация для настроек JWT
+    Настройки для JWT токенов (аутентификация и авторизация)
     """
     secret_key: str = Field(
         alias='JWT_SECRET_KEY',
@@ -39,16 +52,20 @@ class JWTSettings(BaseSettings):
 
 
 class Settings(BaseSettings):
-    project_name: str = Field(alias="PROJECT_NAME", default="HyperSpectRus")
+    """
+    Главный класс настроек приложения.
+    Объединяет все конфигурации и общие параметры проекта.
+    """
+    project_name: str = Field(alias="PROJECT_NAME", default="Example Backend Application")
     project_description: str = Field(
-        alias="PROJECT_DESCRIPTION", default="Application for HyperSpectRus"
+        alias="PROJECT_DESCRIPTION", default="An example backend application with FastAPI"
     )
     jwt: JWTSettings = JWTSettings()
     db: DBSettings = DBSettings()
+    redis: RedisSettings = RedisSettings()
 
     default_host: str = "0.0.0.0"
     default_port: int = 8000
 
-    timezone: str = Field(alias="TIMEZONE", default="Europe/Moscow")
-
+# Глобальный экземпляр настроек приложения
 settings = Settings()
