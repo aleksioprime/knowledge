@@ -42,14 +42,14 @@ async def login(
     status_code=status.HTTP_200_OK,
 )
 async def logout(
-        tokens: TokenSchema,
+        token: RefreshTokenSchema,
         service: Annotated[AuthService, Depends(get_auth_service)],
 ):
     """
     Выполняет выход пользователя из системы.
     Помечает refresh токен как отозванный в Redis.
     """
-    await service.logout(tokens)
+    await service.logout(token.refresh_token)
 
 
 @router.post(

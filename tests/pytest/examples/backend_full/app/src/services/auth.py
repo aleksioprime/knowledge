@@ -52,16 +52,16 @@ class AuthService:
             access_token=new_tokens,
         )
 
-    async def logout(self, tokens: TokenSchema):
+    async def logout(self, refresh_token: str):
         """
         Выполняет выход пользователя из системы.
         Добавляет refresh токен в черный список в Redis.
         """
         # Проверяем валидность токена перед отзывом
-        await self._is_token_valid(tokens.refresh_token)
+        await self._is_token_valid(refresh_token)
         # Добавляем токен в Redis с TTL равным времени его жизни
         await self._revoke_token(
-            tokens.refresh_token,
+            refresh_token,
             settings.jwt.refresh_token_expire_time
         )
 
@@ -77,11 +77,11 @@ class AuthService:
 
         return user
 
-    async def _generate_jwt_tokens(self, user: User, roles: list) -> TokenSchema:
+    async def _generate_jwt_tokens(self, user: User) -> TokenSchema:
         """
         Генерирует пару JWT токенов (access и refresh)
         """
-        access_token, refresh_token = self.jwt_helper.generate_token_pair(user, roles)
+        access_token, refresh_token = self.jwt_helper.generate_token_pair(user)
         return TokenSchema(
             access_token=access_token,
             refresh_token=refresh_token,

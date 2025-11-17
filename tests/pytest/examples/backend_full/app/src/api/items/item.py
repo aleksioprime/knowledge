@@ -39,7 +39,7 @@ async def get_items(
     Поддерживает поиск по названию, фильтрацию по цене, группе и тэгу.
     Поддерживает сортировку по указанным полям.
     """
-    items = await service.get_all_items(params)
+    items = await service.get_all(params)
     return items
 
 
