@@ -44,7 +44,7 @@ async def get_items(
 
 
 @router.get(
-    path="/{item_id}",
+    path="/{item_id}/",
     summary="Получить элемент по ID",
     description="Возвращает информацию об элементе по его уникальному идентификатору",
     response_model=ItemResponseSchema,
@@ -58,7 +58,7 @@ async def get_item(
     Получает детальную информацию об элементе.
     Включает связанные данные: группу и теги.
     """
-    item = await service.get_item_by_id(item_id)
+    item = await service.get_detail_by_id(item_id)
     return item
 
 
@@ -78,12 +78,12 @@ async def create_item(
     Создает новый элемент в системе.
     Требует название, цену и опционально ID группы.
     """
-    created_item = await service.create_item(body)
+    created_item = await service.create(body)
     return created_item
 
 
 @router.patch(
-    path="/{item_id}",
+    path="/{item_id}/",
     summary="Обновить элемент",
     description="Обновляет данные элемента по его ID",
     response_model=ItemResponseSchema,
@@ -99,12 +99,12 @@ async def update_item(
     Обновляет существующий элемент.
     Можно обновить название, цену или группу.
     """
-    updated_item = await service.update_item(item_id, body)
+    updated_item = await service.update(item_id, body)
     return updated_item
 
 
 @router.delete(
-    path="/{item_id}",
+    path="/{item_id}/",
     summary="Удалить элемент",
     description="Удаляет элемент по его ID",
     status_code=status.HTTP_204_NO_CONTENT,
@@ -118,4 +118,4 @@ async def delete_item(
     Удаляет элемент из системы.
     После удаления элемент невозможно восстановить.
     """
-    await service.delete_item(item_id)
+    await service.delete(item_id)

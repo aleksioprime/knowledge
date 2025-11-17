@@ -79,8 +79,8 @@ class ItemRepository(BaseItemRepository, BaseSQLRepository):
         # Фильтры поиска
         query = self._apply_filters(query, params)
 
-        # Сортировка по названию по возрастанию
-        query = query.order_by(Item.name.asc())
+        # Применяем сортировку
+        query = self._apply_sorting(query, params)
 
         # Пагинация
         stmt = (query.offset(params.offset).limit(params.limit))
@@ -162,7 +162,60 @@ class ItemRepository(BaseItemRepository, BaseSQLRepository):
 
     def _apply_filters(self, query, params: ItemQueryParams):
         """Применяет фильтры поиска"""
+        # Фильтр по поисковому запросу (q)
         if params.q:
             pattern = f"%{params.q}%"
             query = query.filter(Item.name.ilike(pattern))
+        
+        # Фильтр по названию
+        if params.name:
+            pattern = f"%{params.name}%"
+            query = query.filter(Item.name.ilike(pattern))
+        
+        # Фильтр по минимальной цене
+        if params.min_price is not None:
+            query = query.filter(Item.price >= params.min_price)
+        
+        # Фильтр по максимальной цене
+        if params.max_price is not None:
+            query = query.filter(Item.price <= params.max_price)
+        
+        # Фильтр по группе
+        if params.group_id:
+            query = query.filter(Item.group_id == params.group_id)
+        
+        # Фильтр по тегам
+        if params.tag_ids:
+            from src.models.item import item_tags
+            query = query.join(item_tags).filter(item_tags.c.tag_id.in_(params.tag_ids))
+        
+        return query
+
+    def _apply_sorting(self, query, params: ItemQueryParams):
+        """Применяет сортировку к запросу"""
+        # Определяем доступные поля для сортировки
+        sort_fields = {
+            'name': Item.name,
+            'price': Item.price,
+            'created_at': Item.created_at,
+            'updated_at': Item.updated_at,
+        }
+        
+        # Получаем поле для сортировки (по умолчанию created_at)
+        sort_by = params.sort_by if params.sort_by else 'created_at'
+        order = params.order if params.order else 'desc'
+        
+        # Проверяем, что поле существует
+        if sort_by not in sort_fields:
+            sort_by = 'created_at'
+        
+        # Получаем колонку для сортировки
+        sort_column = sort_fields[sort_by]
+        
+        # Применяем направление сортировки
+        if order == 'asc':
+            query = query.order_by(sort_column.asc())
+        else:
+            query = query.order_by(sort_column.desc())
+        
         return query
