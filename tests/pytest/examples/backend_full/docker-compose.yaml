@@ -6,7 +6,7 @@ x-app: &app
 services:
   postgres:
     image: postgres:14
-    container_name: example-pytest-postgres
+    container_name: example-test-postgres
     platform: linux/amd64
     <<: *app
     volumes:
@@ -17,9 +17,19 @@ services:
       timeout: 5s
       retries: 5
 
+  adminer:
+    image: adminer
+    platform: linux/amd64
+    container_name: example-test-adminer
+    ports:
+      - "7012:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
   redis:
     image: redis:6
-    container_name: example-pytest-redis
+    container_name: example-test-redis
     platform: linux/amd64
     <<: *app
     volumes:
@@ -33,7 +43,7 @@ services:
   app:
     build:
       context: ./app
-    container_name: example-pytest-app
+    container_name: example-test-app
     <<: *app
     volumes:
       - ./app:/app/
