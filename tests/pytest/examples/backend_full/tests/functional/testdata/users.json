@@ -1,0 +1,28 @@
+{
+  "users": [
+    {
+      "username": "test_user",
+      "password": "TestPassword123!",
+      "email": "test_user@example.com",
+      "first_name": "Test",
+      "last_name": "User",
+      "is_admin": false
+    },
+    {
+      "username": "admin_user",
+      "password": "AdminPassword123!",
+      "email": "admin@example.com",
+      "first_name": "Admin",
+      "last_name": "User",
+      "is_admin": true
+    },
+    {
+      "username": "john_doe",
+      "password": "JohnPassword123!",
+      "email": "john.doe@example.com",
+      "first_name": "John",
+      "last_name": "Doe",
+      "is_admin": false
+    }
+  ]
+}

@@ -1,23 +1,12 @@
 import asyncio
 import pytest
 
-from utils.waiters import wait_for_postgres, wait_for_redis, wait_for_app
-
 
 pytest_plugins = [
     'fixtures.http',
+    'fixtures.postgres',
+    'fixtures.setup',
 ]
-
-
-@pytest.fixture(scope='session', autouse=True)
-def wait_for_services():
-    """
-    Ожидает доступности всех необходимых сервисов перед запуском тестов
-    """
-    wait_for_postgres()
-    wait_for_redis()
-    wait_for_app()
-
 
 @pytest.fixture(scope='session', autouse=True)
 def event_loop():
