@@ -1,10 +1,13 @@
+x-app: &app
+  env_file:
+    - ./.env.example
+
 services:
   postgres_test:
     image: postgres:14
-    container_name: functional-test-fastapi
+    container_name: functional-test-postgres
     platform: linux/amd64
-    env_file:
-      - .env.example
+    <<: *app
     volumes:
       - postgres_volume:/var/lib/postgresql/data/
     healthcheck:
@@ -17,8 +20,7 @@ services:
     image: redis:6
     container_name: functional-test-redis
     platform: linux/amd64
-    env_file:
-      - .env.example
+    <<: *app
     volumes:
       - redis_volume:/data
     healthcheck:
@@ -31,8 +33,7 @@ services:
     build:
       context: ../../
     container_name: functional-test-app
-    env_file:
-      - .env.example
+    <<: *app
     depends_on:
       postgres_test:
         condition: service_healthy
@@ -46,8 +47,7 @@ services:
     build:
       context: ../../
     container_name: tests
-    env_file:
-      - .env.example
+    <<: *app
     depends_on:
       app_test:
         condition: service_started
