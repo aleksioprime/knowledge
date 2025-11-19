@@ -20,19 +20,6 @@ from src.models.user import User
 from src.models.item import Group, Item, Tag
 
 
-async def create_tables():
-    """
-    Создает все таблицы в базе данных.
-    Если таблицы уже существуют, они не будут пересозданы.
-    """
-    async with engine.begin() as conn:
-        # Удаляем существующие таблицы (осторожно!)
-        # await conn.run_sync(Base.metadata.drop_all)
-        # Создаем все таблицы
-        await conn.run_sync(Base.metadata.create_all)
-    print("✓ Таблицы созданы")
-
-
 async def create_users():
     """
     Создает тестовых пользователей:
@@ -43,7 +30,7 @@ async def create_users():
         # Проверяем, есть ли уже пользователи
         result = await session.execute(select(User).limit(1))
         if result.scalar_one_or_none():
-            print("⚠ Пользователи уже существуют, пропускаем создание")
+            print("Пользователи уже существуют, пропускаем создание")
             return
 
         users = [
@@ -83,9 +70,7 @@ async def create_users():
 
         session.add_all(users)
         await session.commit()
-        print(f"✓ Создано {len(users)} пользователей")
-        print("  Логины: admin (пароль: admin123), user1/user2 (пароль: password123)")
-
+        print(f"Создано {len(users)} пользователей")
 
 async def create_groups():
     """
@@ -128,7 +113,7 @@ async def create_groups():
         for group in groups:
             await session.refresh(group)
 
-        print(f"✓ Создано {len(groups)} групп")
+        print(f"Создано {len(groups)} групп")
         return groups
 
 
@@ -140,7 +125,7 @@ async def create_tags():
         # Проверяем, есть ли уже теги
         result = await session.execute(select(Tag).limit(1))
         if result.scalar_one_or_none():
-            print("⚠ Теги уже существуют, пропускаем создание")
+            print("Теги уже существуют, пропускаем создание")
             # Загружаем существующие теги
             result = await session.execute(select(Tag))
             return result.scalars().all()
@@ -163,7 +148,7 @@ async def create_tags():
         for tag in tags:
             await session.refresh(tag)
 
-        print(f"✓ Создано {len(tags)} тегов")
+        print(f"Создано {len(tags)} тегов")
         return tags
 
 
@@ -175,7 +160,7 @@ async def create_items(groups: list[Group], tags: list[Tag]):
         # Проверяем, есть ли уже элементы
         result = await session.execute(select(Item).limit(1))
         if result.scalar_one_or_none():
-            print("⚠ Элементы уже существуют, пропускаем создание")
+            print("Элементы уже существуют, пропускаем создание")
             return
 
         # Если группы или теги не переданы, загружаем их из БД
@@ -291,38 +276,25 @@ async def create_items(groups: list[Group], tags: list[Tag]):
 
         session.add_all(items)
         await session.commit()
-        print(f"✓ Создано {len(items)} элементов")
+        print(f"Создано {len(items)} элементов")
 
 
 async def main():
     """
     Главная функция для создания всех тестовых данных
     """
-    print("\n" + "="*60)
-    print("Создание демонстрационных данных")
-    print("="*60 + "\n")
 
     try:
-        # Создаем таблицы
-        await create_tables()
-
         # Создаем данные
         await create_users()
         groups = await create_groups()
         tags = await create_tags()
         await create_items(groups, tags)
 
-        print("\n" + "="*60)
-        print("✓ Демонстрационные данные успешно созданы!")
-        print("="*60)
-        print("\nТеперь вы можете:")
-        print("  • Войти как admin (admin123)")
-        print("  • Войти как user1 или user2 (password123)")
-        print("  • Просмотреть элементы через API")
-        print("  • Протестировать фильтрацию и пагинацию\n")
+        print("Демонстрационные данные успешно созданы!")
 
     except Exception as e:
-        print(f"\n❌ Ошибка при создании данных: {e}")
+        print(f"\nОшибка при создании данных: {e}")
         raise
 
 

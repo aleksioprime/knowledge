@@ -5,25 +5,28 @@
 из JSON файлов в базу данных перед запуском тестов и их очистки после завершения.
 """
 import pytest
+from sqlalchemy import text
 from werkzeug.security import generate_password_hash
 
-from core.settings import test_settings
-from testdata import test_data_loader
+from testdata import load_test_data
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope='session', autouse=True)
 async def setup_test_data(db_session_maker):
     """
     Подготовка тестовых данных перед запуском тестов.
-    Создает пользователей, группы, теги и items в БД.
+    Создает пользователей, группы, теги и items в БД из JSON файлов.
     После завершения тестов очищает все данные.
     """
     async with db_session_maker() as session:
-        # Импортируем модели здесь, чтобы избежать циклических импортов
-        from sqlalchemy import text
+        # Загружаем данные из JSON
+        users_data = load_test_data('users.json')['users']
+        items_file = load_test_data('items.json')
+        groups_data = items_file.get('groups', [])
+        tags_data = items_file.get('tags', [])
+        items_data = items_file.get('items', [])
 
         # Создаем пользователей
-        users_data = test_data_loader.get_users()
         user_ids = {}
 
         for user_data in users_data:
@@ -48,7 +51,6 @@ async def setup_test_data(db_session_maker):
             user_ids[user_data['username']] = user_id
 
         # Создаем группы
-        groups_data = test_data_loader.get_groups()
         group_ids = {}
 
         for group_data in groups_data:
@@ -68,7 +70,6 @@ async def setup_test_data(db_session_maker):
             group_ids[group_data['name']] = group_id
 
         # Создаем теги
-        tags_data = test_data_loader.get_tags()
         tag_ids = {}
 
         for tag_data in tags_data:
@@ -85,9 +86,6 @@ async def setup_test_data(db_session_maker):
             tag_ids[tag_data['name']] = tag_id
 
         # Создаем items
-        items_data = test_data_loader.get_items()
-        item_ids = {}
-
         for item_data in items_data:
             group_id = group_ids.get(item_data.get('group_name'))
 
@@ -103,9 +101,8 @@ async def setup_test_data(db_session_maker):
                     'price': item_data['price'],
                     'group_id': group_id
                 }
-            )
+                )
             item_id = result.scalar_one()
-            item_ids[item_data['name']] = item_id
 
             # Связываем item с тегами
             if 'tags' in item_data:
