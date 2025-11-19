@@ -1,0 +1,68 @@
+services:
+  postgres_test:
+    image: postgres:14
+    container_name: functional-test-fastapi
+    platform: linux/amd64
+    env_file:
+      - .env.example
+    volumes:
+      - postgres_volume:/var/lib/postgresql/data/
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis_test:
+    image: redis:6
+    container_name: functional-test-redis
+    platform: linux/amd64
+    env_file:
+      - .env.example
+    volumes:
+      - redis_volume:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app_test:
+    build:
+      context: ../../
+    container_name: functional-test-app
+    env_file:
+      - .env.example
+    depends_on:
+      postgres_test:
+        condition: service_healthy
+      redis_test:
+        condition: service_healthy
+    volumes:
+        - ../../:/app
+    command: ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+  tests:
+    build:
+      context: ../../
+    container_name: tests
+    env_file:
+      - .env.example
+    depends_on:
+      app_test:
+        condition: service_started
+      postgres_test:
+        condition: service_healthy
+      redis_test:
+        condition: service_healthy
+    volumes:
+      - ../../:/app
+      - ../../reports:/app/reports
+    command: >
+        sh -c "export PYTHONPATH=\$(pwd):\$PYTHONPATH
+        && python tests/functional/utils/waiters.py
+        && pytest tests/functional/src --log-cli-level=INFO -s"
+
+volumes:
+  postgres_volume:
+  redis_volume:
