@@ -3,7 +3,7 @@ from httpx import AsyncClient
 
 
 class TestPingAPI:
-    endpoint_template = "ping"
+    endpoint_template = "/api/ping/"
 
     @pytest.mark.asyncio
     async def test_ping(self, make_get_request):
@@ -16,4 +16,4 @@ class TestPingAPI:
 
         # Проверка статуса ответа
         assert response.status_code == 200, f"Статус ответа должен быть 200, пришёл {response.status_code}"
-        assert response.json() == {"status": "ok", "message": "Server is up and running."}
+        assert response.json() == {"status": "ok", "message": "Server is up and running"}

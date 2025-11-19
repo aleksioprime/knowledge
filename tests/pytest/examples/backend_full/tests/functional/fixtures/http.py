@@ -1,6 +1,6 @@
 import pytest
 from httpx import AsyncClient, Response
-from tests.functional.core.settings import test_settings
+from core.settings import test_settings
 
 
 @pytest.fixture()

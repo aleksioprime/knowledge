@@ -3,7 +3,7 @@ import psycopg2
 import redis
 import requests
 
-from tests.functional.core.settings import test_settings
+from core.settings import test_settings
 
 
 @backoff.on_exception(
@@ -33,10 +33,11 @@ def wait_for_postgres():
 
 @backoff.on_exception(
     backoff.expo,
-    redis.redis_exceptions.ConnectionError,
+    (redis.ConnectionError, redis.TimeoutError),
     max_tries=10,
     max_time=100,
-    jitter=backoff.full_jitter
+    jitter=backoff.full_jitter,
+    on_backoff=lambda details: print(f"Retrying connection to Redis: {details}")
 )
 def wait_for_redis():
     """
@@ -44,7 +45,7 @@ def wait_for_redis():
     """
     redis_client = redis.Redis(host=test_settings.redis.host, port=test_settings.redis.port)
     if not redis_client.ping():
-        raise redis.redis_exceptions.ConnectionError("Redis is not available")
+        raise redis.ConnectionError("Redis is not available")
 
 
 @backoff.on_exception(

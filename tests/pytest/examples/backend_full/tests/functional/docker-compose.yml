@@ -1,6 +1,6 @@
 x-app: &app
   env_file:
-    - ./.env.example
+    - .env.example
 
 services:
   postgres_test:
@@ -11,7 +11,7 @@ services:
     volumes:
       - postgres_volume:/var/lib/postgresql/data/
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -31,7 +31,7 @@ services:
 
   app_test:
     build:
-      context: ../../
+      context: ../../app
     container_name: functional-test-app
     <<: *app
     depends_on:
@@ -40,12 +40,12 @@ services:
       redis_test:
         condition: service_healthy
     volumes:
-        - ../../:/app
+        - ../../app:/app
     command: ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]
 
   tests:
     build:
-      context: ../../
+      context: .
     container_name: tests
     <<: *app
     depends_on:
@@ -56,12 +56,9 @@ services:
       redis_test:
         condition: service_healthy
     volumes:
-      - ../../:/app
-      - ../../reports:/app/reports
+      - ./reports:/app/reports
     command: >
-        sh -c "export PYTHONPATH=\$(pwd):\$PYTHONPATH
-        && python tests/functional/utils/waiters.py
-        && pytest tests/functional/src --log-cli-level=INFO -s"
+      sh -c "python utils/waiters.py && pytest"
 
 volumes:
   postgres_volume:

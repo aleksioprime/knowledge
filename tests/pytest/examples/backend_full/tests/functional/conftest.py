@@ -1,11 +1,11 @@
 import asyncio
 import pytest
 
-from tests.functional.utils.waiters import wait_for_postgres, wait_for_redis, wait_for_app
+from utils.waiters import wait_for_postgres, wait_for_redis, wait_for_app
 
 
 pytest_plugins = [
-    'tests.functional.fixtures.http',
+    'fixtures.http',
 ]
 
 

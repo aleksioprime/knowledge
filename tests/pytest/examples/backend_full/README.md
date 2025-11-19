@@ -31,3 +31,13 @@ docker exec -it example-test-app alembic upgrade head
 ```shell
 docker exec -it example-test-app python -m scripts.create_demo_data
 ```
+
+## Выполнение тестов
+```
+docker-compose -f tests/functional/docker-compose.yml -p example-functional-test up --build --abort-on-container-exit
+```
+
+Удаление тестов:
+```
+docker-compose -f tests/functional/docker-compose.yml -p example-functional-test down -v
+```
