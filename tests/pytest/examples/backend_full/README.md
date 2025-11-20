@@ -32,12 +32,19 @@ docker exec -it example-test-app alembic upgrade head
 docker exec -it example-test-app python -m scripts.create_demo_data
 ```
 
-## Выполнение тестов
+Удаление сервиса с БД:
+```shell
+docker-compose -p example-test down -v
 ```
+
+## Выполнение функциональных тестов
+
+Запуск тестов в контейнерах
+```sh
 docker-compose -f tests/functional/docker-compose.yml -p example-functional-test up --build --abort-on-container-exit
 ```
 
 Удаление тестов:
-```
+```sh
 docker-compose -f tests/functional/docker-compose.yml -p example-functional-test down -v
 ```

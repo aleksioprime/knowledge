@@ -9,7 +9,7 @@ import pytest
 from sqlalchemy import text
 from werkzeug.security import generate_password_hash
 
-from testdata import load_test_data
+from testdata.loader import load_test_data
 
 
 @pytest.fixture(scope='session', autouse=True)
@@ -141,3 +141,14 @@ async def setup_test_data(db_session_maker):
         await session.execute(text("DELETE FROM users"))
         await session.commit()
         print("Тестовые данные очищены")
+
+    # Удаление таблиц
+    async with db_session_maker() as session:
+        await session.execute(text("DROP TABLE IF EXISTS item_tags"))
+        await session.execute(text("DROP TABLE IF EXISTS items"))
+        await session.execute(text("DROP TABLE IF EXISTS tags"))
+        await session.execute(text("DROP TABLE IF EXISTS groups"))
+        await session.execute(text("DROP TABLE IF EXISTS users"))
+        await session.execute(text("DROP TABLE IF EXISTS alembic_version"))
+        await session.commit()
+        print("Таблицы удалены")

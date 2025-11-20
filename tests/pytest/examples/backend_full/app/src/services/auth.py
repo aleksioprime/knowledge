@@ -57,7 +57,9 @@ class AuthService:
         Выполняет выход пользователя из системы.
         Добавляет refresh токен в черный список в Redis.
         """
-        # Проверяем валидность токена перед отзывом
+        # Сначала проверяем подлинность и формат токена
+        self.jwt_helper.verify(refresh_token)
+        # Затем проверяем, что токен не был отозван ранее
         await self._is_token_valid(refresh_token)
         # Добавляем токен в Redis с TTL равным времени его жизни
         await self._revoke_token(

@@ -3,7 +3,7 @@
 Проверяют login, logout, refresh токенов.
 """
 import pytest
-from httpx import AsyncClient, Response
+from httpx import Response
 
 
 class TestAuthLogin:
@@ -266,12 +266,9 @@ class TestAuthFlow:
     @pytest.mark.asyncio
     async def test_full_auth_flow(self, make_post_request, test_user_data):
         """
-        Тест полного цикла авторизации:
-        1. Login - получение токенов
-        2. Refresh - обновление access токена
-        3. Logout - выход из системы
+        Тест полного цикла авторизации
         """
-        # 1. Login
+        # 1. Авторизация (Login). Получение токенов
         login_data = {
             "username": test_user_data["username"],
             "password": test_user_data["password"]
@@ -280,7 +277,7 @@ class TestAuthFlow:
         assert login_response.status_code == 200, "Ошибка при login"
         tokens = login_response.json()
 
-        # 2. Refresh
+        # 2. Обновление access токена (Refresh)
         refresh_data = {
             "refresh_token": tokens["refresh_token"]
         }
@@ -289,7 +286,7 @@ class TestAuthFlow:
         new_access_token = refresh_response.json()["access_token"]
         assert new_access_token != tokens["access_token"], "Access токен не обновился"
 
-        # 3. Logout
+        # 3. Выход из системы (Logout)
         logout_data = {
             "refresh_token": tokens["refresh_token"]
         }
