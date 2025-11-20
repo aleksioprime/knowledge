@@ -5,7 +5,7 @@
 from redis.asyncio import Redis
 
 from src.core.config import settings
-from src.exceptions.base import BaseException
+from src.exceptions.auth import InvalidCredentialsException, TokenRevokedException
 from src.models.user import User
 from src.repositories.uow import UnitOfWork
 from src.schemas.auth import AuthSchema
@@ -73,7 +73,7 @@ class AuthService:
 
         # Проверяем существование пользователя и корректность пароля
         if not user or not user.check_password(body.password):
-            raise BaseException('Ошибка имени пользователя или пароля')
+            raise InvalidCredentialsException()
 
         return user
 
@@ -95,7 +95,7 @@ class AuthService:
 
         # Если токен найден в Redis со значением "revoked" - он отозван
         if is_revoked and is_revoked.decode() == "revoked":
-            raise BaseException("Token has been revoked")
+            raise TokenRevokedException()
 
     async def _revoke_token(self, token: str, expire_time: int):
         """

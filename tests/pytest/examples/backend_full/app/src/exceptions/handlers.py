@@ -7,6 +7,7 @@ from fastapi.responses import JSONResponse
 from starlette import status
 
 from src.exceptions.base import BaseException
+from src.exceptions.auth import UnauthorizedException
 
 
 def register_exception_handlers(app: FastAPI):
@@ -14,6 +15,19 @@ def register_exception_handlers(app: FastAPI):
     Регистрирует обработчики исключений в FastAPI приложении.
     Преобразует исключения в понятные JSON ответы для клиента.
     """
+
+    @app.exception_handler(UnauthorizedException)
+    async def unauthorized_exception_handler(request: Request, exc: UnauthorizedException):
+        """
+        Обработчик для исключений аутентификации.
+        Возвращает 401 Unauthorized с сообщением об ошибке.
+        """
+        return JSONResponse(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            content={
+                "detail": str(exc.message),
+            },
+        )
 
     @app.exception_handler(BaseException)
     async def request_exception_handler(request: Request, exc: BaseException):

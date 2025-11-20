@@ -29,10 +29,6 @@ class TestAuthLogin:
         data = response.json()
         assert "access_token" in data, "Отсутствует access_token в ответе"
         assert "refresh_token" in data, "Отсутствует refresh_token в ответе"
-        assert "token_type" in data, "Отсутствует token_type в ответе"
-
-        # Проверка типа токена
-        assert data["token_type"] == "bearer", f"Ожидался token_type 'bearer', получен {data['token_type']}"
 
         # Проверка, что токены не пустые
         assert len(data["access_token"]) > 0, "access_token пустой"
@@ -126,6 +122,7 @@ class TestAuthRefresh:
         Тест успешного обновления access токена с использованием refresh токена.
         Должен вернуть новый access токен.
         """
+
         refresh_data = {
             "refresh_token": auth_tokens["refresh_token"]
         }

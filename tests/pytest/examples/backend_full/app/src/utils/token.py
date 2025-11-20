@@ -3,6 +3,7 @@
 Предоставляет функции для декодирования и валидации токенов.
 """
 import time
+from uuid import uuid4
 from datetime import timedelta
 import jwt
 from jwt import ExpiredSignatureError, InvalidTokenError, decode
@@ -10,6 +11,7 @@ from jwt import ExpiredSignatureError, InvalidTokenError, decode
 from src.schemas.auth import UserJWT
 from src.utils.time import utc_now
 from src.core.config import settings
+from src.exceptions.auth import UnauthorizedException
 
 
 class JWTHelper:
@@ -27,6 +29,7 @@ class JWTHelper:
             'iat': now,                     # Время создания токена (issued at)
             'exp': now + expiration,        # Время истечения токена (expiration)
             'is_admin': is_admin,           # Флаг администратора
+            "jti": str(uuid4()),            # Уникальный идентификатор токена (JWT ID)
         }
         # Кодируем payload с помощью секретного ключа
         encoded_jwt = jwt.encode(payload, key=settings.jwt.secret_key, algorithm=settings.jwt.algorithm)
@@ -66,10 +69,10 @@ class JWTHelper:
             )
         except jwt.ExpiredSignatureError:
             # Токен истек (exp < текущее время)
-            raise BaseException('Token has expired')
+            raise UnauthorizedException('Token has expired')
         except jwt.InvalidTokenError:
             # Невалидная подпись или формат токена
-            raise BaseException('Invalid token')
+            raise UnauthorizedException('Invalid token')
 
         return payload
 

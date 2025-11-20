@@ -1,6 +1,7 @@
 """
 Фикстуры для работы с авторизацией в тестах.
 """
+import random
 import pytest
 from httpx import Response
 
@@ -9,16 +10,18 @@ from testdata import load_test_data
 
 @pytest.fixture()
 def test_user_data():
-    """Возвращает данные обычного тестового пользователя"""
+    """Возвращает данные случайного обычного тестового пользователя"""
     users = load_test_data('users.json')['users']
-    return next(user for user in users if not user.get('is_admin', False))
+    non_admin_users = [user for user in users if not user.get('is_admin', False)]
+    return random.choice(non_admin_users)
 
 
 @pytest.fixture()
 def admin_user_data():
-    """Возвращает данные админ-пользователя"""
+    """Возвращает данные случайного админ-пользователя"""
     users = load_test_data('users.json')['users']
-    return next(user for user in users if user.get('is_admin', False))
+    admin_users = [user for user in users if user.get('is_admin', False)]
+    return random.choice(admin_users)
 
 
 @pytest.fixture()

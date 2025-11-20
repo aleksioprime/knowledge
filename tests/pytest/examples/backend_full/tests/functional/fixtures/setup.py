@@ -4,6 +4,7 @@
 Этот модуль содержит фикстуры для автоматической загрузки тестовых данных
 из JSON файлов в базу данных перед запуском тестов и их очистки после завершения.
 """
+import uuid
 import pytest
 from sqlalchemy import text
 from werkzeug.security import generate_password_hash
@@ -32,13 +33,14 @@ async def setup_test_data(db_session_maker):
         for user_data in users_data:
             hashed_password = generate_password_hash(user_data['password'])
             query = text("""
-                INSERT INTO users (username, hashed_password, email, first_name, last_name, is_admin)
-                VALUES (:username, :hashed_password, :email, :first_name, :last_name, :is_admin)
+                INSERT INTO users (id, username, hashed_password, email, first_name, last_name, is_admin)
+                VALUES (:id, :username, :hashed_password, :email, :first_name, :last_name, :is_admin)
                 RETURNING id
             """)
             result = await session.execute(
                 query,
                 {
+                    'id': uuid.uuid4(),
                     'username': user_data['username'],
                     'hashed_password': hashed_password,
                     'email': user_data['email'],
@@ -55,13 +57,14 @@ async def setup_test_data(db_session_maker):
 
         for group_data in groups_data:
             query = text("""
-                INSERT INTO groups (name, description)
-                VALUES (:name, :description)
+                INSERT INTO groups (id, name, description)
+                VALUES (:id, :name, :description)
                 RETURNING id
             """)
             result = await session.execute(
                 query,
                 {
+                    'id': uuid.uuid4(),
                     'name': group_data['name'],
                     'description': group_data.get('description')
                 }
@@ -74,13 +77,16 @@ async def setup_test_data(db_session_maker):
 
         for tag_data in tags_data:
             query = text("""
-                INSERT INTO tags (name)
-                VALUES (:name)
+                INSERT INTO tags (id, name)
+                VALUES (:id, :name)
                 RETURNING id
             """)
             result = await session.execute(
                 query,
-                {'name': tag_data['name']}
+                {
+                    'id': uuid.uuid4(),
+                    'name': tag_data['name']
+                }
             )
             tag_id = result.scalar_one()
             tag_ids[tag_data['name']] = tag_id
@@ -90,13 +96,14 @@ async def setup_test_data(db_session_maker):
             group_id = group_ids.get(item_data.get('group_name'))
 
             query = text("""
-                INSERT INTO items (name, price, group_id)
-                VALUES (:name, :price, :group_id)
+                INSERT INTO items (id, name, price, group_id)
+                VALUES (:id, :name, :price, :group_id)
                 RETURNING id
             """)
             result = await session.execute(
                 query,
                 {
+                    'id': uuid.uuid4(),
                     'name': item_data['name'],
                     'price': item_data['price'],
                     'group_id': group_id
@@ -119,6 +126,8 @@ async def setup_test_data(db_session_maker):
                         )
 
         await session.commit()
+        print(f"Тестовые данные загружены: {len(users_data)} пользователей, "
+              f"{len(groups_data)} групп, {len(tags_data)} тегов, {len(items_data)} items")
 
     yield
 
@@ -131,3 +140,4 @@ async def setup_test_data(db_session_maker):
         await session.execute(text("DELETE FROM groups"))
         await session.execute(text("DELETE FROM users"))
         await session.commit()
+        print("Тестовые данные очищены")

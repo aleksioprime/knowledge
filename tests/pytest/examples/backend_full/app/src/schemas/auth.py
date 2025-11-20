@@ -11,8 +11,8 @@ class AuthSchema(BaseModel):
     Схема для аутентификации пользователя.
     Принимает логин и пароль при входе в систему.
     """
-    username: str = Field(..., description="Логин пользователя")
-    password: str = Field(..., description="Пароль пользователя")
+    username: str = Field(..., min_length=1, description="Логин пользователя")
+    password: str = Field(..., min_length=1, description="Пароль пользователя")
 
 
 class UserJWT(BaseModel):
