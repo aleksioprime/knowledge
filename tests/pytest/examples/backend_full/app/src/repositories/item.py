@@ -62,10 +62,14 @@ class ItemRepository(BaseItemRepository, BaseSQLRepository):
         stmt = (
             select(Item)
             .where(Item.id == item_id)
-            .options(joinedload(Item.group))
+            .options(
+                joinedload(Item.group),
+                joinedload(Item.tags)
+            )
         )
         result = await self.session.execute(stmt)
-        return result.scalars().one_or_none()
+        # Используем unique() для устранения дубликатов при joinedload коллекций
+        return result.unique().scalars().one_or_none()
 
     async def get_all(self, params: ItemQueryParams) -> Tuple[List[Item], int]:
         """
@@ -73,7 +77,10 @@ class ItemRepository(BaseItemRepository, BaseSQLRepository):
         """
         query = (
             select(Item)
-            .options(joinedload(Item.group))
+            .options(
+                joinedload(Item.group),
+                joinedload(Item.tags)
+            )
         )
 
         # Фильтры поиска
@@ -87,7 +94,8 @@ class ItemRepository(BaseItemRepository, BaseSQLRepository):
 
         # Выполняем запрос и получаем результаты
         result = await self.session.execute(stmt)
-        items = result.scalars().all()
+        # Используем unique() для устранения дубликатов при joinedload коллекций
+        items = result.unique().scalars().all()
 
         # Получаем общее количество элементов для пагинации
         total = await self._count_all(params)
@@ -103,6 +111,9 @@ class ItemRepository(BaseItemRepository, BaseSQLRepository):
         # Добавляем в сессию и синхронизируем изменения с БД
         self.session.add(item)
         await self.session.flush()
+
+        # Загружаем связанные объекты, чтобы избежать DetachedInstanceError
+        await self.session.refresh(item, ['group', 'tags'])
 
         return item
 
@@ -128,6 +139,9 @@ class ItemRepository(BaseItemRepository, BaseSQLRepository):
 
         if not item:
             raise NoResultFound(f"Элемент с ID {item_id} не найден")
+
+        # Загружаем связанные объекты, чтобы избежать DetachedInstanceError
+        await self.session.refresh(item, ['group', 'tags'])
 
         return item
 
@@ -166,29 +180,29 @@ class ItemRepository(BaseItemRepository, BaseSQLRepository):
         if params.q:
             pattern = f"%{params.q}%"
             query = query.filter(Item.name.ilike(pattern))
-        
+
         # Фильтр по названию
         if params.name:
             pattern = f"%{params.name}%"
             query = query.filter(Item.name.ilike(pattern))
-        
+
         # Фильтр по минимальной цене
         if params.min_price is not None:
             query = query.filter(Item.price >= params.min_price)
-        
+
         # Фильтр по максимальной цене
         if params.max_price is not None:
             query = query.filter(Item.price <= params.max_price)
-        
+
         # Фильтр по группе
         if params.group_id:
             query = query.filter(Item.group_id == params.group_id)
-        
+
         # Фильтр по тегам
         if params.tag_ids:
             from src.models.item import item_tags
             query = query.join(item_tags).filter(item_tags.c.tag_id.in_(params.tag_ids))
-        
+
         return query
 
     def _apply_sorting(self, query, params: ItemQueryParams):
@@ -200,22 +214,22 @@ class ItemRepository(BaseItemRepository, BaseSQLRepository):
             'created_at': Item.created_at,
             'updated_at': Item.updated_at,
         }
-        
+
         # Получаем поле для сортировки (по умолчанию created_at)
         sort_by = params.sort_by if params.sort_by else 'created_at'
         order = params.order if params.order else 'desc'
-        
+
         # Проверяем, что поле существует
         if sort_by not in sort_fields:
             sort_by = 'created_at'
-        
+
         # Получаем колонку для сортировки
         sort_column = sort_fields[sort_by]
-        
+
         # Применяем направление сортировки
         if order == 'asc':
             query = query.order_by(sort_column.asc())
         else:
             query = query.order_by(sort_column.desc())
-        
+
         return query

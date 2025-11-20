@@ -46,3 +46,15 @@ async def admin_auth_tokens(make_post_request, admin_user_data) -> dict:
     response: Response = await make_post_request("/api/login/", json=login_data)
     assert response.status_code == 200, f"Ошибка авторизации админа: {response.text}"
     return response.json()
+
+
+@pytest.fixture()
+async def auth_headers(auth_tokens) -> dict:
+    """Возвращает заголовки с access токеном для авторизованных запросов"""
+    return {"Authorization": f"Bearer {auth_tokens['access_token']}"}
+
+
+@pytest.fixture()
+async def admin_auth_headers(admin_auth_tokens) -> dict:
+    """Возвращает заголовки с access токеном админа для авторизованных запросов"""
+    return {"Authorization": f"Bearer {admin_auth_tokens['access_token']}"}

@@ -8,6 +8,7 @@ from typing import Optional
 from fastapi import HTTPException, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
+from src.schemas.auth import UserJWT
 from src.utils.token import JWTHelper
 
 
@@ -23,10 +24,10 @@ class JWTBearer(HTTPBearer):
         """
         super().__init__(auto_error=auto_error)
 
-    async def __call__(self, request: Request) -> dict:
+    async def __call__(self, request: Request) -> UserJWT:
         """
         Проверяет JWT токен из заголовка Authorization.
-        Валидирует токен и возвращает декодированный payload
+        Валидирует токен и возвращает объект UserJWT с данными пользователя.
         """
         # Извлекаем credentials из заголовка Authorization
         credentials: HTTPAuthorizationCredentials = await super().__call__(request)
@@ -55,9 +56,12 @@ class JWTBearer(HTTPBearer):
         return decoded_token
 
     @staticmethod
-    def parse_token(jwt_token: str) -> Optional[dict]:
+    def parse_token(jwt_token: str) -> Optional[UserJWT]:
         """
-        Декодирует JWT токен и возвращает payload
+        Декодирует JWT токен и возвращает объект UserJWT.
+        Преобразует поле 'sub' из JWT в 'id' через alias в схеме.
         """
         payload = JWTHelper().decode(jwt_token)
-        return payload
+        if not payload:
+            return None
+        return UserJWT(**payload)

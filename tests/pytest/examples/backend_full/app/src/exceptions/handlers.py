@@ -8,6 +8,7 @@ from starlette import status
 
 from src.exceptions.base import BaseException
 from src.exceptions.auth import UnauthorizedException
+from src.exceptions.item import ItemNotFoundException
 
 
 def register_exception_handlers(app: FastAPI):
@@ -24,6 +25,19 @@ def register_exception_handlers(app: FastAPI):
         """
         return JSONResponse(
             status_code=status.HTTP_401_UNAUTHORIZED,
+            content={
+                "detail": str(exc.message),
+            },
+        )
+
+    @app.exception_handler(ItemNotFoundException)
+    async def item_not_found_exception_handler(request: Request, exc: ItemNotFoundException):
+        """
+        Обработчик для исключений "элемент не найден".
+        Возвращает 404 Not Found с сообщением об ошибке.
+        """
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
             content={
                 "detail": str(exc.message),
             },

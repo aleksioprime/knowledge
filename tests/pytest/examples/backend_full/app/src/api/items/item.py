@@ -53,6 +53,7 @@ async def get_items(
 async def get_item(
         item_id: UUID,
         service: Annotated[ItemService, Depends(get_item_service)],
+        user: Annotated[UserJWT, Depends(permission_required())],
 ) -> ItemResponseSchema:
     """
     Получает детальную информацию об элементе.
@@ -72,7 +73,7 @@ async def get_item(
 async def create_item(
         body: ItemCreateSchema,
         service: Annotated[ItemService, Depends(get_item_service)],
-        user: Annotated[UserJWT, Depends(permission_required())],
+        user: Annotated[UserJWT, Depends(permission_required(admin=True))],
 ) -> ItemResponseSchema:
     """
     Создает новый элемент в системе.
@@ -93,7 +94,7 @@ async def update_item(
         item_id: UUID,
         body: ItemUpdateSchema,
         service: Annotated[ItemService, Depends(get_item_service)],
-        user: Annotated[UserJWT, Depends(permission_required())],
+        user: Annotated[UserJWT, Depends(permission_required(admin=True))],
 ) -> ItemResponseSchema:
     """
     Обновляет существующий элемент.
@@ -112,7 +113,7 @@ async def update_item(
 async def delete_item(
         item_id: UUID,
         service: Annotated[ItemService, Depends(get_item_service)],
-        user: Annotated[UserJWT, Depends(permission_required())],
+        user: Annotated[UserJWT, Depends(permission_required(admin=True))],
 ) -> None:
     """
     Удаляет элемент из системы.

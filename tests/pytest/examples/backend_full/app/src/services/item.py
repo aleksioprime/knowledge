@@ -8,6 +8,7 @@ from typing import List
 from sqlalchemy.exc import IntegrityError, NoResultFound
 
 from src.exceptions.base import BaseException
+from src.exceptions.item import ItemNotFoundException
 from src.repositories.uow import UnitOfWork
 from src.schemas.pagination import PaginatedResponse
 from src.schemas.item import ItemResponseSchema, ItemCreateSchema, ItemUpdateSchema, ItemQueryParams
@@ -32,7 +33,7 @@ class ItemService:
             item = await self.uow.item.get_detail_by_id(item_id)
 
             if not item:
-                raise BaseException(f"Элемент с указанным ID не найден")
+                raise ItemNotFoundException()
 
         return ItemResponseSchema.model_validate(item)
 
@@ -61,10 +62,11 @@ class ItemService:
         async with self.uow:
             try:
                 created_item = await self.uow.item.create(body)
+                result = ItemResponseSchema.model_validate(created_item)
             except IntegrityError as exc:
                 raise BaseException("Ошибка ограничения целостности данных в базе данных") from exc
 
-        return ItemResponseSchema.model_validate(created_item)
+        return result
 
     async def update(self, item_id: UUID, body: ItemUpdateSchema) -> ItemResponseSchema:
         """
@@ -73,10 +75,11 @@ class ItemService:
         async with self.uow:
             try:
                 updated_item = await self.uow.item.update(item_id, body)
+                result = ItemResponseSchema.model_validate(updated_item)
             except NoResultFound as exc:
-                raise BaseException("Элемент с указанным ID не найден") from exc
+                raise ItemNotFoundException() from exc
 
-        return ItemResponseSchema.model_validate(updated_item)
+        return result
 
     async def delete(self, item_id: UUID) -> None:
         """
@@ -86,4 +89,4 @@ class ItemService:
             try:
                 await self.uow.item.delete(item_id)
             except NoResultFound as exc:
-                raise BaseException("Элемент с указанным ID не найден") from exc
+                raise ItemNotFoundException() from exc
