@@ -1,0 +1,43 @@
+services:
+  rabbitmq:
+    image: rabbitmq:4.1.1-management-alpine
+    ports:
+      - "25672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "check_port_connectivity" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  posts_service:
+    build: ./posts_service
+    ports:
+      - "7041:8000"
+    environment:
+      DATABASE_URL: sqlite+aiosqlite:///./data/posts.db
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
+    volumes:
+      - posts_db_data:/app/data
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  categories_service:
+    build: ./categories_service
+    ports:
+      - "7042:8000"
+    environment:
+      DATABASE_URL: sqlite+aiosqlite:///./data/categories.db
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
+    volumes:
+      - categories_db_data:/app/data
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+volumes:
+  posts_db_data:
+  categories_db_data:

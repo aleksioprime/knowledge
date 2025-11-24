@@ -1,0 +1,5 @@
+fastapi==0.115.12
+uvicorn==0.38.0
+sqlalchemy==2.0.44
+aiosqlite==0.21.0
+aio_pika==9.5.8

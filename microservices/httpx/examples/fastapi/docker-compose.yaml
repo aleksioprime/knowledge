@@ -1,0 +1,27 @@
+services:
+  posts_service:
+    build: ./posts_service
+    ports:
+      - "7031:8000" # Порт, по которому будет доступен Posts Service
+    environment:
+      DATABASE_URL: sqlite+aiosqlite:///./data/posts.db # Отдельная БД для постов
+      CATEGORIES_SERVICE_URL: http://categories_service:8000 # URL для связи с Categories Service
+    volumes:
+      - posts_db_data:/app/data
+    depends_on:
+      categories_service:
+        condition: service_started
+
+
+  categories_service:
+    build: ./categories_service
+    ports:
+      - "7032:8000" # Порт, по которому будет доступен Categories Service
+    environment:
+      DATABASE_URL: sqlite+aiosqlite:///./data/categories.db # Отдельная БД для категорий
+    volumes:
+      - categories_db_data:/app/data
+
+volumes:
+  posts_db_data:
+  categories_db_data:
