@@ -27,6 +27,122 @@ RabbitMQ — это брокер сообщений с открытым исхо
     Обменник — это компонент RabbitMQ, который принимает сообщения от производителей и маршрутизирует их в одну или несколько очередей. Производитель отправляет сообщение в обменник, а не напрямую в очередь. Это позволяет гибко управлять маршрутизацией.
 
 
+## Основные команды RabbitMQ:
+
+### Подключение:
+
+- `connection = await aio_pika.connect_robust(RABBIT_URL)` - установка надёжного соединения по указанному URL (автоматически пытается переподключиться в случае разрыва и пересоздаёт каналы/очереди/консьюмеров).
+  Далее в соединении нужно работать через контекстный менеджер:
+  ```python
+  async with connection:
+    # Создание канала подключения
+    channel = await connection.channel()
+  ```
+- `await channel.set_qos(prefetch_count=1)` - потребитель будет брать не более 1 сообщения из очереди за раз, пока оно не будет обработано
+
+### Объявление очереди:
+
+- `queue = await channel.declare_queue("tasks")` - простое объявление, аовторный вызов не создаёт новую очередь
+- `queue = await channel.declare_queue("tasks", durable=True)` - очередь cохраняется после перезапуска RabbitMQ
+- `queue = await channel.declare_queue("temp", auto_delete=True)` - очередь удаляется, когда перестают использовать
+- дополнительные аргументы (TTL, DLQ, etc.):
+  ```python
+  queue = await channel.declare_queue(
+    "events",
+    arguments={
+        "x-message-ttl": 60000,  # TTL в мс на очередь
+        "x-dead-letter-exchange": "dlx",
+        "x-dead-letter-routing-key": "events.dlq",
+      }
+  )
+  ```
+
+### Чтение сообщений:
+
+- `await queue.consume(on_message)` - основной способ чтения сообщений через callback
+  ```python
+  # callback с автоматической обработкой
+  async def on_message(message: aio_pika.IncomingMessage):
+    # контекстный менеджер автоматически отправляет ack (подтверждение чтения) при выходе
+    async with message.process():
+        print(message.body)
+  ```
+  ```python
+  # ручная обработка
+  try:
+      ...
+      # положительное подтверждение обработки
+      await message.ack()
+  except ValueError as e:
+      # отрицательное подтверждение обработки c выбрасывания сообщения в DLQ
+      await message.nack(requeue=False)
+  except Exception:
+      # отрицательное подтверждение обработки c возвращением в очередь
+      await message.nack(requeue=True)
+      raise
+  ```
+
+### Работа с обменниками
+
+- `exchange = await channel.declare_exchange("logs", type=ExchangeType.DIRECT)` - объявление обменника
+
+  Типы обменника:
+  - ExchangeType.DIRECT - маршрутизация по точному совпадению routing_key
+  - ExchangeType.FANOUT - отправляет сообщения во все очереди, привязанные к этому обменнику
+  - ExchangeType.TOPIC - маршрутизация по шаблонам (например, Маршрутизация по шаблонам: user.*, order.#, log.error.*)
+  - ExchangeType.HEADERS - маршрутизация по заголовкам (headers)
+
+  Дополнительные параметры:
+  - passive=True - не создаёт exchange, а только проверяет, что он существует
+  - durable=True - exchange будет переживать перезапуск RabbitMQ
+  - auto_delete=True - удалить exchange автоматически, когда все очереди отвязаны и нет активных каналов, использующих его
+  - arguments - словарь дополнительных аргументов AMQP
+
+- `default_exchange = channel.default_exchange` - получение ссылки на обменник по-умолчанию (обменник отправляет сообщения в очередь, указанную в routing_key)
+  ```python
+  await default_exchange.publish(
+      Message(b"hi"),
+      routing_key="queue_name"
+  )
+  ```
+  Каждая очередь автоматически привязывается к обмену по умолчанию с ключом маршрутизации, который совпадает с именем очереди
+
+### Bindings (связывание очередей и обменников)
+
+- `await queue.bind(exchange, routing_key="user.created")` - создать привязку очереди к обменника
+- `await queue.unbind(exchange, routing_key="user.created")` - удалить привязку очереди от обменника
+
+### Message: создание и свойства
+
+```python
+message = Message(
+    body=b"hello",
+    delivery_mode=DeliveryMode.PERSISTENT,
+    headers={"service": "billing"},
+    content_type="application/json",
+)
+```
+
+Параметры:
+- body: данные сообщения
+- headers: произвольные метаданные
+- content_type: MIME-тип
+- reply_to: очередь ответа (для RPC)
+- correlation_id: ID вызова (для RPC)
+- expiration: TTL сообщения
+- delivery_mode=2: хранить на диске
+
+Пример TTL-сообщения: `Message(body=b"data", expiration=5000)`
+
+
+## Советы
+
+- Все создаваемые очереди должны быть долговременными (англ. durable). То есть в настройках очереди должен стоять флаг durable. Это позволит не потерять данные при перезагрузке сервера.
+- Сообщения должны отправляться с delivery_mode=2 (то есть persistent). Этот параметр указывает серверу сохранять полученное сообщение на диск.
+- Если отправка сообщения не удалась, его лучше записать во временное хранилище, а через некоторое время попытаться отправить заново.
+- В заголовках сообщений обязательно передавать параметр X-Request-Id — тот самый, который генерируется при любом входящем HTTP-запросе от пользователя и прокидывается во все зависимые запросы.
+- Не должно быть очередей, которые долго не разгребаются и бесконтрольно растут. Очереди должны мониториться на возраст самого старого сообщения: нужно алертить, если этот возраст больше допустимого.
+
 ## Cценарий Remote Procedure Call (RPC)
 
 RPC позволяет одному сервису (Клиенту) вызывать функцию или процедуру в другом сервисе (Сервере), как если бы эта функция выполнялась локально, но на самом деле вызов происходит через сеть с помощью обмена сообщениями
@@ -71,8 +187,8 @@ docker run -d \
   --platform linux/arm64 \
   -p 5672:5672 \
   -p 15672:15672 \
-  -e RABBITMQ_DEFAULT_USER=user \
-  -e RABBITMQ_DEFAULT_PASS=password \
+  -e RABBITMQ_DEFAULT_USER=guest \
+  -e RABBITMQ_DEFAULT_PASS=guest \
   rabbitmq:4.1.1-management
 ```
 
@@ -86,8 +202,8 @@ services:
     platform: linux/amd64
 
     environment:
-      RABBITMQ_DEFAULT_USER: user
-      RABBITMQ_DEFAULT_PASS: password
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
       RABBITMQ_DEFAULT_VHOST: "/"
 
       TZ: Europe/Moscow

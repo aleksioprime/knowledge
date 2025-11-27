@@ -1,3 +1,4 @@
+from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.core.dependencies import get_post_service
@@ -9,12 +10,22 @@ router = APIRouter(prefix="/posts", tags=["posts"])
 
 @router.get("/", response_model=list[Post])
 async def read_posts(
+        category_id: Optional[int] = None,
         skip: int = 0,
         limit: int = 100,
         post_service: PostService = Depends(get_post_service)
 ):
     """Получить список всех постов"""
-    posts = await post_service.get_all_posts(skip=skip, limit=limit)
+    if category_id is not None:
+        posts = await post_service.get_posts_by_category(
+            category_id=category_id,
+            skip=skip,
+            limit=limit
+            )
+        if posts is None:
+            raise HTTPException(status_code=404, detail="Категория не найдена")
+    else:
+        posts = await post_service.get_all_posts(skip=skip, limit=limit)
     return posts
 
 

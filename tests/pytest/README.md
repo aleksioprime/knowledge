@@ -405,7 +405,7 @@ def test_db():
     assert db.get("user1")["name"] == "Bob"
 ```
 
-**Моки (Mocks)** - проверка взаимодействия:
+**Моки (Mocks)** - проверка взаимодействия (имитирует поведение настоящих функций):
 ```python
 from unittest.mock import Mock, MagicMock
 

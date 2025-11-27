@@ -11,7 +11,12 @@ RABBITMQ_URL = os.getenv("RABBITMQ_URL")
 
 
 class RpcClient:
-    """Асинхронный RPC клиент для RabbitMQ"""
+    """
+    Асинхронный RPC клиент для RabbitMQ
+    Отвечает за общую логику RPC-взаимодействия по сети:
+    подключение, отправку запросов, ожидание ответов, обработку таймаутов.
+    Он не знает ничего конкретно о категориях.
+    """
 
     def __init__(self, amqp_url: str = RABBITMQ_URL):
         """Инициализация RPC клиента"""
@@ -85,3 +90,36 @@ class RpcClient:
             # Если ответ не получен в течение таймаута, удаляем Future из словаря
             self.futures.pop(correlation_id, None)
             return None
+
+
+class RabbitMQCategoryValidator:
+    """
+    Конкретная реализация валидатора категорий через RabbitMQ RPC
+    Отвечает за специфичную бизнес-логику валидации категорий:
+    он знает, какую очередь использовать (category_check_queue),
+    как интерпретировать ответ (является ли b'true'подтверждением существования)
+    и что делать в случае None ответа.
+    """
+
+    def __init__(self):
+        """Инициализация валидатора категорий"""
+        self.rpc_client = RpcClient()
+
+    async def connect(self):
+        """Установка соединения с RabbitMQ"""
+        await self.rpc_client.connect()
+
+    async def close(self):
+        """Закрытие соединения с RabbitMQ"""
+        await self.rpc_client.close()
+
+    async def check_exists(self, category_id: int) -> bool:
+        """Проверка существования категории по ID через RPC вызов"""
+        response = await self.rpc_client.call(category_id)
+        if response is None:
+            return False
+        return response == b'true'
+
+# Будет создан один единственный экземпляр RabbitMQCategoryValidator на всё время жизни приложения
+# Этот экземпляр открывает и закрывает соединение с RabbitMQ при старте и остановке приложения в main.py
+category_validator_instance = RabbitMQCategoryValidator()

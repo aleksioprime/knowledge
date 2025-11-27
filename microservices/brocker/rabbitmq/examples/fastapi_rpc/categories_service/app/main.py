@@ -1,18 +1,27 @@
+import asyncio
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
 from app.api.routers import categories
 from app.core.database import create_db_and_tables
+from app.core.rabbitmq_worker import run_consumer
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    print("Приложение запускается. Создаем базу данных...")
+    print("Приложение категорий запускается. Создаем базу данных и запускаем RabbitMQ consumer...")
+    # Запускаем consumer как фоновую задачу
+    consumer_task = asyncio.create_task(run_consumer())
     await create_db_and_tables()
-    print("База данных инициализирована")
+    print("Инициализация завершена")
     yield
-    print("Приложение завершает работу")
+    print("Приложение категорий завершает работу. Останавливаем consumer...")
+    consumer_task.cancel()
+    try:
+        await consumer_task
+    except asyncio.CancelledError:
+        print("Consumer RabbitMQ успешно остановлен")
 
 
 app = FastAPI(

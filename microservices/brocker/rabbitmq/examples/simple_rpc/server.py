@@ -29,7 +29,6 @@ class RpcServer:
         self.connection = await aio_pika.connect_robust(self.amqp_url)
         self.channel = await self.connection.channel()
 
-        # default_exchange доступен в твоей версии aio-pika
         self.default_exchange = self.channel.default_exchange
 
     async def start(self):
