@@ -11,8 +11,8 @@ services:
       KAFKA_NODE_ID: 1                              # Уникальный ID узла (должен быть уникален в кластере)
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093  # Список контроллеров в формате nodeId@host:port
 
-      # Слушатели (broker + controller)
-      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9096   # Порты для брокера и контроллера
+      # Слушатели: внутренний (PLAINTEXT), контроллер (CONTROLLER) и внешний (EXTERNAL)
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093,EXTERNAL://0.0.0.0:9096   # Адреса, на которых Kafka будет слушать подключения
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,EXTERNAL://127.0.0.1:9096    # Адреса, по которому клиенты будут подключаться (kafka:9092 для внутреннего использования, 127.0.0.1:9096 для внешнего)
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT  # Протоколы безопасности для слушателей
 

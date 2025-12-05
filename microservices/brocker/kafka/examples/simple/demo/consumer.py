@@ -6,16 +6,30 @@
 from kafka import KafkaConsumer
 import json
 
+def deserializer(serialized):
+    """
+    Десериализатор получаемых данных
+    """
+    return json.loads(serialized)
+
+def event_handler(value):
+    """
+    Обработчик события. Как только мы получаем новое сообщение,
+    будет отрабатывать данная функция
+    """
+    print(f"Event: {value['event']}, value: {value['value']}")
+
 # Создание потребителя Kafka
 consumer = KafkaConsumer(
     "demo-topic",                        # Топик для подписки
     bootstrap_servers="localhost:9096",  # Адрес Kafka брокера
     auto_offset_reset="earliest",        # Начинать чтение с начала топика
     enable_auto_commit=True,             # Автоматически подтверждать смещения
-    value_deserializer=lambda v: json.loads(v.decode("utf-8")) # Десериализация сообщений
+    value_deserializer=deserializer      # Десериализация сообщений
 )
 
 print("Слушаю сообщения...")
 
+# Чтение сообщений из топика и их обработка с помощью event_handler
 for message in consumer:
-    print("Получено:", message.value)
+    event_handler(message.value)
