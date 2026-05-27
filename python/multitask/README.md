@@ -1,4 +1,4 @@
-# Многозадачность
+# Многозадачность в Python
 
 Многозадачность — это способ выполнения нескольких задач в одной системе так, будто они выполняются одновременно, хотя внутри компьютер обычно делает только одну вещь в каждый конкретный момент времени.
 
@@ -61,4 +61,12 @@ IPC (Inter-Process Communication или межпроцессная переда�
 - I/O bound-задачи (non-RAM I/O bound) - основная часть работы приходится на ввод/вывод информации — I/O или input/output (работа с файловой системой и с сетью)
 - Memory bound-задачи (RAM I/O bound) - интенсивная работа с оперативной памятью (работа со сложными математическими моделями)
 
-## Цикл событий
+## Содержание
+
+- [Асинхронность (asyncio)](async.ipynb)
+- [Event Loop](event_loop.ipynb)
+- [Многопоточность (threading)](multithreading.ipynb)
+- [Multiprocessing](multiprocessing.ipynb)
+- [Thread Pool](thread_pool.ipynb)
+- [Сокеты](sockets.ipynb)
+- [Demo: multiprocessing](demo/mp_demo_1.py)

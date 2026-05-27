@@ -131,3 +131,7 @@ locust -f locustfile.py --master
 # Запуск воркера
 locust -f locustfile.py --worker --master-host=127.0.0.1
 ```
+
+## Содержание
+
+- [Пример нагрузочного теста](example/README.md)

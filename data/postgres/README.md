@@ -1,8 +1,12 @@
-# Базы данных (PostgreSQL)
+# PostgreSQL
 
-Установка и запуск контейнера:
+**PostgreSQL** — мощная объектно-реляционная СУБД с открытым исходным кодом. Поддерживает ACID-транзакции, расширения (PostGIS, pg_trgm, pgvector), JSON/JSONB, оконные функции, CTE, partitioning и репликацию.
+
+## Установка и запуск
+
+Через `docker run`:
 ```sh
-!docker run --name postgres \
+docker run --name postgres \
   --platform linux/arm64 \
   -e POSTGRES_USER=postgres \
   -e POSTGRES_PASSWORD=postgres \
@@ -12,7 +16,7 @@
   -d postgres:16
 ```
 
-Установка и запуск `docker-compose`:
+Через `docker-compose`:
 ```yaml
 services:
   postgres:
@@ -39,3 +43,11 @@ services:
 volumes:
   postgres_volume:
 ```
+
+## Содержание
+
+- [Подключение к БД](docs/connect.ipynb)
+- [Запросы (SELECT, JOIN, агрегации)](docs/query.ipynb)
+- [Транзакции и уровни изоляции](docs/transaction.ipynb)
+- [Дополнительные возможности](docs/extra.ipynb)
+- [Практические задачи](docs/tasks.ipynb)

@@ -461,3 +461,10 @@ omit = ["*/tests/*", "*/migrations/*"]
 fail_under = 80
 skip_covered = true
 ```
+
+## Содержание
+
+- [Пример: simple (минимальный)](examples/simple/README.md)
+- Пример: backend_simple — `examples/backend_simple/`
+- Пример: backend_repo (репозиторий-паттерн) — `examples/backend_repo/`
+- [Пример: backend_full (полноценный)](examples/backend_full/README.md)

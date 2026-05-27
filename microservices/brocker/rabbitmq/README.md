@@ -235,3 +235,12 @@ volumes:
   rabbitmq_data:
   rabbitmq_log:
 ```
+## Содержание
+
+- [Пример: simple_queue (точка-точка)](examples/simple_queue/README.md)
+- [Пример: simple_pub_sub (fanout)](examples/simple_pub_sub/README.md)
+- [Пример: simple_topic (topic exchange)](examples/simple_topic/README.md)
+- [Пример: simple_rpc (RPC pattern)](examples/simple_rpc/README.md)
+- [Пример: simple_delay (отложенная доставка)](examples/simple_delay/README.md)
+- [Пример: simple_dlq (Dead Letter Queue)](examples/simple_dlq/README.md)
+- [Пример: fastapi_rpc (интеграция с FastAPI)](examples/fastapi_rpc/README.md)
