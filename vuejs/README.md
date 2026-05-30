@@ -4,9 +4,16 @@
 
 ## Содержание
 
-- [Установка проекта](project_setup.md)
-- [Установка модулей](modules_install.md)
-- [Дополнительные модули](extra_modules.md)
-- [Общие компоненты](common_components.md)
+- [Установка проекта](docs/install_basic.md)
+- [Установка модулей](docs/install_modules.md)
+- [Дополнительные модули](docs/extra_modules.md)
+- [Использование v-html](docs/v_html.md)
+- [Основы Vue](docs/vue_basics.md)
+- [Реактивность в Vue](docs/reactivity.md)
+- [Жизненный цикл Vue](docs/lifecycle.md)
+- [События в Vue](docs/events.md)
+- [Основы работы с компонентами Vue](docs/components_basics.md)
+- [Slots в компонентах Vue](docs/components_slots.md)
+- [Composition API и Options API](docs/composition_options_api.md)
 - [Добавление Middleware](middleware.md)
 - [Сервис авторизации JWT](jwt_auth_service.md)
