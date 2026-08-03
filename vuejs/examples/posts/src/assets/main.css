@@ -1,0 +1,17 @@
+/* Учитываем padding и border внутри заданной ширины элементов. */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  color: #222;
+  background: #fff;
+  font-family: Arial, sans-serif;
+}
+
+/* Общий узкий контейнер делает длинный текст удобным для чтения. */
+.page-shell {
+  width: min(100% - 32px, 720px);
+  margin: 40px auto;
+}

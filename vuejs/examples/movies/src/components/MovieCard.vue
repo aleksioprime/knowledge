@@ -6,12 +6,8 @@ defineProps({
 
 <template>
   <article class="movie-card">
-    <img
-      v-if="movie.poster_path"
-      :src="`https://image.tmdb.org/t/p/w500${movie.poster_path}`"
-      :alt="movie.title"
-      loading="lazy"
-    />
+    <img v-if="movie.poster_path" :src="`https://image.tmdb.org/t/p/w500${movie.poster_path}`" :alt="movie.title"
+      loading="lazy" />
     <div v-else class="poster-placeholder">Нет постера</div>
 
     <div class="movie-info">

@@ -1,59 +1,93 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+
+import { getMovies } from './api/movies'
 import MovieList from './components/MovieList.vue'
+import MoviesLoader from './components/MoviesLoader.vue'
 import Search from './components/Search.vue'
 
-const token = import.meta.env.VITE_TMDB_ACCESS_TOKEN
 const movies = ref([])
-const isLoading = ref(true)
+const query = ref('')
+const nextPage = ref(1)
+const totalPages = ref(1)
+const isLoading = ref(false)
 const error = ref('')
 
-const API_ENDPOINT = 'https://api.themoviedb.org'
+let requestController = null
 
-async function loadMovies(query = '') {
+// Следующую страницу можно запросить, пока её номер не превысил total_pages от TMDB.
+const hasMore = computed(() => nextPage.value <= totalPages.value)
+
+async function loadMovies() {
+  if (isLoading.value || !hasMore.value) return
+
   isLoading.value = true
   error.value = ''
 
+  const controller = new AbortController()
+  requestController = controller
+
   try {
-    const params = new URLSearchParams({
-      language: 'ru-RU',
+    const data = await getMovies({
+      query: query.value,
+      page: nextPage.value,
+      signal: controller.signal,
     })
 
-    if (query) params.set('query', query)
-
-    const headers = new Headers({
-      Authorization: `Bearer ${token}`,
-    })
-
-    const path = query ? '/3/search/movie' : '/3/movie/popular'
-    const response = await fetch(`${API_ENDPOINT}${path}?${params.toString()}`, { headers })
-
-    if (!response.ok) throw new Error('Не удалось загрузить фильмы')
-
-    const data = await response.json()
-    movies.value = data.results
+    movies.value.push(...data.results)
+    nextPage.value = data.page + 1
+    totalPages.value = data.total_pages
   } catch (requestError) {
-    error.value = requestError.message
+    if (requestError.name !== 'AbortError') {
+      error.value = requestError.message
+    }
   } finally {
-    isLoading.value = false
+    // Старый отменённый запрос не должен менять состояние нового запроса.
+    if (requestController === controller) {
+      isLoading.value = false
+      requestController = null
+    }
   }
 }
 
-onMounted(() => {
-  loadMovies()
-})
+// Новый поиск очищает старые результаты и начинает загрузку с первой страницы.
+async function startSearch(searchQuery = '') {
+  requestController?.abort()
+
+  query.value = searchQuery
+  movies.value = []
+  nextPage.value = 1
+  totalPages.value = 1
+  isLoading.value = false
+  error.value = ''
+
+  await loadMovies()
+}
+
+onMounted(() => startSearch())
+onBeforeUnmount(() => requestController?.abort())
 </script>
 
 <template>
   <main>
     <h1>Фильмы</h1>
 
-    <Search @search="loadMovies" @reset="loadMovies" />
+    <Search @search="startSearch" @reset="startSearch" />
 
-    <p v-if="isLoading">Загрузка…</p>
-    <p v-else-if="error" class="error">{{ error }}</p>
+    <p v-if="isLoading && !movies.length">Загрузка…</p>
+    <p v-else-if="error && !movies.length" class="error">{{ error }}</p>
     <p v-else-if="!movies.length">Ничего не найдено</p>
-    <MovieList v-else :movies="movies" />
+
+    <template v-else>
+      <MovieList :movies="movies" />
+      <MoviesLoader
+        :loading="isLoading"
+        :has-more="hasMore"
+        :error="error"
+        @load="loadMovies"
+        @retry="loadMovies"
+      />
+    </template>
   </main>
 </template>
 

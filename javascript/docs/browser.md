@@ -37,6 +37,8 @@ document.querySelector('.user-list').addEventListener('click', (event) => {
 
 ## HTTP-запросы
 
+Подробно Fetch, Axios, HTTP-методы, JSON, отмена и обработка ошибок разобраны в разделе [HTTP-запросы в JavaScript](http_requests.md).
+
 ```js
 async function createUser(data) {
   const response = await fetch('/api/users', {

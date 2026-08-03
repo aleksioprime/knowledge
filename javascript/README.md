@@ -25,6 +25,7 @@ console.log(activeNames) // ['Анна']
 - [Массивы и коллекции](docs/arrays_collections.md) — Array, Map и Set
 - [Объекты, прототипы и классы](docs/objects_classes.md)
 - [Асинхронность](docs/async.md) — Promise, async/await и event loop
+- [HTTP-запросы: Fetch и Axios](docs/http_requests.md)
 - [Модули](docs/modules.md) — import/export и организация кода
 - [JavaScript в браузере](docs/browser.md) — DOM, события, fetch и хранилища
 - [Ошибки и отладка](docs/errors.md)

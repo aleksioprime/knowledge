@@ -1,9 +1,10 @@
 <script setup>
 const model = defineModel('modelValue', {
-  type: Number,
+  type: String,
   required: true,
   default: null,
 })
+
 </script>
 
 <template>
