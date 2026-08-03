@@ -1,0 +1,62 @@
+name: example-clickhouse-nodes
+
+services:
+  zookeeper:
+    image: zookeeper:3.8
+    hostname: example-zookeeper
+
+  clickhouse-node1:
+    image: clickhouse/clickhouse-server:23
+    hostname: example-clickhouse-node1
+    ports:
+      - "18123:8123"
+      - "19000:9000"
+    volumes:
+      - ./data/node1:/etc/clickhouse-server
+    depends_on:
+      - zookeeper
+
+  clickhouse-node2:
+    image: clickhouse/clickhouse-server:23
+    hostname: example-clickhouse-node2
+    ports:
+      - "18124:8123"
+      - "19001:9000"
+    volumes:
+      - ./data/node2:/etc/clickhouse-server
+    depends_on:
+      - zookeeper
+
+  clickhouse-node3:
+    image: clickhouse/clickhouse-server:23
+    hostname: example-clickhouse-node3
+    ports:
+      - "18125:8123"
+      - "19002:9000"
+    volumes:
+      - ./data/node3:/etc/clickhouse-server
+    depends_on:
+      - zookeeper
+
+  clickhouse-node4:
+    image: clickhouse/clickhouse-server:23
+    hostname: example-clickhouse-node4
+    ports:
+      - "18126:8123"
+      - "19003:9000"
+    volumes:
+      - ./data/node4:/etc/clickhouse-server
+    depends_on:
+      - zookeeper
+
+  python-client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    image: clickhouse-python-client:local
+    working_dir: /workspace
+    command: tail -f /dev/null
+    volumes:
+      - ./client/workspace:/workspace
+    depends_on:
+      - clickhouse-node1

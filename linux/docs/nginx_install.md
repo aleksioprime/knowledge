@@ -1,5 +1,7 @@
 ## Установка NGINX
 
+Здесь описаны установка пакета и создание первого сайта на Ubuntu. Reverse proxy, TLS, балансировка и ограничения разобраны в разделе [NGINX](../../web/nginx/README.md).
+
 Обновите пакеты Ubuntu:
 ```sh
 sudo apt update

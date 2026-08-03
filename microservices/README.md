@@ -24,4 +24,5 @@
 - [HTTPX](httpx/README.md) — синхронный/асинхронный HTTP-клиент
 - [API Gateway](api_gateway/README.md) — единая точка входа в систему
 - [Keycloak](keycloak/README.md) — OAuth2/OIDC сервер аутентификации
-- [Nginx](nginx/README.md) — reverse proxy и балансировщик нагрузки
+
+Базовые принципы сетевого взаимодействия вынесены в раздел [Веб-протоколы и инфраструктура](../web/README.md): там описаны HTTP, безопасность, передача файлов и NGINX.

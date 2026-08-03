@@ -2,40 +2,160 @@
 
 ## Что такое жизненный цикл компонента
 
-Жизненный цикл компонента - это набор этапов, через которые проходит компонент:
+Жизненный цикл - это последовательность этапов от создания экземпляра компонента до его удаления. Vue сам проходит эти этапы, а lifecycle hooks позволяют запустить свой код в нужный момент.
 
-- создание состояния
-- рендер
-- монтирование в DOM
-- обновление при изменении данных
-- удаление из DOM
+Упрощённая последовательность выглядит так:
 
-Это важно, потому что разный код должен выполняться в разное время.
+```text
+инициализация
+    ↓
+beforeMount / onBeforeMount
+    ↓
+создание и вставка DOM
+    ↓
+mounted / onMounted
+    ↓
+изменилось реактивное состояние
+    ↓
+beforeUpdate / onBeforeUpdate
+    ↓
+обновление DOM
+    ↓
+updated / onUpdated
+    ↓
+beforeUnmount / onBeforeUnmount
+    ↓
+удаление DOM и остановка эффектов
+    ↓
+unmounted / onUnmounted
+```
 
-Например:
+Этап обновления может повториться много раз. Этапы создания, монтирования и размонтирования для одного экземпляра компонента выполняются один раз.
 
-- запрос данных часто делают после монтирования
-- работу с DOM делают, когда элемент уже появился
-- очистку таймеров и подписок делают перед удалением компонента
+## Options API и Composition API
 
-## Основные lifecycle hooks
+Один и тот же этап называется по-разному в зависимости от используемого API:
 
-В Composition API чаще всего используют такие хуки:
+| Этап | Options API | Composition API |
+| --- | --- | --- |
+| Начало инициализации | `beforeCreate` | код внутри `setup()` или `<script setup>` |
+| Состояние и методы созданы | `created` | код внутри `setup()` или `<script setup>` |
+| Перед первым рендерингом DOM | `beforeMount` | `onBeforeMount` |
+| DOM компонента создан | `mounted` | `onMounted` |
+| Перед обновлением DOM | `beforeUpdate` | `onBeforeUpdate` |
+| DOM обновлён | `updated` | `onUpdated` |
+| Перед удалением компонента | `beforeUnmount` | `onBeforeUnmount` |
+| Компонент удалён | `unmounted` | `onUnmounted` |
 
-- `onMounted`
-- `onUpdated`
-- `onUnmounted`
-- `onBeforeMount`
-- `onBeforeUpdate`
-- `onBeforeUnmount`
+В Composition API нет хуков `onBeforeCreate` и `onCreated`. Обычный код верхнего уровня `<script setup>` выполняется при настройке экземпляра компонента и заменяет большинство задач этих ранних хуков.
 
-Пример:
+`setup()` выполняется раньше хуков Options API, включая `beforeCreate`. Не стоит смешивать два API без необходимости: для новых компонентов с `<script setup>` обычно используют функции `onMounted`, `onUpdated` и `onUnmounted`.
+
+## Этапы подробнее
+
+### 1. Инициализация
+
+Vue создаёт экземпляр компонента, обрабатывает props и настраивает реактивное состояние, `computed`, методы и watchers.
+
+В `<script setup>` этот код выполняется для каждого нового экземпляра компонента:
+
+```vue
+<script setup>
+import { ref } from 'vue'
+
+const count = ref(0)
+console.log('Компонент инициализируется')
+</script>
+```
+
+На этом этапе DOM компонента ещё не существует. Нельзя получить его элементы через template refs.
+
+Обычно здесь создают состояние, настраивают `computed` и `watch`, а также могут запускать запросы, если для них не нужен DOM. Ждать `onMounted` только ради обычного HTTP-запроса необязательно.
+
+В проектах с Vite шаблон `.vue`-компонента обычно компилируется во время сборки. Поэтому компиляцию шаблона не стоит воспринимать как обязательный отдельный этап при каждом создании компонента в браузере.
+
+### 2. Первое отображение и монтирование
+
+Перед первым отображением вызывается `onBeforeMount`. Реактивное состояние уже готово, но DOM-узлы компонента ещё не созданы.
+
+После этого Vue создаёт DOM по шаблону и вставляет его в родительский контейнер. Затем вызывается `onMounted`.
+
+```vue
+<script setup>
+import { ref, onBeforeMount, onMounted } from 'vue'
+
+const inputRef = ref(null)
+
+onBeforeMount(() => {
+  console.log(inputRef.value) // null: input ещё не создан
+})
+
+onMounted(() => {
+  console.log(inputRef.value) // HTMLInputElement
+  inputRef.value.focus()
+})
+</script>
+
+<template>
+  <input ref="inputRef">
+</template>
+```
+
+`onMounted` используют, когда нужен готовый DOM, browser API или библиотека, которая работает с DOM. Этот хук не выполняется во время серверного рендеринга.
+
+### 3. Обновление
+
+Если изменилось реактивное значение, используемое при рендеринге, Vue планирует обновление компонента. Несколько изменений состояния могут быть объединены в одно обновление DOM.
+
+Порядок этапа:
+
+1. Изменяется реактивное состояние.
+2. Вызывается `onBeforeUpdate`.
+3. Vue обновляет DOM.
+4. Вызывается `onUpdated`.
+
+```vue
+<script setup>
+import { ref, onBeforeUpdate, onUpdated } from 'vue'
+
+const count = ref(0)
+
+onBeforeUpdate(() => {
+  console.log('DOM сейчас содержит старое значение')
+})
+
+onUpdated(() => {
+  console.log('DOM уже содержит новое значение')
+})
+</script>
+
+<template>
+  <button @click="count++">Нажатий: {{ count }}</button>
+</template>
+```
+
+Не изменяйте состояние компонента безусловно внутри `onUpdated`: это может запустить новое обновление и создать бесконечный цикл. Если нужно дождаться DOM после одного конкретного изменения, обычно понятнее использовать `nextTick()` рядом с этим изменением.
+
+### 4. Размонтирование
+
+Компонент размонтируется, когда Vue удаляет его из дерева, например из-за `v-if`, смены страницы или удаления родительского компонента.
+
+`v-if="false"` действительно удаляет компонент и запускает его размонтирование. `v-show="false"` только скрывает DOM через CSS, поэтому lifecycle hooks размонтирования не вызываются.
+
+Сначала вызывается `onBeforeUnmount`. Компонент и его DOM ещё доступны. После удаления DOM вызывается `onUnmounted`.
+
+Во время размонтирования Vue автоматически останавливает реактивные эффекты компонента. Ресурсы, созданные вручную вне Vue, нужно очистить самостоятельно:
+
+- таймеры и интервалы;
+- глобальные DOM-события;
+- `ResizeObserver`, `IntersectionObserver` и другие observers;
+- WebSocket-соединения и сторонние подписки.
 
 ```vue
 <script setup>
 import { onMounted, onUnmounted } from 'vue'
 
-function onResize() {
+const onResize = () => {
   console.log(window.innerWidth)
 }
 
@@ -49,20 +169,40 @@ onUnmounted(() => {
 </script>
 ```
 
-Здесь логика простая:
+Правило простое: если компонент что-то подключил или запустил вручную, при размонтировании он должен это отключить или остановить.
 
-- после монтирования подписываемся на событие
-- перед окончательным удалением компонента очищаем подписку
+## Как регистрировать lifecycle hooks
 
-## Когда использовать хуки
+Функции `onMounted`, `onUpdated` и другие Composition API hooks нужно регистрировать синхронно во время выполнения `setup()`:
 
-- `onMounted` - когда нужно работать с DOM, запускать начальную загрузку данных, подключать внешние библиотеки
-- `onUpdated` - когда нужно отреагировать на уже произошедшее обновление DOM
-- `onUnmounted` - когда нужно очищать таймеры, события, подписки, observer-объекты
+```js
+// Правильно
+onMounted(() => {
+  console.log('mounted')
+})
+
+// Неправильно: hook регистрируется слишком поздно
+setTimeout(() => {
+  onMounted(() => {
+    console.log('не сработает как ожидается')
+  })
+}, 100)
+```
+
+Асинхронной может быть функция, переданная в hook, но сам вызов `onMounted(...)` должен произойти синхронно при настройке компонента.
+
+## Когда какой hook нужен
+
+- `onBeforeMount` - редко; DOM ещё не создан, но состояние уже настроено.
+- `onMounted` - доступ к DOM, фокус, измерение размеров, browser API, запуск DOM-библиотеки.
+- `onBeforeUpdate` - чтение состояния DOM непосредственно перед его обновлением.
+- `onUpdated` - действие после любого обновления DOM компонента; для конкретного изменения часто лучше `nextTick`.
+- `onBeforeUnmount` - действие непосредственно перед удалением, пока компонент ещё полностью доступен.
+- `onUnmounted` - очистка таймеров, обработчиков, observers и внешних подписок.
 
 ## `watch()`
 
-`watch()` нужен, когда вы хотите отреагировать на изменение данных побочным действием.
+`watch()` следит за явно указанными реактивными данными и запускает callback, когда они изменились. Его используют для побочных действий: запросов, записи в `localStorage`, синхронизации со сторонними библиотеками и другой логики, которая не вычисляет значение для шаблона.
 
 ```vue
 <script setup>
@@ -76,36 +216,225 @@ watch(search, (newValue, oldValue) => {
 </script>
 ```
 
-Это уже не вычисление значения, а реакция на изменение.
+Callback получает новое значение, старое значение и функцию регистрации очистки:
 
-### Типичные сценарии для `watch`
+```js
+watch(source, (newValue, oldValue, onCleanup) => {
+  // Побочное действие
+}, options)
+```
 
-- запуск запроса при изменении фильтра
-- синхронизация с `localStorage`
-- реакция на изменение маршрута
-- вызов стороннего API
+По умолчанию `watch` ленивый: при создании watcher callback не запускается, а ждёт первого изменения источника.
 
-### Когда `watch` особенно уместен
+Источником может быть `ref`, `computed`, getter-функция, реактивный объект или массив из нескольких источников.
 
-`watch` хорошо подходит, когда:
+```js
+const count = ref(0)
 
-- нужно следить за конкретным источником
-- важно получить старое и новое значение
-- нужно контролировать момент запуска и побочный эффект
+watch(count, (newCount, oldCount) => {
+  console.log(oldCount, '->', newCount)
+})
+```
 
-Пример:
+Передавать `.value` не нужно: `watch(count, ...)` получает сам `ref`, а Vue читает его значение автоматически.
+
+Чтобы следить только за одним свойством реактивного объекта, передайте getter-функцию:
+
+```js
+const user = reactive({
+  name: 'Анна',
+  address: {
+    city: 'Москва',
+  },
+})
+
+watch(
+  () => user.address.city,
+  (newCity, oldCity) => {
+    console.log(oldCity, '->', newCity)
+  },
+)
+```
+
+Так делать нельзя:
+
+```js
+watch(user.address.city, () => {})
+```
+
+В этом случае в `watch` попадёт текущее строковое значение, а не реактивный источник.
+
+#### Несколько источников
+
+```js
+const page = ref(1)
+const search = ref('')
+
+watch(
+  [page, search],
+  ([newPage, newSearch], [oldPage, oldSearch]) => {
+    console.log({ newPage, newSearch, oldPage, oldSearch })
+  },
+)
+```
+
+Также в массив можно добавлять getter-функции:
+
+```js
+watch([page, () => user.address.city], ([newPage, newCity]) => {
+  console.log(newPage, newCity)
+})
+```
+
+### `immediate`
+
+Опция `immediate: true` запускает callback сразу при создании watcher, а затем при каждом изменении источника. При первом запуске `oldValue` равен `undefined`.
+
+```js
+watch(
+  search,
+  (newSearch, oldSearch) => {
+    console.log({ newSearch, oldSearch })
+    loadResults(newSearch)
+  },
+  { immediate: true },
+)
+```
+
+Это удобно, когда одну и ту же функцию нужно использовать и для начальной загрузки, и для последующих обновлений.
+
+### `once`
+
+Опция `once: true` доступна с Vue 3.4. После первого вызова callback watcher автоматически останавливается.
+
+```js
+watch(
+  isAuthorized,
+  () => {
+    console.log('Статус авторизации впервые изменился')
+  },
+  { once: true },
+)
+```
+
+При совместном использовании `immediate: true` и `once: true` немедленный запуск считается первым: callback выполнится сразу, после чего watcher остановится.
+
+### `deep`
+
+Обычный watcher с getter следит за заменой возвращаемого значения, но не за изменением его вложенных свойств:
+
+```js
+watch(
+  () => user.address,
+  () => {
+    console.log('Ссылка на address изменилась')
+  },
+)
+```
+
+Для отслеживания вложенных изменений используют `deep`:
+
+```js
+watch(
+  () => user.address,
+  (newAddress, oldAddress) => {
+    console.log('Изменилось вложенное свойство address')
+  },
+  { deep: true },
+)
+```
+
+При вложенном изменении `newAddress` и `oldAddress` могут ссылаться на один и тот же объект. Vue не создаёт его копию перед каждым обновлением.
+
+Если передать в `watch` реактивный объект напрямую, глубокое отслеживание включится автоматически:
+
+```js
+watch(user, () => {
+  console.log('Изменилось любое вложенное свойство user')
+})
+```
+
+Глубокий обход большого объекта может быть дорогим. Если требуется одно поле, лучше следить за ним через getter. Начиная с Vue 3.5 вместо `true` можно передать максимальную глубину обхода, например `{ deep: 2 }`.
+
+### Очистка предыдущего побочного эффекта
+
+Если источник быстро меняется, предыдущий запрос может завершиться позже нового и записать устаревшие данные. `onWatcherCleanup` позволяет отменить работу перед повторным запуском watcher:
 
 ```vue
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, onWatcherCleanup } from 'vue'
 
-const page = ref(1)
+const userId = ref(1)
+const user = ref(null)
 
-watch(page, async (newPage) => {
-  console.log('Загружаем страницу', newPage)
+watch(userId, async (newUserId) => {
+  const controller = new AbortController()
+
+  onWatcherCleanup(() => {
+    controller.abort()
+  })
+
+  const response = await fetch(`/api/users/${newUserId}`, {
+    signal: controller.signal,
+  })
+
+  user.value = await response.json()
 })
 </script>
 ```
+
+`onWatcherCleanup` доступен с Vue 3.5. Его нужно вызвать синхронно внутри callback, до первого `await`.
+
+Универсальная альтернатива - третий аргумент callback `onCleanup`:
+
+```js
+watch(userId, async (newUserId, oldUserId, onCleanup) => {
+  const controller = new AbortController()
+
+  onCleanup(() => {
+    controller.abort()
+  })
+
+  const response = await fetch(`/api/users/${newUserId}`, {
+    signal: controller.signal,
+  })
+})
+```
+
+Функция очистки также вызывается при остановке watcher.
+
+### Время запуска: `flush`
+
+Vue группирует обновления, поэтому callback watcher не обязательно выполняется сразу после каждой строки с изменением состояния. Время запуска можно настроить:
+
+- `flush: 'pre'` - значение по умолчанию; callback выполняется перед обновлением DOM текущего компонента;
+- `flush: 'post'` - callback выполняется после обновления DOM и подходит для чтения обновлённых элементов;
+- `flush: 'sync'` - callback выполняется сразу при изменении; не группируется и требует осторожности.
+
+```js
+watch(isOpen, () => {
+  console.log('DOM уже обновлён')
+}, { flush: 'post' })
+```
+
+`flush: 'sync'` не стоит использовать для массивов и других значений, которые могут много раз измениться в одном синхронном участке кода.
+
+### Остановка, пауза и продолжение
+
+`watch` возвращает управляющий объект-функцию. Методы `pause` и `resume` доступны в Vue 3.5+:
+
+```js
+const watcher = watch(search, loadResults)
+
+watcher.pause()
+watcher.resume()
+watcher.stop()
+
+// Вызов без метода также полностью останавливает watcher
+watcher()
+```
+
+Watcher, созданный синхронно внутри `<script setup>`, Vue автоматически остановит при размонтировании компонента. Если создать его позже, например внутри `setTimeout`, связь с компонентом может потеряться — такой watcher нужно остановить вручную.
 
 ## `watchEffect()`
 
@@ -122,172 +451,3 @@ watchEffect(() => {
 })
 </script>
 ```
-
-- `watchEffect` удобен для простых реактивных эффектов
-- зависимости задаются не явно, а выводятся из кода внутри функции
-- для более контролируемых сценариев часто удобнее обычный `watch`
-
-## `computed` или `watch`
-
-Разделение простое:
-
-- `computed` - когда нужно получить новое значение из других значений
-- `watch` - когда нужно выполнить действие при изменении
-
-Пример:
-
-- `fullName`, `filteredUsers`, `isFormValid` - это `computed`
-- `saveToLocalStorage`, `fetchData`, `sendAnalytics` - это `watch`
-
-## `nextTick()`
-
-`nextTick()` используют, когда нужно дождаться, пока Vue применит изменения состояния к DOM.
-
-Важно понимать: реактивные данные могут измениться сразу, но обновление DOM Vue обычно делает не мгновенно в ту же строку кода, а откладывает до ближайшего цикла обновления.
-
-Поэтому такой код может сработать раньше, чем DOM реально обновится:
-
-```js
-count.value++
-console.log(element.textContent)
-```
-
-Если после изменения состояния нужно, например, прочитать обновленный DOM, установить фокус, измерить размеры элемента или проскроллить к только что появившемуся блоку обычно используют `nextTick()`.
-
-```vue
-<script setup>
-import { ref, nextTick } from 'vue'
-
-const isOpen = ref(false)
-// Ссылка на DOM-элемент input после его появления в шаблоне
-const inputRef = ref(null)
-
-async function open() {
-  // Меняем состояние: после этого input должен появиться в DOM
-  isOpen.value = true
-  // Ждем, пока Vue завершит обновление DOM
-  await nextTick()
-  // Теперь элемент уже существует, и на него можно поставить фокус
-  inputRef.value.focus()
-}
-</script>
-
-<template>
-  <button @click="open">Открыть</button>
-  <!-- input появится только после isOpen = true -->
-  <input v-if="isOpen" ref="inputRef" />
-</template>
-```
-
-## События клавиатуры и lifecycle-сценарии
-
-События клавиатуры технически относятся к событиям шаблона, но на практике часто связаны с жизненным циклом компонента и управлением фокусом.
-
-Например:
-
-- открыть модалку
-- дождаться появления `input`
-- поставить туда фокус
-- закрыть модалку по `Escape`
-
-```vue
-<script setup>
-import { ref, nextTick } from 'vue'
-
-const isOpen = ref(false)
-const inputRef = ref(null)
-
-async function openModal() {
-  isOpen.value = true
-  await nextTick()
-  inputRef.value.focus()
-}
-
-function closeModal() {
-  isOpen.value = false
-}
-</script>
-
-<template>
-  <button @click="openModal">Открыть</button>
-
-  <div v-if="isOpen" class="modal" @keydown.esc="closeModal">
-    <input ref="inputRef" />
-  </div>
-</template>
-```
-
-Здесь сочетаются сразу несколько вещей:
-
-- изменение состояния
-- ожидание обновления DOM через `nextTick`
-- работа с фокусом
-- клавиатурное событие `@keydown.esc`
-
-## Частые практические сценарии
-
-### Загрузка данных после монтирования
-
-```vue
-<script setup>
-import { ref, onMounted } from 'vue'
-
-const users = ref([])
-
-onMounted(async () => {
-  // Здесь обычно делают первый запрос
-  users.value = await fetchUsers()
-})
-</script>
-```
-
-### Очистка таймера
-
-```vue
-<script setup>
-import { onMounted, onUnmounted } from 'vue'
-
-let timerId = null
-
-onMounted(() => {
-  timerId = setInterval(() => {
-    console.log('tick')
-  }, 1000)
-})
-
-onUnmounted(() => {
-  clearInterval(timerId)
-})
-</script>
-```
-
-### Подписка на глобальное событие клавиатуры
-
-```vue
-<script setup>
-import { onMounted, onUnmounted } from 'vue'
-
-function onKeydown(event) {
-  if (event.key === 'Escape') {
-    console.log('Закрыть окно')
-  }
-}
-
-onMounted(() => {
-  window.addEventListener('keydown', onKeydown)
-})
-
-onUnmounted(() => {
-  window.removeEventListener('keydown', onKeydown)
-})
-</script>
-```
-
-Это хороший пример кода, который обязательно требует очистки в `onUnmounted`.
-
-## Краткое правило
-
-- lifecycle hooks отвечают за момент выполнения кода в жизни компонента
-- `watch` и `watchEffect` отвечают за реакцию на изменение данных
-- `nextTick` нужен, когда вы ждете применения изменений к DOM
-- события клавиатуры часто пересекаются с жизненным циклом, если есть управление фокусом, модалки, глобальные подписки и cleanup

@@ -14,6 +14,6 @@
 
 - [Установка Ubuntu Server](docs/ubuntu_install.md)
 - [Настройка SSH](docs/ssh_setup.md)
-- [Установка NGINX](docs/nginx_install.md)
+- [Установка NGINX на Ubuntu](docs/nginx_install.md) — установка пакета и первый сайт; основные сценарии находятся в разделе [Веб-протоколы и инфраструктура](../web/nginx/README.md)
 - [Настройка локального DNS](docs/dns_local_setup.md)
 - [Настройка WireGuard](docs/wireguard_setup.md)

@@ -106,11 +106,20 @@ export default defineConfig({
 
 ### Установка и настройка ESLint
 
+ESLint помогает находить ошибки и нарушения правил оформления в JavaScript- и Vue-коде до запуска приложения.
+
+Prettier - инструмент автоматического форматирования кода: он приводит отступы, кавычки, переносы строк и другие элементы оформления к единому стилю. ESLint в основном проверяет качество и корректность кода, а Prettier отвечает за его внешний вид.
+
 Установите ESLint и плагины:
 
 ```sh
 npm install -D eslint @eslint/js eslint-plugin-vue @vue/eslint-config-prettier
 ```
+
+- `eslint` - запускает статическую проверку кода.
+- `@eslint/js` - добавляет рекомендуемые правила ESLint для JavaScript.
+- `eslint-plugin-vue` - проверяет код и шаблоны в `.vue`-компонентах.
+- `@vue/eslint-config-prettier` - отключает правила ESLint, которые могут конфликтовать с форматированием Prettier
 
 В папку проекта нужно добавить файл `eslint.config.js` - flat-конфиг ESLint для `.js` и `.vue`
 
@@ -138,6 +147,14 @@ export default [
   },
 ]
 ```
+
+- `js.configs.recommended` - включает базовые рекомендуемые правила для JavaScript, например поиск необъявленных переменных.
+- `vue.configs['flat/recommended']` - включает рекомендуемые правила для Vue и проверку шаблонов компонентов.
+- `prettier` - отключает конфликтующие с Prettier правила форматирования.
+- `vue/multi-word-component-names: 'off'` - разрешает однословные имена компонентов, например `Home.vue`.
+- `vue/require-default-prop: 'off'` - разрешает необязательные входные параметры (`props`) без значения по умолчанию.
+
+Секция `rules` переопределяет отдельные правила: значение `'off'` отключает проверку, `'warn'` выводит предупреждение, а `'error'` считает нарушение ошибкой.
 
 Можно добавить `@vue/eslint-config-prettier/skip-formatting` и `skipFormatting` после `...vue.configs['flat/recommended']`, если нужно убрать конфликты форматирования между ESLint и Prettier
 
@@ -188,7 +205,9 @@ npm run lint -- --fix
     "@vitejs/plugin-vue": "^6.0.6",
     "@vue/eslint-config-prettier": "^10.2.0",
     "eslint": "^10.4.0",
+    "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-vue": "^10.9.1",
+    "prettier": "^3.8.3",
     "vite": "^8.0.12"
   }
 }

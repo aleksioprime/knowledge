@@ -1,0 +1,30 @@
+name: example-clickhouse-simple
+
+services:
+  clickhouse:
+    image: clickhouse/clickhouse-server:latest
+    ports:
+      - "18223:8123"  # HTTP интерфейс
+      - "19100:9000"  # Native интерфейс
+    environment:
+      CLICKHOUSE_DB: analytics
+      CLICKHOUSE_USER: developer
+      CLICKHOUSE_PASSWORD: demo_password
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+
+  python-client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    image: clickhouse-simple-python-client:local
+    working_dir: /workspace
+    command: tail -f /dev/null
+    volumes:
+      - ./client/workspace:/workspace
+    depends_on:
+      - clickhouse
+
+volumes:
+  clickhouse_data:

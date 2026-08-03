@@ -8,7 +8,8 @@
 - [Python](python/README.md) — основы языка, ООП, функции, алгоритмы, многозадачность, livecoding
 - [Фреймворки](framework/README.md) — FastAPI, Django, Celery, Dramatiq
 - [Базы данных и хранилища](data/README.md) — PostgreSQL, SQLAlchemy, MongoDB, Redis, ClickHouse, Elasticsearch, S3, Airflow
-- [Микросервисы](microservices/README.md) — брокеры сообщений, HTTPX, API Gateway, Keycloak, Nginx
+- [Микросервисы](microservices/README.md) — брокеры сообщений, HTTPX, API Gateway, Keycloak
+- [Веб-протоколы и инфраструктура](web/README.md) — HTTP, веб-безопасность, передача файлов и NGINX
 - [Тестирование](tests/README.md) — Pytest, Locust, Postman
 - [CI/CD](ci_cd/README.md) — GitHub Actions, Kubernetes, Portainer
 - [DevTools](devtools/README.md) — Docker, Git, линтеры, Poetry, uv, pyenv
@@ -17,5 +18,6 @@
 - [Machine Learning](ml/README.md) — классическое ML и нейронные сети
 - [Мониторинг и аналитика](analyze/README.md) — Prometheus, Grafana
 - [Системный дизайн](design/README.md) — принципы и паттерны проектирования
+- [JavaScript](javascript/README.md) — основы языка, коллекции, асинхронность, модули и браузерные API
 - [Frontend (Vue.js)](vuejs/README.md) — заметки по фронтенду
 - [Pet-проекты](pet/README.md) — учебные сервисы и эксперименты
