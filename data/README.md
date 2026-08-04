@@ -4,6 +4,7 @@
 
 ## Содержание
 
+- [SQL](sql/README.md) — язык запросов и справочник для собеседований
 - [PostgreSQL](postgres/README.md) — реляционная СУБД
 - [SQLAlchemy](sqlalchemy/README.md) — ORM/Core для Python
 - [Alembic](alembic/README.md) — миграции для SQLAlchemy

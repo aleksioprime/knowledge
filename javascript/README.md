@@ -21,13 +21,22 @@ console.log(activeNames) // ['Анна']
 
 - [Основы синтаксиса](docs/basics.md) — переменные, операторы и управляющие конструкции
 - [Типы и преобразования](docs/types.md) — примитивы, объекты, сравнение и truthy/falsy
-- [Функции и области видимости](docs/functions_scope.md) — функции, замыкания и `this`
-- [Массивы и коллекции](docs/arrays_collections.md) — Array, Map и Set
-- [Объекты, прототипы и классы](docs/objects_classes.md)
+- [Функции и области видимости](docs/functions.md) — hoisting, замыкания, `this` и функции высшего порядка
+- [Массивы и методы массивов](docs/arrays.md)
+- [Коллекции и перебор](docs/collections.md) — Map, Set, weak-коллекции, iterable и генераторы
+- [Деструктуризация, spread и rest](docs/destructuring.md) — массивы, объекты, копирование и параметры функций
+- [JSON](docs/json.md) — stringify, parse, replacer, reviver и ограничения
+- [Регулярные выражения](docs/regexp.md) — синтаксис, флаги, группы и методы
+- [Объекты](docs/objects.md) — свойства, методы `Object`, копирование, Proxy и память
+- [Прототипы и прототипное наследование](docs/prototypes.md)
+- [Классы и ООП](docs/classes.md) — поля, методы, наследование, `super`, примеси и композиция
 - [Асинхронность](docs/async.md) — Promise, async/await и event loop
-- [HTTP-запросы: Fetch и Axios](docs/http_requests.md)
+- [HTTP-запросы: Fetch и Axios](docs/requests.md)
+- [WebSocket](docs/websocket.md) — постоянное двустороннее соединение с сервером
 - [Модули](docs/modules.md) — import/export и организация кода
-- [JavaScript в браузере](docs/browser.md) — DOM, события, fetch и хранилища
+- [DOM](docs/dom.md) — дерево документа, поиск, навигация и изменение элементов
+- [События в браузере](docs/events.md) — обработчики, распространение, делегирование и CustomEvent
+- [JavaScript в браузере](docs/browser.md) — таймеры, планирование и хранилища
 - [Ошибки и отладка](docs/errors.md)
 
 ## Связанные разделы
