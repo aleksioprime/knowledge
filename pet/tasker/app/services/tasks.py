@@ -1,8 +1,10 @@
+from redis.asyncio import Redis
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import Task, User
 from app.schemas import TaskCreate, TaskUpdate
+from app.services.stats import invalidate_stats
 
 
 class TaskNotFoundError(Exception):
@@ -27,23 +29,28 @@ async def get_task(session: AsyncSession, owner: User, task_id: int) -> Task:
     return task
 
 
-async def create_task(session: AsyncSession, owner: User, data: TaskCreate) -> Task:
+async def create_task(session: AsyncSession, cache: Redis, owner: User, data: TaskCreate) -> Task:
     task = Task(**data.model_dump(), owner_id=owner.id)
     session.add(task)
     await session.commit()
     await session.refresh(task)
+    await invalidate_stats(cache, owner)
     return task
 
 
-async def update_task(session: AsyncSession, owner: User, task_id: int, data: TaskUpdate) -> Task:
+async def update_task(
+    session: AsyncSession, cache: Redis, owner: User, task_id: int, data: TaskUpdate
+) -> Task:
     task = await get_task(session, owner, task_id)
     for field, value in data.model_dump(exclude_unset=True).items():
         setattr(task, field, value)
     await session.commit()
+    await invalidate_stats(cache, owner)
     return task
 
 
-async def delete_task(session: AsyncSession, owner: User, task_id: int) -> None:
+async def delete_task(session: AsyncSession, cache: Redis, owner: User, task_id: int) -> None:
     task = await get_task(session, owner, task_id)
     await session.delete(task)
     await session.commit()
+    await invalidate_stats(cache, owner)

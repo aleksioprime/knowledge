@@ -2,7 +2,7 @@
 
 Учебный API для списка задач. Проект небольшой, но на нём удобно показывать, как складываются вместе темы из базы знаний: каждая заметка добавляет в него одну деталь.
 
-Сейчас в нём есть регистрация и вход по JWT, задачи пользователя в PostgreSQL, миграции Alembic и тесты.
+Сейчас в нём есть регистрация и вход по JWT, задачи пользователя в PostgreSQL, миграции Alembic, кэш и ограничение попыток входа на Redis, тесты.
 
 ## Запуск
 
@@ -28,6 +28,9 @@ curl -X POST localhost:8000/tasks -H "Authorization: Bearer $TOKEN" -H 'Content-
 
 curl -X PATCH localhost:8000/tasks/1 -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' -d '{"done": true}'
 curl "localhost:8000/tasks?done=true&limit=10" -H "Authorization: Bearer $TOKEN"
+
+curl localhost:8000/tasks/stats -H "Authorization: Bearer $TOKEN"
+# {"total":1,"done":1} — ответ кэшируется в Redis на минуту
 ```
 
 ## Структура
@@ -40,9 +43,10 @@ app/
 ├── core/
 │   ├── config.py      # настройки из переменных окружения
 │   ├── database.py    # подключение к БД и сессия
+│   ├── cache.py       # клиент Redis
 │   └── security.py    # хэширование паролей и JWT
 ├── api/
-│   ├── deps.py        # зависимости: сессия БД, текущий пользователь
+│   ├── deps.py        # зависимости: сессия БД, Redis, текущий пользователь, лимит попыток входа
 │   └── routers/       # HTTP-слой: auth.py, tasks.py
 └── services/          # бизнес-логика и запросы к БД
 migrations/            # миграции Alembic
@@ -53,18 +57,18 @@ tests/                 # тесты API на отдельной тестовой
 
 ## Тесты
 
-Тесты создают таблицы в отдельной базе `tasker_test` и удаляют их после каждого теста.
+Тесты создают таблицы в отдельной базе `tasker_test` и удаляют их после каждого теста, а Redis используют с отдельной базой номер 15.
 
 ```bash
-docker compose up -d db
+docker compose up -d db redis
 docker compose exec db createdb -U tasker tasker_test
 
 pip install -r requirements-dev.txt
 pytest
-# 10 passed
+# 12 passed
 ```
 
-Адрес тестовой базы можно поменять переменной `TEST_DATABASE_URL`.
+Адреса можно поменять переменными `TEST_DATABASE_URL` и `TEST_REDIS_URL`.
 
 ## Как растёт проект
 
@@ -74,9 +78,9 @@ pytest
 | Эндпоинты, зависимости, ошибки, структура, JWT | [FastAPI](../../framework/fast_api/README.md) |
 | Хранение в PostgreSQL | [SQLAlchemy](../../data/sqlalchemy/README.md) |
 | Миграции | [Alembic](../../data/alembic/README.md) |
-| Кэш и ограничение частоты запросов | Redis |
+| Кэш и ограничение частоты запросов | [Redis](../../data/redis/docs/fastapi.md) |
 | Напоминания о сроках в фоне | Celery |
-| Вложения к задачам | S3 / MinIO |
+| Вложения к задачам | [S3](../../data/s3/README.md) — пока отдельным примером, в проект не встроено |
 | CI | GitHub Actions |
 | Метрики и дашборд | Prometheus, Grafana |
 

@@ -33,6 +33,11 @@ class TaskUpdate(BaseModel):
     due_date: date | None = None
 
 
+class TaskStats(BaseModel):
+    total: int
+    done: int
+
+
 class TaskRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

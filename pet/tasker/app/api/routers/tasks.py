@@ -2,9 +2,9 @@ from typing import Annotated
 
 from fastapi import APIRouter, Query, status
 
-from app.api.deps import CurrentUser, SessionDep
-from app.schemas import TaskCreate, TaskRead, TaskUpdate
-from app.services import tasks
+from app.api.deps import CacheDep, CurrentUser, SessionDep
+from app.schemas import TaskCreate, TaskRead, TaskStats, TaskUpdate
+from app.services import stats, tasks
 
 router = APIRouter(prefix='/tasks', tags=['tasks'])
 
@@ -21,8 +21,14 @@ async def list_tasks(
 
 
 @router.post('', status_code=status.HTTP_201_CREATED)
-async def create_task(session: SessionDep, user: CurrentUser, data: TaskCreate) -> TaskRead:
-    return TaskRead.model_validate(await tasks.create_task(session, user, data))
+async def create_task(session: SessionDep, cache: CacheDep, user: CurrentUser, data: TaskCreate) -> TaskRead:
+    return TaskRead.model_validate(await tasks.create_task(session, cache, user, data))
+
+
+# Объявлен раньше /{task_id}, иначе 'stats' попало бы в task_id
+@router.get('/stats')
+async def get_stats(session: SessionDep, cache: CacheDep, user: CurrentUser) -> TaskStats:
+    return await stats.get_stats(session, cache, user)
 
 
 @router.get('/{task_id}')
@@ -31,10 +37,12 @@ async def get_task(session: SessionDep, user: CurrentUser, task_id: int) -> Task
 
 
 @router.patch('/{task_id}')
-async def update_task(session: SessionDep, user: CurrentUser, task_id: int, data: TaskUpdate) -> TaskRead:
-    return TaskRead.model_validate(await tasks.update_task(session, user, task_id, data))
+async def update_task(
+    session: SessionDep, cache: CacheDep, user: CurrentUser, task_id: int, data: TaskUpdate
+) -> TaskRead:
+    return TaskRead.model_validate(await tasks.update_task(session, cache, user, task_id, data))
 
 
 @router.delete('/{task_id}', status_code=status.HTTP_204_NO_CONTENT)
-async def delete_task(session: SessionDep, user: CurrentUser, task_id: int) -> None:
-    await tasks.delete_task(session, user, task_id)
+async def delete_task(session: SessionDep, cache: CacheDep, user: CurrentUser, task_id: int) -> None:
+    await tasks.delete_task(session, cache, user, task_id)
