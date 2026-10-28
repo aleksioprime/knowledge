@@ -24,6 +24,7 @@ class Task(Base):
     done: Mapped[bool] = mapped_column(default=False)
     priority: Mapped[int] = mapped_column(default=1, server_default='1')
     due_date: Mapped[date | None]
+    reminder_sent: Mapped[bool] = mapped_column(default=False, server_default='false')
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
     owner_id: Mapped[int] = mapped_column(ForeignKey('users.id', ondelete='CASCADE'), index=True)
 

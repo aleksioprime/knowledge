@@ -29,13 +29,17 @@ async def cache():
 
 
 @pytest.fixture
-async def client(cache):
+async def sessions():
     engine = create_async_engine(TEST_DATABASE_URL)
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
-    sessions = async_sessionmaker(engine, expire_on_commit=False)
+    yield async_sessionmaker(engine, expire_on_commit=False)
+    await engine.dispose()
 
+
+@pytest.fixture
+async def client(cache, sessions):
     async def get_test_session():
         async with sessions() as session:
             yield session
@@ -45,7 +49,6 @@ async def client(cache):
     async with AsyncClient(transport=ASGITransport(app=app), base_url='http://test') as client:
         yield client
     app.dependency_overrides.clear()
-    await engine.dispose()
 
 
 async def login(client: AsyncClient, email: str) -> dict[str, str]:

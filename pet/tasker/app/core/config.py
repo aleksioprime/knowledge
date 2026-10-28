@@ -6,6 +6,7 @@ class Settings(BaseSettings):
 
     database_url: str = 'postgresql+asyncpg://tasker:tasker@localhost:5432/tasker'
     redis_url: str = 'redis://localhost:6379/0'
+    celery_broker_url: str = 'redis://localhost:6379/1'
     secret_key: str = 'change-me'
     access_token_expire_minutes: int = 60
 

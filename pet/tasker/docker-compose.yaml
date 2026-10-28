@@ -10,6 +10,20 @@ services:
       redis:
         condition: service_healthy
 
+  worker:
+    build: .
+    command: celery -A app.worker worker --loglevel=info
+    env_file: .env
+    depends_on:
+      - app
+
+  beat:
+    build: .
+    command: celery -A app.worker beat --loglevel=info
+    env_file: .env
+    depends_on:
+      - redis
+
   db:
     image: postgres:16
     env_file: .env
