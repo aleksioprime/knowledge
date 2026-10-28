@@ -1,45 +1,19 @@
-from datetime import date
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from app.api.routers import auth, tasks
+from app.services.tasks import TaskNotFoundError
 
 app = FastAPI(title='Задачник')
+app.include_router(auth.router)
+app.include_router(tasks.router)
 
 
-class TaskCreate(BaseModel):
-    title: str
-    due_date: date | None = None
-
-
-class Task(TaskCreate):
-    id: int
-    done: bool = False
-
-
-# Пока задачи хранятся в памяти и пропадают при перезапуске.
-# На этапе про SQLAlchemy их место займёт PostgreSQL.
-tasks: dict[int, Task] = {}
+@app.exception_handler(TaskNotFoundError)
+async def task_not_found(request: Request, exc: TaskNotFoundError) -> JSONResponse:
+    return JSONResponse(status_code=404, content={'detail': 'Задача не найдена'})
 
 
 @app.get('/health')
-def health() -> dict[str, str]:
+async def health() -> dict[str, str]:
     return {'status': 'ok'}
-
-
-@app.get('/tasks')
-def list_tasks() -> list[Task]:
-    return list(tasks.values())
-
-
-@app.post('/tasks', status_code=201)
-def create_task(data: TaskCreate) -> Task:
-    task = Task(id=len(tasks) + 1, **data.model_dump())
-    tasks[task.id] = task
-    return task
-
-
-@app.get('/tasks/{task_id}')
-def get_task(task_id: int) -> Task:
-    if task_id not in tasks:
-        raise HTTPException(status_code=404, detail='Задача не найдена')
-    return tasks[task_id]
