@@ -5,6 +5,6 @@
 ## Содержание
 
 - [FastAPI](fast_api/README.md) — современный асинхронный веб-фреймворк
-- [Django](django/README.md) — «батарейки в комплекте», ORM, админка
+- [Django](django/README.md) — «всё включено»: структура проекта, ORM, админка, Django REST Framework
 - [Celery](celery/README.md) — распределённая очередь фоновых задач
 - [Dramatiq](dramatiq/README.md) — простая и быстрая альтернатива Celery
