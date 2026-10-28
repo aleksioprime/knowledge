@@ -5,4 +5,4 @@
 ## Содержание
 
 - [Задачник](tasker/README.md) — сквозной учебный API для списка задач: на нём показаны темы из базы знаний
-- [Shortener](shortener/README.md) — сервис коротких ссылок (FastAPI + БД)
+- [Сокращатель ссылок](shortener/README.md) — сервис коротких ссылок: FastAPI, PostgreSQL, кэш и счётчики в Redis
