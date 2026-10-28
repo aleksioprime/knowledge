@@ -20,11 +20,11 @@
 Функция является объектом: её можно передавать, сравнивать по ссылке и добавлять ей собственные свойства. Но прикладное состояние обычно лучше хранить отдельно.
 
 ```js
-function loadUser(id, options) {} // объявляем функцию loadUser()
+function loadUser(id, options) {}
 
-loadUser.description = 'Загружает пользователя' // записываем 'Загружает пользователя' в свойство description
-loadUser.name // читаем свойство name; результат: 'loadUser'
-loadUser.length // узнаём число параметров функции до первого значения по умолчанию; результат: 2
+loadUser.description = 'Загружает пользователя'
+loadUser.name // 'loadUser'
+loadUser.length // 2
 ```
 
 Основные встроенные свойства функции:
@@ -36,9 +36,9 @@ loadUser.length // узнаём число параметров функции �
 `name` и `length` обычно нельзя изменить простым присваиванием: их свойства имеют `writable: false`. Пользовательские свойства функции при этом добавлять можно.
 
 ```js
-function example(first, second, third = 0, ...others) {} // объявляем функцию example()
+function example(first, second, third = 0, ...others) {}
 
-example.length // параметры после first и second не учитываются из-за значения по умолчанию; результат: 2
+example.length // 2 — параметры после first и second не учитываются из-за значения по умолчанию
 ```
 
 ### Function declaration
@@ -46,8 +46,8 @@ example.length // параметры после first и second не учиты�
 Function declaration — именованное объявление, которое доступно до строки определения благодаря hoisting:
 
 ```js
-function sum(a, b) { // объявляем функцию sum()
-  return a + b // возвращаем вызывающему коду значение выражения a + b
+function sum(a, b) {
+  return a + b
 }
 ```
 
@@ -56,8 +56,8 @@ function sum(a, b) { // объявляем функцию sum()
 Функция создаётся внутри выражения и обычно сохраняется в переменной. Она может быть анонимной или именованной:
 
 ```js
-const sum = function (a, b) { // создаём обычную функцию и сохраняем её в переменной
-  return a + b // возвращаем вызывающему коду значение выражения a + b
+const sum = function (a, b) {
+  return a + b
 }
 ```
 
@@ -66,13 +66,13 @@ const sum = function (a, b) { // создаём обычную функцию и
 Стрелочная функция предоставляет короткий синтаксис и может неявно возвращать одно выражение:
 
 ```js
-const sum = (a, b) => a + b // создаём функцию и сохраняем её в переменной
+const sum = (a, b) => a + b
 ```
 
 Для неявного возврата объекта нужны круглые скобки, иначе `{}` будет воспринят как тело функции:
 
 ```js
-const createUser = (name) => ({ name }) // создаём функцию и сохраняем её в переменной
+const createUser = (name) => ({ name })
 ```
 
 Особенности стрелочной функции:
@@ -84,10 +84,10 @@ const createUser = (name) => ({ name }) // создаём функцию и со
 - методы `call`, `apply` и `bind` не могут заменить её `this`.
 
 ```js
-const context = { name: 'Alex' } // создаём объект и сохраняем ссылку в переменной
-const arrow = () => this // создаём функцию и сохраняем её в переменной
+const context = { name: 'Alex' }
+const arrow = () => this
 
-arrow.call(context) !== context // вызываем функцию с явно заданным this; результат: true
+arrow.call(context) !== context // true
 ```
 
 `bind()` всё ещё может зафиксировать аргументы стрелочной функции, но не её контекст.
@@ -95,21 +95,21 @@ arrow.call(context) !== context // вызываем функцию с явно �
 Если нужен изменяемый `this`, используйте обычную функцию:
 
 ```js
-function printName() { // объявляем функцию printName()
-  return this.name // возвращаем вызывающему коду значение выражения this.name
+function printName() {
+  return this.name
 }
 
-printName.call(context) // вызываем функцию с явно заданным this; результат: 'Alex'
+printName.call(context) // 'Alex'
 ```
 
 Если нужен именно лексический контекст, создайте стрелочную функцию внутри обычного метода или явно обращайтесь к объекту:
 
 ```js
-const user = { // создаём объект и сохраняем ссылку в переменной
-  name: 'Alex', // задаём свойство name
+const user = {
+  name: 'Alex',
 
-  printLater() { // объявляем метод printLater()
-    setTimeout(() => console.log(this.name), 1000) // выводим значение в консоль
+  printLater() {
+    setTimeout(() => console.log(this.name), 1000)
   },
 }
 ```
@@ -119,9 +119,9 @@ const user = { // создаём объект и сохраняем ссылку
 Функция, хранящаяся в свойстве объекта. В сокращённой записи `this` определяется объектом перед точкой при вызове:
 
 ```js
-const user = { // создаём объект и сохраняем ссылку в переменной
-  greet() { // объявляем метод greet()
-    return `Привет, ${this.name}` // возвращаем вызывающему коду значение выражения `Привет, ${this.name}`
+const user = {
+  greet() {
+    return `Привет, ${this.name}`
   },
 }
 ```
@@ -131,11 +131,11 @@ const user = { // создаём объект и сохраняем ссылку
 Обычная функция, вызываемая через `new`. По соглашению её имя начинается с заглавной буквы. В современном коде для этой задачи часто используют `class`.
 
 ```js
-function User(name) { // объявляем функцию User()
-  this.name = name // сохраняем name в свойстве экземпляра name
+function User(name) {
+  this.name = name
 }
 
-const user = new User('Alex') // создаём новый экземпляр и сохраняем его в переменной
+const user = new User('Alex')
 ```
 
 ### Названия по способу использования
@@ -161,14 +161,14 @@ const user = new User('Alex') // создаём новый экземпляр и
 | модульная | верхний уровень ES-модуля | значения не становятся глобальными автоматически |
 
 ```js
-const globalValue = 'global' // сохраняем строку в переменной
+const globalValue = 'global'
 
-function example(parameter) { // объявляем функцию example()
-  var functionValue = 'function' // объявляем переменную через var внутри функции
+function example(parameter) {
+  var functionValue = 'function'
 
-  if (true) { // проверяем условие и выполняем блок, если оно истинно
-    const blockValue = 'block' // сохраняем строку в переменной
-    console.log(globalValue, parameter, functionValue, blockValue) // выводим значение в консоль
+  if (true) {
+    const blockValue = 'block'
+    console.log(globalValue, parameter, functionValue, blockValue)
   }
 
   // blockValue здесь недоступна
@@ -180,18 +180,18 @@ function example(parameter) { // объявляем функцию example()
 Функция видит собственные переменные и внешнее лексическое окружение:
 
 ```js
-function createCounter() { // объявляем функцию createCounter()
-  let value = 0 // сохраняем числовое значение в переменной
+function createCounter() {
+  let value = 0
 
-  return () => { // возвращаем вызывающему коду значение выражения () => {
-    value += 1 // изменяем текущее значение
-    return value // возвращаем вызывающему коду значение выражения value
+  return () => {
+    value += 1
+    return value
   }
 }
 
-const next = createCounter() // создаём функцию-счётчик с собственным замыканием
-next() // вызываем next(); результат: 1
-next() // вызываем next(); результат: 2
+const next = createCounter()
+next() // 1
+next() // 2
 ```
 
 Возвращённая функция сохраняет доступ к `value`. Это называется замыканием.
@@ -213,8 +213,8 @@ Callback — функция, переданная для последующег�
 IIFE — функциональное выражение, вызываемое сразу после создания:
 
 ```js
-;(function () { // объявляем и сразу вызываем IIFE
-  const privateValue = 42 // сохраняем числовое значение в переменной
+;(function () {
+  const privateValue = 42
 })() // круглые скобки в конце сразу вызывают созданную функцию
 ```
 
@@ -225,10 +225,10 @@ IIFE — функциональное выражение, вызываемое �
 Каррирование преобразует функцию с несколькими аргументами в цепочку функций по одному аргументу:
 
 ```js
-const multiply = (a) => (b) => a * b // создаём функцию и сохраняем её в переменной
-const double = multiply(2) // частично применяем множитель 2 и получаем новую функцию
+const multiply = (a) => (b) => a * b
+const double = multiply(2) // множитель 2 зафиксирован заранее
 
-double(5) // вызываем double(); результат: 10
+double(5) // 10
 ```
 
 Не путайте его с частичным применением, при котором заранее фиксируется только часть аргументов.
@@ -238,9 +238,9 @@ double(5) // вызываем double(); результат: 10
 Рекурсивная функция вызывает сама себя и обязательно должна иметь условие остановки:
 
 ```js
-function factorial(number) { // объявляем функцию factorial()
-  if (number <= 1) return 1 // проверяем условие и выполняем блок, если оно истинно
-  return number * factorial(number - 1) // возвращаем вызывающему коду значение выражения number * factorial(number - 1)
+function factorial(number) {
+  if (number <= 1) return 1
+  return number * factorial(number - 1)
 }
 ```
 
@@ -249,22 +249,22 @@ function factorial(number) { // объявляем функцию factorial()
 Рекурсия особенно естественна для рекурсивных структур: деревьев, вложенных комментариев, каталогов и DOM-узлов.
 
 ```js
-const tree = { // создаём объект и сохраняем ссылку в переменной
-  value: 'root', // задаём свойство value
-  children: [ // задаём свойство children
-    { value: 'left', children: [] }, // добавляем левый лист дерева
-    { value: 'right', children: [] }, // добавляем правый лист дерева
+const tree = {
+  value: 'root',
+  children: [
+    { value: 'left', children: [] },
+    { value: 'right', children: [] },
   ],
 }
 
-function collectValues(node) { // объявляем функцию collectValues()
-  return [ // возвращаем новый массив
-    node.value, // первым элементом результата берём значение текущего узла
-    ...node.children.flatMap(collectValues), // преобразуем элементы и раскрываем результат на один уровень
+function collectValues(node) {
+  return [
+    node.value,
+    ...node.children.flatMap(collectValues),
   ]
 }
 
-collectValues(tree) // вызываем collectValues(); результат: ['root', 'left', 'right']
+collectValues(tree) // ['root', 'left', 'right']
 ```
 
 У рекурсивного алгоритма должны быть базовый случай и шаг, приближающий данные к нему. В примере базовым случаем является пустой `children`.
@@ -281,9 +281,9 @@ JavaScript поддерживает функциональный стиль, х�
 - побочные эффекты — сеть, DOM, хранилище — стараются изолировать на границах программы.
 
 ```js
-const getActiveNames = (users) => users // создаём функцию и сохраняем её в переменной
-  .filter((user) => user.active) // оставляем элементы, прошедшие проверку
-  .map((user) => user.name) // преобразуем каждый элемент и создаём новый массив
+const getActiveNames = (users) => users
+  .filter((user) => user.active)
+  .map((user) => user.name)
 ```
 
 Эта функция не изменяет `users` и зависит только от аргумента, поэтому её легко тестировать. Полный запрет изменений не является целью сам по себе: важнее контролировать общее изменяемое состояние.
@@ -293,20 +293,20 @@ const getActiveNames = (users) => users // создаём функцию и со
 У обычной функции `this` определяется способом вызова:
 
 ```js
-const user = { // создаём объект и сохраняем ссылку в переменной
-  name: 'Alex', // задаём свойство name
-  greet() { // объявляем метод greet()
-    return `Привет, ${this.name}` // возвращаем вызывающему коду значение выражения `Привет, ${this.name}`
+const user = {
+  name: 'Alex',
+  greet() {
+    return `Привет, ${this.name}`
   },
 }
 
-user.greet() // вызываем user.greet(); результат: this === user
+user.greet() // this === user
 ```
 
 Arrow function не создаёт собственный `this`, а берёт его из внешней области. Поэтому её удобно использовать в callback, но обычно не стоит использовать как метод, которому нужен динамический `this`.
 
 ```js
-const greet = user.greet // извлекаем метод из объекта, из-за чего при вызове потеряется this
+const greet = user.greet
 greet()                // контекст user потерян
 user.greet.bind(user)() // контекст привязан явно
 ```
@@ -330,10 +330,10 @@ const boundGreet = greet.bind(user) // вызов произойдёт позж�
 `bind()` также поддерживает частичное применение аргументов:
 
 ```js
-const add = (a, b) => a + b // создаём функцию и сохраняем её в переменной
-const addTen = add.bind(null, 10) // создаём функцию с заранее зафиксированным первым аргументом
+const add = (a, b) => a + b
+const addTen = add.bind(null, 10)
 
-addTen(5) // вызываем addTen(); результат: 15
+addTen(5) // 15
 ```
 
 У стрелочной функции собственный `this` отсутствует, поэтому `call`, `apply` и `bind` не могут заменить её лексический `this`.
@@ -343,19 +343,19 @@ addTen(5) // вызываем addTen(); результат: 15
 Контекст теряется, когда метод передают другой функции отдельно от объекта:
 
 ```js
-const user = { // создаём объект и сохраняем ссылку в переменной
-  name: 'John', // задаём свойство name
+const user = {
+  name: 'John',
 
-  printName() { // объявляем метод printName()
-    console.log(this.name) // выводим значение в консоль
+  printName() {
+    console.log(this.name)
   },
 
-  delayedPrintName() { // объявляем метод delayedPrintName()
-    setTimeout(this.printName, 1000) // планируем однократный вызов callback после задержки
+  delayedPrintName() {
+    setTimeout(this.printName, 1000)
   },
 }
 
-user.delayedPrintName() // вызываем user.delayedPrintName()
+user.delayedPrintName()
 ```
 
 Вызов `user.delayedPrintName()` получает правильный `this === user`. Но выражение `this.printName` только извлекает функцию и передаёт её в `setTimeout()`. Через секунду таймер вызывает callback уже без `user` слева от точки, поэтому `this` внутри `printName()` не указывает на `user`. Точное значение `this` у callback таймера зависит от среды, но имя `'John'` таким способом не будет получено.
@@ -363,16 +363,16 @@ user.delayedPrintName() // вызываем user.delayedPrintName()
 Первый вариант исправления — стрелочный callback. Он сохраняет `this` из `delayedPrintName()`:
 
 ```js
-delayedPrintName() { // объявляем метод delayedPrintName()
-  setTimeout(() => this.printName(), 1000) // планируем однократный вызов callback после задержки
+delayedPrintName() {
+  setTimeout(() => this.printName(), 1000)
 }
 ```
 
 Второй вариант — создать функцию с привязанным контекстом через `bind()`:
 
 ```js
-delayedPrintName() { // объявляем метод delayedPrintName()
-  setTimeout(this.printName.bind(this), 1000) // планируем однократный вызов callback после задержки
+delayedPrintName() {
+  setTimeout(this.printName.bind(this), 1000)
 }
 ```
 
@@ -387,9 +387,9 @@ setTimeout(this.printName(), 1000) // неправильно
 Стрелочная функция в качестве самого метода тоже обычно не исправляет ситуацию:
 
 ```js
-const user = { // создаём объект и сохраняем ссылку в переменной
-  name: 'John', // задаём свойство name
-  printName: () => console.log(this.name), // выводим значение в консоль
+const user = {
+  name: 'John',
+  printName: () => console.log(this.name),
 }
 ```
 
@@ -400,15 +400,15 @@ const user = { // создаём объект и сохраняем ссылку
 Мемоизация сохраняет результат функции по её аргументам, чтобы не повторять одинаковое вычисление:
 
 ```js
-function memoize(fn) { // объявляем функцию memoize()
-  const cache = new Map() // создаём новый экземпляр и сохраняем его в переменной
+function memoize(fn) {
+  const cache = new Map()
 
-  return (value) => { // возвращаем вызывающему коду значение выражения (value) => {
-    if (cache.has(value)) return cache.get(value) // получаем значение из коллекции
+  return (value) => {
+    if (cache.has(value)) return cache.get(value)
 
-    const result = fn(value) // передаём значение в очередную функцию композиции
-    cache.set(value, result) // сохраняем значение в коллекции
-    return result // возвращаем вызывающему коду значение выражения result
+    const result = fn(value)
+    cache.set(value, result)
+    return result
   }
 }
 ```

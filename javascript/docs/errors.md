@@ -7,9 +7,9 @@
 Для программной ошибки обычно создают объект `Error`:
 
 ```js
-const error = new Error('Пользователь не найден') // создаём новый экземпляр и сохраняем его в переменной
+const error = new Error('Пользователь не найден')
 
-error.name // читаем свойство name; результат: 'Error'
+error.name // 'Error'
 error.message // 'Пользователь не найден'
 error.stack   // стек вызовов, формат зависит от среды
 ```
@@ -26,12 +26,12 @@ error.stack   // стек вызовов, формат зависит от ср�
 `throw` немедленно прекращает текущее выполнение и передаёт ошибку вверх по стеку до ближайшего подходящего `catch`:
 
 ```js
-function divide(a, b) { // объявляем функцию divide()
-  if (b === 0) { // проверяем условие и выполняем блок, если оно истинно
-    throw new RangeError('Деление на ноль') // создаём ошибку и передаём её вызывающему коду
+function divide(a, b) {
+  if (b === 0) {
+    throw new RangeError('Деление на ноль')
   }
 
-  return a / b // возвращаем вызывающему коду значение выражения a / b
+  return a / b
 }
 ```
 
@@ -53,14 +53,14 @@ throw 'Ошибка'            // допустимо, но неудобно о�
 - `finally` выполняется после `try/catch` независимо от результата.
 
 ```js
-try { // начинаем блок, в котором может возникнуть ошибка
-  const user = await loadUser(id) // ожидаем завершения асинхронной операции и сохраняем результат
-  renderUser(user) // вызываем renderUser()
-} catch (error) { // перехватываем возникшую ошибку
-  console.error(error) // выводим ошибку в консоль
-  showGenericError() // вызываем showGenericError()
-} finally { // выполняем очистку при любом результате
-  hideLoader() // вызываем hideLoader()
+try {
+  const user = await loadUser(id)
+  renderUser(user)
+} catch (error) {
+  console.error(error)
+  showGenericError()
+} finally {
+  hideLoader()
 }
 ```
 
@@ -69,11 +69,11 @@ try { // начинаем блок, в котором может возникн�
 Если объект ошибки не нужен, параметр `catch` можно опустить:
 
 ```js
-function parseOrNull(text) { // объявляем функцию parseOrNull()
-  try { // начинаем блок, в котором может возникнуть ошибка
-    return JSON.parse(text) // преобразуем JSON-строку в значение JavaScript
-  } catch { // перехватываем возникшую ошибку
-    return null // возвращаем вызывающему коду значение выражения null
+function parseOrNull(text) {
+  try {
+    return JSON.parse(text)
+  } catch {
+    return null
   }
 }
 ```
@@ -91,10 +91,10 @@ function parseOrNull(text) { // объявляем функцию parseOrNull()
 | `AggregateError` | несколько ошибок, например из `Promise.any()` |
 
 ```js
-null.name // читаем свойство name; результат: TypeError
-unknownVariable // смотрим текущее значение unknownVariable; результат: ReferenceError
-JSON.parse('{broken}') // преобразуем JSON-строку в значение JavaScript; результат: SyntaxError
-new Array(-1) // пытаемся создать массив с недопустимой длиной; результат: RangeError
+null.name // TypeError
+unknownVariable // ReferenceError
+JSON.parse('{broken}') // SyntaxError
+new Array(-1) // RangeError — пытаемся создать массив с недопустимой длиной
 ```
 
 `EvalError` сохранён ради совместимости, но современный JavaScript почти не создаёт его автоматически.
@@ -104,21 +104,21 @@ new Array(-1) // пытаемся создать массив с недопус�
 Собственный класс позволяет отличать ожидаемую ошибку предметной области от остальных:
 
 ```js
-class ValidationError extends Error { // объявляем дочерний класс
-  constructor(message, field, options) { // объявляем конструктор для инициализации экземпляра
-    super(message, options) // вызываем конструктор родительского класса
-    this.name = 'ValidationError' // сохраняем 'ValidationError' в свойстве экземпляра name
-    this.field = field // сохраняем field в свойстве экземпляра field
+class ValidationError extends Error {
+  constructor(message, field, options) {
+    super(message, options)
+    this.name = 'ValidationError'
+    this.field = field
   }
 }
 
-try { // начинаем блок, в котором может возникнуть ошибка
-  validateUser(user) // вызываем validateUser()
-} catch (error) { // перехватываем возникшую ошибку
-  if (error instanceof ValidationError) { // проверяем условие и выполняем блок, если оно истинно
-    showFieldError(error.field, error.message) // вызываем showFieldError()
-  } else { // выполняем ветку, когда предыдущие условия ложны
-    throw error // создаём ошибку и передаём её вызывающему коду
+try {
+  validateUser(user)
+} catch (error) {
+  if (error instanceof ValidationError) {
+    showFieldError(error.field, error.message)
+  } else {
+    throw error
   }
 }
 ```
@@ -130,12 +130,12 @@ try { // начинаем блок, в котором может возникн�
 При добавлении контекста сохраняйте исходную причину:
 
 ```js
-async function loadProfile(id) { // объявляем асинхронную функцию, которая возвращает Promise
-  try { // начинаем блок, в котором может возникнуть ошибка
-    return await requestProfile(id) // возвращаем вызывающему коду значение выражения await requestProfile(id)
-  } catch (error) { // перехватываем возникшую ошибку
-    throw new Error(`Не удалось загрузить профиль ${id}`, { // создаём ошибку и передаём её вызывающему коду
-      cause: error, // задаём свойство cause
+async function loadProfile(id) {
+  try {
+    return await requestProfile(id)
+  } catch (error) {
+    throw new Error(`Не удалось загрузить профиль ${id}`, {
+      cause: error,
     })
   }
 }
@@ -148,14 +148,14 @@ async function loadProfile(id) { // объявляем асинхронную ф
 Если функция не обрабатывает ошибку, она автоматически передаётся вызывающей функции:
 
 ```js
-function readSettings() { // объявляем функцию readSettings()
-  return parseSettings() // возвращаем вызывающему коду значение выражения parseSettings()
+function readSettings() {
+  return parseSettings()
 }
 
-try { // начинаем блок, в котором может возникнуть ошибка
-  readSettings() // вызываем readSettings()
-} catch (error) { // перехватываем возникшую ошибку
-  console.error('Настройки не загружены', error) // выводим ошибку в консоль
+try {
+  readSettings()
+} catch (error) {
+  console.error('Настройки не загружены', error)
 }
 ```
 
@@ -166,11 +166,11 @@ try { // начинаем блок, в котором может возникн�
 `try...catch` перехватывает ошибку только в текущем синхронном выполнении:
 
 ```js
-try { // начинаем блок, в котором может возникнуть ошибка
-  setTimeout(() => { // планируем однократный вызов callback после задержки
-    throw new Error('Поздняя ошибка') // создаём ошибку и передаём её вызывающему коду
+try {
+  setTimeout(() => {
+    throw new Error('Поздняя ошибка')
   }, 0)
-} catch (error) { // перехватываем возникшую ошибку
+} catch (error) {
   // Не выполнится: callback запустится позже в другом вызове стека.
 }
 ```
@@ -178,11 +178,11 @@ try { // начинаем блок, в котором может возникн�
 Обрабатывать такую ошибку нужно внутри callback:
 
 ```js
-setTimeout(() => { // планируем однократный вызов callback после задержки
-  try { // начинаем блок, в котором может возникнуть ошибка
-    riskyOperation() // вызываем riskyOperation()
-  } catch (error) { // перехватываем возникшую ошибку
-    reportError(error) // вызываем reportError()
+setTimeout(() => {
+  try {
+    riskyOperation()
+  } catch (error) {
+    reportError(error)
   }
 }, 0)
 ```
@@ -192,21 +192,21 @@ setTimeout(() => { // планируем однократный вызов callb
 Отклонённый Promise обрабатывают через `.catch()` или `await` внутри `try...catch`:
 
 ```js
-try { // начинаем блок, в котором может возникнуть ошибка
-  await riskyOperation() // ожидаем завершения асинхронной операции
-} catch (error) { // перехватываем возникшую ошибку
-  reportError(error) // вызываем reportError()
+try {
+  await riskyOperation()
+} catch (error) {
+  reportError(error)
 }
 
-riskyOperation().catch(reportError) // обрабатываем ошибку Promise
+riskyOperation().catch(reportError)
 ```
 
 Если забыть `await`, окружающий `try...catch` не перехватит позднее отклонение Promise. Promise нужно вернуть, ожидать или явно обработать через `.catch()`.
 
 ```js
-try { // начинаем блок, в котором может возникнуть ошибка
+try {
   riskyOperation() // Promise запущен, но не ожидается
-} catch (error) { // перехватываем возникшую ошибку
+} catch (error) {
   // rejected Promise сюда не попадёт
 }
 ```
@@ -216,14 +216,14 @@ try { // начинаем блок, в котором может возникн�
 JavaScript позволяет бросить любое значение, поэтому нельзя без проверки считать, что в `catch` всегда находится `Error`:
 
 ```js
-try { // начинаем блок, в котором может возникнуть ошибка
-  riskyOperation() // вызываем riskyOperation()
-} catch (error) { // перехватываем возникшую ошибку
-  const message = error instanceof Error // проверяем тип ошибки перед чтением message
+try {
+  riskyOperation()
+} catch (error) {
+  const message = error instanceof Error
     ? error.message // для Error используем его понятное сообщение
     : String(error) // неизвестное брошенное значение приводим к строке
 
-  console.error(message) // выводим ошибку в консоль
+  console.error(message)
 }
 ```
 
@@ -232,12 +232,12 @@ try { // начинаем блок, в котором может возникн�
 На верхнем уровне браузер позволяет заметить синхронную необработанную ошибку и отклонённый Promise. Такие обработчики подходят для журналирования, но не заменяют локальное восстановление интерфейса.
 
 ```js
-window.addEventListener('error', (event) => { // подписываемся на событие
-  reportError(event.error) // вызываем reportError()
+window.addEventListener('error', (event) => {
+  reportError(event.error)
 })
 
-window.addEventListener('unhandledrejection', (event) => { // подписываемся на событие
-  reportError(event.reason) // вызываем reportError()
+window.addEventListener('unhandledrejection', (event) => {
+  reportError(event.reason)
 })
 ```
 

@@ -7,26 +7,26 @@
 Рассмотрим один класс, в котором сразу показаны поля экземпляра, приватное состояние, конструктор, обычный метод, getter и static-метод.
 
 ```js
-class User { // объявляем класс
+class User {
   role = 'user'           // публичное поле экземпляра
   #token                  // приватное поле экземпляра
   static type = 'account' // статическое поле класса
 
-  constructor(name, token) { // объявляем конструктор для инициализации экземпляра
-    this.name = name // сохраняем name в свойстве экземпляра name
-    this.#token = token // сохраняем переданный токен в приватном поле экземпляра
+  constructor(name, token) {
+    this.name = name
+    this.#token = token
   }
 
-  greet() { // объявляем метод greet()
-    return `Привет, ${this.name}` // возвращаем вызывающему коду значение выражения `Привет, ${this.name}`
+  greet() {
+    return `Привет, ${this.name}`
   }
 
-  get tokenLength() { // объявляем метод tokenLength()
-    return this.#token.length // возвращаем вызывающему коду значение выражения this.#token.length
+  get tokenLength() {
+    return this.#token.length
   }
 
-  static fromJSON(data) { // объявляем метод fromJSON()
-    return new User(data.name, data.token) // возвращаем вызывающему коду значение выражения new User(data.name, data.token)
+  static fromJSON(data) {
+    return new User(data.name, data.token)
   }
 }
 ```
@@ -44,11 +44,11 @@ class User { // объявляем класс
 Класс можно объявить декларацией или выражением:
 
 ```js
-class User {} // объявляем класс
+class User {}
 
-const Admin = class { // создаём анонимный класс и сохраняем его в переменной
-  isAdmin() { // объявляем метод isAdmin()
-    return true // возвращаем вызывающему коду значение выражения true
+const Admin = class {
+  isAdmin() {
+    return true
   }
 }
 ```
@@ -60,10 +60,10 @@ const Admin = class { // создаём анонимный класс и сох�
 `constructor` вызывается оператором `new` для начальной настройки экземпляра. В одном классе может быть только один `constructor`.
 
 ```js
-class User { // объявляем класс
-  constructor(name, age) { // объявляем конструктор для инициализации экземпляра
-    this.name = name // сохраняем name в свойстве экземпляра name
-    this.age = age // сохраняем age в свойстве экземпляра age
+class User {
+  constructor(name, age) {
+    this.name = name
+    this.age = age
   }
 }
 ```
@@ -71,7 +71,7 @@ class User { // объявляем класс
 Если собственный конструктор не нужен, его можно не писать. Для обычного базового класса конструктор по умолчанию эквивалентен пустому:
 
 ```js
-constructor() {} // объявляем конструктор для инициализации экземпляра
+constructor() {}
 ```
 
 ## Создание экземпляра и возвращаемое значение
@@ -79,7 +79,7 @@ constructor() {} // объявляем конструктор для иници�
 Экземпляр создают оператором `new`:
 
 ```js
-const user = new User('Alex', 30) // создаём новый экземпляр и сохраняем его в переменной
+const user = new User('Alex', 30)
 ```
 
 Вызвать класс как обычную функцию нельзя:
@@ -93,8 +93,8 @@ User('Alex', 30) // TypeError: class constructor нельзя вызвать б�
 Обычно из `constructor` ничего не возвращают. Если базовый конструктор явно вернёт другой объект, результатом `new` станет этот объект; возвращённое примитивное значение игнорируется. Такой код затрудняет понимание и почти не применяется.
 
 ```js
-const user = new User('Alex', 30) // создаём экземпляр User с именем Alex и возрастом 30
-user.name // читаем созданное конструктором свойство; результат: 'Alex'
+const user = new User('Alex', 30)
+user.name // 'Alex'
 ```
 
 ## Поля класса
@@ -102,16 +102,16 @@ user.name // читаем созданное конструктором свой
 Поле можно объявить прямо в теле класса или создать через `this` в конструкторе:
 
 ```js
-class Counter { // объявляем класс
-  step = 1 // задаём публичному полю step начальное значение 1
-  #value = 0 // создаём приватное поле счётчика с начальным значением 0
+class Counter {
+  step = 1
+  #value = 0
 
-  constructor(initialValue = 0) { // объявляем конструктор для инициализации экземпляра
-    this.#value = initialValue // заменяем начальное значение счётчика аргументом конструктора
+  constructor(initialValue = 0) {
+    this.#value = initialValue
   }
 
-  increment() { // объявляем метод increment()
-    this.#value += this.step // изменяем текущее значение
+  increment() {
+    this.#value += this.step
   }
 }
 ```
@@ -125,23 +125,23 @@ class Counter { // объявляем класс
 Getter вычисляет значение при чтении свойства, setter выполняет проверку или преобразование при записи:
 
 ```js
-class Temperature { // объявляем класс
-  #celsius = 0 // храним температуру во внутреннем приватном поле
+class Temperature {
+  #celsius = 0
 
-  get celsius() { // объявляем метод celsius()
-    return this.#celsius // возвращаем вызывающему коду значение выражения this.#celsius
+  get celsius() {
+    return this.#celsius
   }
 
-  set celsius(value) { // объявляем метод celsius()
-    if (!Number.isFinite(value)) { // проверяем условие и выполняем блок, если оно истинно
-      throw new TypeError('Температура должна быть числом') // создаём ошибку и передаём её вызывающему коду
+  set celsius(value) {
+    if (!Number.isFinite(value)) {
+      throw new TypeError('Температура должна быть числом')
     }
 
-    this.#celsius = value // сохраняем проверенное значение в приватном поле
+    this.#celsius = value
   }
 }
 
-const temperature = new Temperature() // создаём новый экземпляр и сохраняем его в переменной
+const temperature = new Temperature()
 temperature.celsius = 20 // вызывает setter
 temperature.celsius      // вызывает getter и возвращает 20
 ```
@@ -153,28 +153,28 @@ temperature.celsius      // вызывает getter и возвращает 20
 Ключевое слово `extends` создаёт связь между прототипами родительского и дочернего классов:
 
 ```js
-class Animal { // объявляем класс
-  constructor(name) { // объявляем конструктор для инициализации экземпляра
-    this.name = name // сохраняем name в свойстве экземпляра name
+class Animal {
+  constructor(name) {
+    this.name = name
   }
 
-  speak() { // объявляем метод speak()
-    return `${this.name} издаёт звук` // возвращаем вызывающему коду значение выражения `${this.name} издаёт звук`
+  speak() {
+    return `${this.name} издаёт звук`
   }
 
-  static category() { // объявляем метод category()
-    return 'animal' // возвращаем вызывающему коду значение выражения 'animal'
+  static category() {
+    return 'animal'
   }
 }
 
-class Dog extends Animal { // объявляем дочерний класс
-  constructor(name, breed) { // объявляем конструктор для инициализации экземпляра
-    super(name) // вызываем конструктор родительского класса
-    this.breed = breed // сохраняем breed в свойстве экземпляра breed
+class Dog extends Animal {
+  constructor(name, breed) {
+    super(name)
+    this.breed = breed
   }
 
-  speak() { // объявляем метод speak()
-    return `${super.speak()}: гав` // возвращаем вызывающему коду значение выражения `${super.speak()}: гав`
+  speak() {
+    return `${super.speak()}: гав`
   }
 }
 ```
@@ -186,10 +186,10 @@ class Dog extends Animal { // объявляем дочерний класс
 Если дочерний класс объявляет метод с тем же именем, он переопределяет унаследованный метод. Родительскую реализацию можно вызвать через `super.method()`:
 
 ```js
-const dog = new Dog('Бим', 'корги') // создаём новый экземпляр и сохраняем его в переменной
+const dog = new Dog('Бим', 'корги')
 
 dog.speak()       // 'Бим издаёт звук: гав'
-Dog.category() // вызываем унаследованный статический метод; результат: 'animal'
+Dog.category() // 'animal'
 ```
 
 В обычном методе `super.method()` обращается к прототипу родительского класса, сохраняя текущий `this`. В static-методе `super.method()` обращается к static-методу родительского класса.
@@ -199,25 +199,25 @@ Dog.category() // вызываем унаследованный статичес
 Если дочерний класс не объявляет `constructor`, JavaScript создаёт его примерно в таком виде:
 
 ```js
-constructor(...args) { // объявляем конструктор для инициализации экземпляра
-  super(...args) // вызываем конструктор родительского класса
+constructor(...args) {
+  super(...args)
 }
 ```
 
 Если дочерний конструктор объявлен явно, он должен вызвать `super(...)` до первого обращения к `this` и до обычного завершения конструктора:
 
 ```js
-class Dog extends Animal { // объявляем дочерний класс
-  constructor(name, breed) { // объявляем конструктор для инициализации экземпляра
+class Dog extends Animal {
+  constructor(name, breed) {
     super(name)        // создаёт и инициализирует this через родительский класс
-    this.breed = breed // сохраняем breed в свойстве экземпляра breed
+    this.breed = breed
   }
 }
 ```
 
 ```js
-class BrokenDog extends Animal { // объявляем дочерний класс
-  constructor(name) { // объявляем конструктор для инициализации экземпляра
+class BrokenDog extends Animal {
+  constructor(name) {
     this.name = name // ReferenceError: super() ещё не вызван
   }
 }
@@ -230,35 +230,35 @@ class BrokenDog extends Animal { // объявляем дочерний клас
 Статические элементы принадлежат классу, а не его экземплярам. Их используют для фабричных методов, констант и логики, связанной со всем классом:
 
 ```js
-class User { // объявляем класс
-  static defaultRole = 'user' // задаём статическое поле defaultRole
-  static #createdCount = 0 // задаём статическое поле #createdCount
+class User {
+  static defaultRole = 'user'
+  static #createdCount = 0
 
-  constructor(name) { // объявляем конструктор для инициализации экземпляра
-    this.name = name // сохраняем name в свойстве экземпляра name
-    User.#createdCount += 1 // изменяем текущее значение
+  constructor(name) {
+    this.name = name
+    User.#createdCount += 1
   }
 
-  static createGuest() { // объявляем метод createGuest()
-    return new User('Гость') // возвращаем вызывающему коду значение выражения new User('Гость')
+  static createGuest() {
+    return new User('Гость')
   }
 
-  static get createdCount() { // объявляем метод createdCount()
-    return User.#createdCount // возвращаем вызывающему коду значение выражения User.#createdCount
+  static get createdCount() {
+    return User.#createdCount
   }
 
-  static { // начинаем блок однократной статической инициализации класса
-    if (!this.defaultRole) { // проверяем условие и выполняем блок, если оно истинно
-      throw new Error('Не указана роль по умолчанию') // создаём ошибку и передаём её вызывающему коду
+  static {
+    if (!this.defaultRole) {
+      throw new Error('Не указана роль по умолчанию')
     }
   }
 }
 
-const guest = User.createGuest() // создаём гостевого пользователя статическим фабричным методом
+const guest = User.createGuest()
 
-User.defaultRole // читаем свойство defaultRole; результат: 'user'
-User.createdCount // читаем свойство createdCount; результат: 1
-guest.defaultRole // читаем свойство defaultRole; результат: undefined
+User.defaultRole // 'user'
+User.createdCount // 1
+guest.defaultRole // undefined
 ```
 
 Статический блок выполняется один раз при вычислении определения класса. Внутри него доступен `this`, равный самому классу, и приватные static-поля.
@@ -268,39 +268,39 @@ guest.defaultRole // читаем свойство defaultRole; результа
 Отдельного ключевого слова `protected` в JavaScript нет. Исторически имя с подчёркиванием, например `_balance`, означает «внутреннее по договорённости», но язык не запрещает доступ снаружи:
 
 ```js
-class Account { // объявляем класс
-  constructor(balance) { // объявляем конструктор для инициализации экземпляра
-    this._balance = balance // сохраняем balance в свойстве экземпляра _balance
+class Account {
+  constructor(balance) {
+    this._balance = balance
   }
 }
 
-const account = new Account(100) // создаём новый экземпляр и сохраняем его в переменной
+const account = new Account(100)
 account._balance = -1000 // технически разрешено
 ```
 
 Настоящее приватное поле `#balance` недоступно даже дочернему классу. Если подклассу нужен контролируемый доступ, родитель может предоставить обычные методы или getters/setters:
 
 ```js
-class Account { // объявляем класс
-  #balance = 0 // создаём приватный баланс с нулевым начальным значением
+class Account {
+  #balance = 0
 
-  getBalance() { // объявляем метод getBalance()
-    return this.#balance // возвращаем вызывающему коду значение выражения this.#balance
+  getBalance() {
+    return this.#balance
   }
 
-  deposit(amount) { // объявляем метод deposit()
-    if (amount <= 0) { // проверяем условие и выполняем блок, если оно истинно
-      throw new RangeError('Сумма должна быть положительной') // создаём ошибку и передаём её вызывающему коду
+  deposit(amount) {
+    if (amount <= 0) {
+      throw new RangeError('Сумма должна быть положительной')
     }
 
-    this.#balance += amount // изменяем текущее значение
+    this.#balance += amount
   }
 }
 
-class SavingsAccount extends Account { // объявляем дочерний класс
-  addInterest(rate) { // объявляем метод addInterest()
-    const interest = this.getBalance() * rate // вычисляем проценты от текущего баланса
-    this.deposit(interest) // вызываем this.deposit()
+class SavingsAccount extends Account {
+  addInterest(rate) {
+    const interest = this.getBalance() * rate
+    this.deposit(interest)
   }
 }
 ```
@@ -314,29 +314,29 @@ JavaScript-класс может напрямую наследоваться т�
 Примесь (mixin) — объект или функция, добавляющая классу отдельную возможность:
 
 ```js
-const canLog = { // создаём объект и сохраняем ссылку в переменной
-  log(message) { // объявляем метод log()
-    console.log(`[${this.name}]: ${message}`) // выводим значение в консоль
+const canLog = {
+  log(message) {
+    console.log(`[${this.name}]: ${message}`)
   },
 }
 
-const canSerialize = { // создаём объект и сохраняем ссылку в переменной
-  toJSON() { // объявляем метод toJSON()
-    return { name: this.name } // возвращаем вызывающему коду значение выражения { name: this.name }
+const canSerialize = {
+  toJSON() {
+    return { name: this.name }
   },
 }
 
-class User { // объявляем класс
-  constructor(name) { // объявляем конструктор для инициализации экземпляра
-    this.name = name // сохраняем name в свойстве экземпляра name
+class User {
+  constructor(name) {
+    this.name = name
   }
 }
 
-Object.assign(User.prototype, canLog, canSerialize) // копируем методы примесей в прототип класса
+Object.assign(User.prototype, canLog, canSerialize) // методы примесей попадают в прототип
 
-const user = new User('Анна') // создаём новый экземпляр и сохраняем его в переменной
-user.log('создан') // вызываем метод объекта
-JSON.stringify(user) // преобразуем значение JavaScript в строку JSON
+const user = new User('Анна')
+user.log('создан')
+JSON.stringify(user)
 ```
 
 Такой подход копирует методы в прототип, но не создаёт дополнительную цепочку наследования. Для mixin с getters, setters или особыми descriptors вместо `Object.assign()` понадобятся `Object.getOwnPropertyDescriptors()` и `Object.defineProperties()`.
@@ -344,12 +344,12 @@ JSON.stringify(user) // преобразуем значение JavaScript в с
 Функциональная примесь может вернуть подкласс и сохранить использование `super`:
 
 ```js
-const Timestamped = (Base) => class extends Base { // создаём функцию и сохраняем её в переменной
-  createdAt = new Date() // фиксируем время создания каждого нового экземпляра
+const Timestamped = (Base) => class extends Base {
+  createdAt = new Date()
 }
 
-class Entity {} // объявляем класс
-class User extends Timestamped(Entity) {} // объявляем дочерний класс
+class Entity {}
+class User extends Timestamped(Entity) {}
 ```
 
 Примеси полезны для небольших независимых возможностей. Если между ними появляются скрытые зависимости и конфликты имён, явная композиция объектов обычно понятнее.
@@ -369,15 +369,15 @@ class User extends Timestamped(Entity) {} // объявляем дочерний
 Объект скрывает внутреннее состояние и предоставляет контролируемые методы работы с ним. Поля с `#` действительно приватны на уровне языка:
 
 ```js
-class Counter { // объявляем класс
-  #value = 0 // скрываем текущее значение счётчика в приватном поле
+class Counter {
+  #value = 0
 
-  increment() { // объявляем метод increment()
-    this.#value += 1 // изменяем текущее значение
+  increment() {
+    this.#value += 1
   }
 
-  get value() { // объявляем метод value()
-    return this.#value // возвращаем вызывающему коду значение выражения this.#value
+  get value() {
+    return this.#value
   }
 }
 ```
@@ -391,15 +391,15 @@ class Counter { // объявляем класс
 Разные объекты отвечают на одинаковый вызов по-разному:
 
 ```js
-function makeSound(animal) { // объявляем функцию makeSound()
-  return animal.speak() // возвращаем вызывающему коду значение выражения animal.speak()
+function makeSound(animal) {
+  return animal.speak()
 }
 
-const dog = { speak: () => 'гав' } // создаём объект с собственной реализацией speak()
-const cat = { speak: () => 'мяу' } // создаём другой объект с тем же публичным методом
+const dog = { speak: () => 'гав' }
+const cat = { speak: () => 'мяу' }
 
-makeSound(dog) // передаём собаку; результат: 'гав'
-makeSound(cat) // передаём кошку; результат: 'мяу'
+makeSound(dog) // 'гав'
+makeSound(cat) // 'мяу'
 ```
 
 В JavaScript для такого полиморфизма формальное наследование не обязательно: достаточно, чтобы объект предоставлял нужный метод.

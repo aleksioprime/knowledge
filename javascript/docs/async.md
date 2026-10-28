@@ -7,13 +7,13 @@ JavaScript выполняет пользовательский код в одн�
 Асинхронная операция начинается сейчас, а завершается позже. Пока браузер ждёт таймер, ответ сервера или действие пользователя, JavaScript может выполнять другой код.
 
 ```js
-console.log('Начало') // выводим значение в консоль
+console.log('Начало')
 
-setTimeout(() => { // планируем однократный вызов callback после задержки
-  console.log('Таймер завершён') // выводим значение в консоль
+setTimeout(() => {
+  console.log('Таймер завершён')
 }, 1000)
 
-console.log('Конец') // выводим значение в консоль
+console.log('Конец')
 
 // Начало
 // Конец
@@ -27,13 +27,13 @@ console.log('Конец') // выводим значение в консоль
 Callback — функция, которую передают другой функции, чтобы та вызвала её в нужный момент:
 
 ```js
-function greet(name, callback) { // объявляем функцию greet()
-  console.log(`Привет, ${name}`) // выводим значение в консоль
-  callback() // вызываем переданную callback-функцию
+function greet(name, callback) {
+  console.log(`Привет, ${name}`)
+  callback()
 }
 
-greet('Анна', () => { // вызываем greet()
-  console.log('Приветствие завершено') // выводим значение в консоль
+greet('Анна', () => {
+  console.log('Приветствие завершено')
 })
 ```
 
@@ -42,13 +42,13 @@ Callback не обязательно асинхронный. Например, c
 В старых и некоторых серверных API часто используется соглашение error-first callback: первым аргументом приходит ошибка, вторым — результат.
 
 ```js
-loadUser(42, (error, user) => { // вызываем loadUser()
-  if (error) { // проверяем условие и выполняем блок, если оно истинно
-    console.error(error) // выводим ошибку в консоль
-    return // досрочно выходим из callback после обработки ошибки
+loadUser(42, (error, user) => {
+  if (error) {
+    console.error(error)
+    return
   }
 
-  console.log(user) // выводим значение в консоль
+  console.log(user)
 })
 ```
 
@@ -57,25 +57,25 @@ loadUser(42, (error, user) => { // вызываем loadUser()
 Если каждая следующая операция зависит от предыдущей, callbacks начинают глубоко вкладываться друг в друга:
 
 ```js
-loadUser(42, (userError, user) => { // вызываем loadUser()
-  if (userError) { // проверяем условие и выполняем блок, если оно истинно
-    handleError(userError) // вызываем handleError()
-    return // досрочно выходим из callback после обработки ошибки
+loadUser(42, (userError, user) => {
+  if (userError) {
+    handleError(userError)
+    return
   }
 
-  loadPosts(user.id, (postsError, posts) => { // вызываем loadPosts()
-    if (postsError) { // проверяем условие и выполняем блок, если оно истинно
-      handleError(postsError) // вызываем handleError()
-      return // досрочно выходим из callback после обработки ошибки
+  loadPosts(user.id, (postsError, posts) => {
+    if (postsError) {
+      handleError(postsError)
+      return
     }
 
-    saveReport(posts, (reportError, report) => { // вызываем saveReport()
-      if (reportError) { // проверяем условие и выполняем блок, если оно истинно
-        handleError(reportError) // вызываем handleError()
-        return // досрочно выходим из callback после обработки ошибки
+    saveReport(posts, (reportError, report) => {
+      if (reportError) {
+        handleError(reportError)
+        return
       }
 
-      showReport(report) // вызываем showReport()
+      showReport(report)
     })
   })
 })
@@ -98,27 +98,26 @@ Promise — объект, представляющий будущий резул
 Конструктор `Promise` принимает функцию executor. Она вызывается синхронно и получает две функции: `resolve` для успешного результата и `reject` для ошибки.
 
 ```js
-function delay(milliseconds) { // объявляем функцию delay()
-  return new Promise((resolve) => { // возвращаем вызывающему коду значение выражения new Promise((resolve) => {
-    setTimeout(() => { // планируем однократный вызов callback после задержки
-      resolve('Время вышло') // успешно завершаем Promise и передаём результат
+function delay(milliseconds) {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve('Время вышло')
     }, milliseconds)
   })
 }
 
-delay(1000).then((message) => console.log(message)) // обрабатываем успешный результат Promise
+delay(1000).then((message) => console.log(message))
 ```
 
 Полная форма выглядит так:
 
 ```js
-const promise = new Promise((resolve, reject) => { // создаём новый экземпляр и сохраняем его в переменной
-  // Запускаем операцию.
+const promise = new Promise((resolve, reject) => {
 
-  if (operationSucceeded) { // проверяем условие и выполняем блок, если оно истинно
-    resolve(result) // успешно завершаем Promise и передаём результат
-  } else { // выполняем ветку, когда предыдущие условия ложны
-    reject(new Error('Не удалось выполнить операцию')) // отклоняем Promise и передаём ошибку
+  if (operationSucceeded) {
+    resolve(result)
+  } else {
+    reject(new Error('Не удалось выполнить операцию'))
   }
 })
 ```
@@ -136,15 +135,15 @@ const promise = new Promise((resolve, reject) => { // создаём новый 
 Промисификация — преобразование API с callback в функцию, возвращающую Promise:
 
 ```js
-function loadUserAsync(id) { // объявляем функцию loadUserAsync()
-  return new Promise((resolve, reject) => { // возвращаем вызывающему коду значение выражения new Promise((resolve, reject) => {
-    loadUser(id, (error, user) => { // вызываем loadUser()
-      if (error) { // проверяем условие и выполняем блок, если оно истинно
-        reject(error) // отклоняем Promise и передаём ошибку
-        return // досрочно выходим из callback после отклонения Promise
+function loadUserAsync(id) {
+  return new Promise((resolve, reject) => {
+    loadUser(id, (error, user) => {
+      if (error) {
+        reject(error)
+        return
       }
 
-      resolve(user) // успешно завершаем Promise и передаём результат
+      resolve(user)
     })
   })
 }
@@ -157,11 +156,11 @@ function loadUserAsync(id) { // объявляем функцию loadUserAsync(
 Эти методы создают цепочку обработки Promise: `then()` принимает успешный результат, `catch()` перехватывает ошибку, а `finally()` выполняет завершающее действие при любом исходе.
 
 ```js
-loadUsers() // запускаем операцию и получаем Promise со списком пользователей
-  .then((users) => normalizeUsers(users)) // преобразуем результат и возвращаем его следующему шагу
-  .then((users) => console.log(users)) // получаем преобразованный список и выводим его
-  .catch((error) => console.error(error)) // обрабатываем ошибку Promise
-  .finally(() => hideLoader()) // выполняем завершающую очистку независимо от результата
+loadUsers()
+  .then((users) => normalizeUsers(users))
+  .then((users) => console.log(users))
+  .catch((error) => console.error(error))
+  .finally(() => hideLoader())
 ```
 
 - `then(onFulfilled, onRejected)` обрабатывает успех и, необязательно, ошибку;
@@ -177,10 +176,10 @@ loadUsers() // запускаем операцию и получаем Promise �
 Результат одного обработчика передаётся следующему:
 
 ```js
-loadUser() // вызываем loadUser()
-  .then((user) => loadPosts(user.id)) // обрабатываем успешный результат Promise
-  .then((posts) => renderPosts(posts)) // обрабатываем успешный результат Promise
-  .catch((error) => showError(error)) // обрабатываем ошибку Promise
+loadUser()
+  .then((user) => loadPosts(user.id))
+  .then((posts) => renderPosts(posts))
+  .catch((error) => showError(error))
 ```
 
 Правила цепочки:
@@ -192,28 +191,28 @@ loadUser() // вызываем loadUser()
 - `catch` может восстановить цепочку, если вернёт обычное значение.
 
 ```js
-Promise.resolve(2) // создаём успешно завершённый Promise
-  .then((number) => number * 3) // обрабатываем успешный результат Promise
-  .then((number) => delay(1000).then(() => number + 1)) // обрабатываем успешный результат Promise
-  .then((number) => console.log(number)) // обрабатываем успешный результат Promise; результат: 7
-  .catch((error) => console.error(error)) // обрабатываем ошибку Promise
+Promise.resolve(2)
+  .then((number) => number * 3)
+  .then((number) => delay(1000).then(() => number + 1))
+  .then((number) => console.log(number)) // 7
+  .catch((error) => console.error(error))
 ```
 
 Если забыть `return` перед асинхронной операцией внутри `then`, следующая часть цепочки не будет её ждать:
 
 ```js
-loadUser() // вызываем loadUser()
-  .then((user) => { // обрабатываем успешный результат Promise
+loadUser()
+  .then((user) => {
     loadPosts(user.id) // Ошибка: Promise не возвращён.
   })
-  .then((posts) => { // обрабатываем успешный результат Promise
-    console.log(posts) // выводим значение в консоль; результат: undefined
+  .then((posts) => {
+    console.log(posts) // undefined
   })
 
 // Правильно:
-loadUser() // вызываем loadUser()
-  .then((user) => loadPosts(user.id)) // обрабатываем успешный результат Promise
-  .then((posts) => console.log(posts)) // обрабатываем успешный результат Promise
+loadUser()
+  .then((user) => loadPosts(user.id))
+  .then((posts) => console.log(posts))
 ```
 
 ### Статические методы Promise
@@ -234,21 +233,21 @@ loadUser() // вызываем loadUser()
 Ключевое слово `async` объявляет асинхронную функцию. Такая функция всегда возвращает Promise:
 
 ```js
-async function getNumber() { // объявляем асинхронную функцию, которая возвращает Promise
-  return 42 // возвращаем вызывающему коду значение выражения 42
+async function getNumber() {
+  return 42
 }
 
-getNumber().then((number) => console.log(number)) // обрабатываем успешный результат Promise; результат: 42
+getNumber().then((number) => console.log(number)) // 42
 ```
 
 Обычное возвращённое значение становится fulfilled Promise, а выброшенная ошибка — rejected Promise:
 
 ```js
-async function fail() { // объявляем асинхронную функцию, которая возвращает Promise
-  throw new Error('Не удалось получить данные') // создаём ошибку и передаём её вызывающему коду
+async function fail() {
+  throw new Error('Не удалось получить данные')
 }
 
-fail().catch((error) => console.error(error.message)) // обрабатываем ошибку Promise
+fail().catch((error) => console.error(error.message))
 ```
 
 Вызов `async`-функции начинается синхронно и выполняется до первого встреченного `await`. Само слово `async` не переносит тяжёлые вычисления в другой поток и не защищает интерфейс от блокировки.
@@ -258,9 +257,9 @@ fail().catch((error) => console.error(error.message)) // обрабатывае�
 `await` приостанавливает выполнение текущей `async`-функции до получения результата, но не блокирует весь JavaScript и event loop:
 
 ```js
-async function showProfile() { // объявляем асинхронную функцию
-  const profile = await loadProfile() // ждём Promise от loadProfile() и получаем его успешный результат
-  renderProfile(profile) // передаём полученный профиль функции отображения
+async function showProfile() {
+  const profile = await loadProfile()
+  renderProfile(profile)
 }
 ```
 
@@ -271,9 +270,9 @@ async function showProfile() { // объявляем асинхронную фу
 Справа может находиться любое выражение:
 
 ```js
-const user = await loadUser() // ждём Promise и записываем его успешный результат в user
-const value = await 42 // получаем обычное значение 42 через Promise.resolve(42)
-const result = await getThenable() // ждём thenable — объект с совместимым методом then()
+const user = await loadUser()
+const value = await 42
+const result = await getThenable() // thenable — любой объект с методом then()
 ```
 
 Обычное значение ведёт себя как `Promise.resolve(value)`. Поэтому ожидать его разрешено, но обычно бессмысленно. Чаще всего справа стоит вызов функции, возвращающей Promise.
@@ -285,9 +284,9 @@ const result = await getThenable() // ждём thenable — объект с со
 Если операции не зависят друг от друга, их можно запустить вместе:
 
 ```js
-const [users, roles] = await Promise.all([ // запускаем несколько Promise и ожидаем результат выбранного комбинатора
-  fetchUsers(), // вызываем fetchUsers()
-  fetchRoles(), // вызываем fetchRoles()
+const [users, roles] = await Promise.all([
+  fetchUsers(),
+  fetchRoles(),
 ])
 ```
 
@@ -296,9 +295,9 @@ const [users, roles] = await Promise.all([ // запускаем несколь�
 Когда важен результат каждой операции, включая ошибки, используют `Promise.allSettled`:
 
 ```js
-const results = await Promise.allSettled([ // запускаем несколько Promise и ожидаем результат выбранного комбинатора
-  loadUser(), // вызываем loadUser()
-  loadPosts(), // вызываем loadPosts()
+const results = await Promise.allSettled([
+  loadUser(),
+  loadPosts(),
 ])
 
 // Элементы имеют вид:
@@ -309,13 +308,13 @@ const results = await Promise.allSettled([ // запускаем несколь�
 `Promise.race` принимает результат или ошибку первого завершившегося участника. Например, с его помощью можно ограничить время ожидания:
 
 ```js
-const timeout = new Promise((resolve, reject) => { // создаём новый экземпляр и сохраняем его в переменной
-  setTimeout(() => reject(new Error('Превышено время ожидания')), 3000) // планируем однократный вызов callback после задержки
+const timeout = new Promise((resolve, reject) => {
+  setTimeout(() => reject(new Error('Превышено время ожидания')), 3000)
 })
 
-const data = await Promise.race([ // запускаем несколько Promise и ожидаем результат выбранного комбинатора
-  loadData(), // вызываем loadData()
-  timeout, // добавляем Promise тайм-аута вторым участником гонки
+const data = await Promise.race([
+  loadData(),
+  timeout,
 ])
 ```
 
@@ -330,10 +329,10 @@ const data = await Promise.race([ // запускаем несколько Promi
 После завершения текущего синхронного кода выполняются microtasks (`Promise.then`, продолжение после `await`), затем среда может взять следующую задачу, например таймер или событие:
 
 ```js
-console.log('A') // выводим значение в консоль
-setTimeout(() => console.log('B'), 0) // выводим значение в консоль
-Promise.resolve().then(() => console.log('C')) // обрабатываем успешный результат Promise
-console.log('D') // выводим значение в консоль
+console.log('A')
+setTimeout(() => console.log('B'), 0)
+Promise.resolve().then(() => console.log('C'))
+console.log('D')
 
 // A, D, C, B
 ```
@@ -341,7 +340,7 @@ console.log('D') // выводим значение в консоль
 `queueMicrotask(callback)` явно добавляет callback в очередь микрозадач:
 
 ```js
-queueMicrotask(() => console.log('microtask')) // выводим значение в консоль
+queueMicrotask(() => console.log('microtask'))
 ```
 
 Не создавайте бесконечную цепочку микрозадач: она не даст браузеру перейти к обработке событий и отрисовке.

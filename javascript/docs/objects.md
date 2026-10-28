@@ -7,17 +7,17 @@
 Литерал `{}` — основной способ создать объект. Внутри перечисляют свойства с данными и методы с поведением.
 
 ```js
-const user = { // создаём объект и сохраняем ссылку в переменной
-  id: 42, // задаём свойство id
-  name: 'Alex', // задаём свойство name
-  ['is' + 'Active']: true, // вычисляем имя свойства и получаем ключ isActive
-  greet() { // объявляем метод greet()
-    return `Привет, ${this.name}` // возвращаем вызывающему коду значение выражения `Привет, ${this.name}`
+const user = {
+  id: 42,
+  name: 'Alex',
+  ['is' + 'Active']: true,
+  greet() {
+    return `Привет, ${this.name}`
   },
 }
 
-user.name // читаем свойство name
-user['isActive'] // читаем значение по индексу или ключу 'isActive'
+user.name
+user['isActive']
 ```
 
 Проверять собственное свойство следует через `Object.hasOwn(user, 'name')`. Оператор `in` учитывает и свойства в цепочке прототипов.
@@ -35,12 +35,12 @@ user['isActive'] // читаем значение по индексу или к�
 - getter и setter выполняют функции при чтении и записи свойства.
 
 ```js
-const user = { // создаём объект и сохраняем ссылку в переменной
-  firstName: 'Alex', // задаём свойство firstName
-  lastName: 'Prime', // задаём свойство lastName
+const user = {
+  firstName: 'Alex',
+  lastName: 'Prime',
 
-  get fullName() { // объявляем метод fullName()
-    return `${this.firstName} ${this.lastName}` // возвращаем вызывающему коду значение выражения `${this.firstName} ${this.lastName}`
+  get fullName() {
+    return `${this.firstName} ${this.lastName}`
   },
 }
 ```
@@ -50,13 +50,13 @@ const user = { // создаём объект и сохраняем ссылку
 Ключ свойства объекта может быть только строкой или `Symbol`. Числа и другие значения при использовании в качестве ключа преобразуются в строки.
 
 ```js
-const object = {} // создаём пустой объект
+const object = {}
 
-object[1] = 'один' // записываем 'один' по индексу или ключу 1
+object[1] = 'один'
 object['1'] // 'один': это тот же ключ
 
-const id = Symbol('id') // создаём уникальный symbol-ключ
-object[id] = 42 // записываем 42 по индексу или ключу id
+const id = Symbol('id')
+object[id] = 42
 ```
 
 `Symbol` создаёт уникальный ключ и не попадает в `Object.keys()` или обычный `for...in`. Получить symbol-ключи можно через `Object.getOwnPropertySymbols()`, а все собственные ключи — через `Reflect.ownKeys()`.
@@ -64,22 +64,22 @@ object[id] = 42 // записываем 42 по индексу или ключу
 Объект не подходит как ключ другого обычного объекта: он обычно преобразуется в строку `'[object Object]'`, из-за чего разные объекты могут создать один и тот же ключ.
 
 ```js
-const firstKey = { id: 1 } // создаём объект и сохраняем ссылку в переменной
-const secondKey = { id: 2 } // создаём объект и сохраняем ссылку в переменной
-const dictionary = {} // создаём пустой объект
+const firstKey = { id: 1 }
+const secondKey = { id: 2 }
+const dictionary = {}
 
-dictionary[firstKey] = 'first' // записываем 'first' по индексу или ключу firstKey
-dictionary[secondKey] = 'second' // записываем 'second' по индексу или ключу secondKey
+dictionary[firstKey] = 'first'
+dictionary[secondKey] = 'second'
 
-dictionary[firstKey] // читаем значение по индексу или ключу firstKey; результат: 'second'
+dictionary[firstKey] // 'second'
 ```
 
 Если ключом должен быть объект, число без строкового преобразования или другое значение, используйте `Map`:
 
 ```js
-const roles = new Map() // создаём новый экземпляр и сохраняем его в переменной
-roles.set(firstKey, 'admin') // сохраняем значение в коллекции
-roles.set(secondKey, 'user') // сохраняем значение в коллекции
+const roles = new Map()
+roles.set(firstKey, 'admin')
+roles.set(secondKey, 'user')
 ```
 
 ### Доступ к свойствам
@@ -87,18 +87,18 @@ roles.set(secondKey, 'user') // сохраняем значение в колл�
 Точка подходит для заранее известного корректного имени. Квадратные скобки позволяют использовать вычисляемое значение, пробелы и symbol-ключи.
 
 ```js
-user.name // читаем свойство name
-user['first name'] // читаем свойство объекта через квадратные скобки
-user[propertyName] // читаем значение по индексу или ключу propertyName
-user[id] // читаем значение по индексу или ключу id
+user.name
+user['first name']
+user[propertyName]
+user[id]
 ```
 
 Optional chaining `?.` прекращает чтение цепочки, если значение слева равно `null` или `undefined`. Вместо ошибки всё выражение вернёт `undefined`:
 
 ```js
-const city = user.address?.city // читаем city, только если свойство address существует
-const firstPhone = user.contacts?.phones?.[0] // безопасно читаем первый элемент возможно отсутствующего массива
-const label = user.getLabel?.() // вызываем метод, только если свойство getLabel содержит функцию
+const city = user.address?.city // undefined, если address нет
+const firstPhone = user.contacts?.phones?.[0] // undefined, если массива нет
+const label = user.getLabel?.() // undefined, если getLabel равен null или undefined
 ```
 
 Оператор проверяет только значение непосредственно слева от `?.`. Например, в `user.address?.city` переменная `user` всё равно должна существовать.
@@ -114,11 +114,11 @@ const label = user.getLabel?.() // вызываем метод, только е�
 Статические методы ниже превращают собственные перечисляемые свойства объекта в массив, который затем можно перебирать обычными методами массивов.
 
 ```js
-const user = { name: 'Alex', role: 'admin' } // создаём объект и сохраняем ссылку в переменной
+const user = { name: 'Alex', role: 'admin' }
 
-Object.keys(user) // получаем массив собственных перечисляемых ключей; результат: ['name', 'role']
-Object.values(user) // получаем массив собственных перечисляемых значений; результат: ['Alex', 'admin']
-Object.entries(user) // получаем массив пар ключ–значение; результат: [['name', 'Alex'], ['role', 'admin']]
+Object.keys(user) // ['name', 'role']
+Object.values(user) // ['Alex', 'admin']
+Object.entries(user) // [['name', 'Alex'], ['role', 'admin']]
 ```
 
 Эти методы возвращают только собственные перечисляемые свойства со строковыми ключами. Symbol-ключи они не включают.
@@ -132,16 +132,16 @@ Object.entries(user) // получаем массив пар ключ–знач
 `Object.fromEntries()` выполняет обратную операцию для пар ключ–значение:
 
 ```js
-const entries = [['name', 'Alex'], ['role', 'admin']] // создаём массив пар ключ–значение
-Object.fromEntries(entries) // вызываем Object.fromEntries(); результат: { name: 'Alex', role: 'admin' }
+const entries = [['name', 'Alex'], ['role', 'admin']]
+Object.fromEntries(entries) // { name: 'Alex', role: 'admin' }
 ```
 
 Например, объект можно преобразовать через методы массива:
 
 ```js
-const doubled = Object.fromEntries( // собираем новый объект из преобразованных пар
-  Object.entries({ a: 1, b: 2 }) // получаем массив пар ключ–значение
-    .map(([key, value]) => [key, value * 2]), // преобразуем каждый элемент и создаём новый массив
+const doubled = Object.fromEntries(
+  Object.entries({ a: 1, b: 2 })
+    .map(([key, value]) => [key, value * 2]),
 )
 // { a: 2, b: 4 }
 ```
@@ -151,7 +151,7 @@ const doubled = Object.fromEntries( // собираем новый объект 
 Результат проверки зависит от того, нужно ли учитывать унаследованные свойства или только свойства самого объекта.
 
 ```js
-Object.hasOwn(user, 'name') // проверяем наличие собственного свойства; результат: true
+Object.hasOwn(user, 'name') // true
 'toString' in user          // true: найдено в прототипе
 ```
 
@@ -167,23 +167,23 @@ Object.hasOwn(user, 'name') // проверяем наличие собстве�
 | `Reflect.has(object, key)` | да | да |
 
 ```js
-const parent = { inherited: true } // создаём объект и сохраняем ссылку в переменной
-const object = Object.create(parent) // создаём объект с указанным прототипом
+const parent = { inherited: true }
+const object = Object.create(parent)
 
-object.own = undefined // записываем undefined в свойство own
+object.own = undefined
 
-'own' in object // проверяем наличие свойства во всей цепочке прототипов; результат: true
-'inherited' in object // проверяем наличие свойства во всей цепочке прототипов; результат: true
-Object.hasOwn(object, 'own') // проверяем наличие собственного свойства; результат: true
-Object.hasOwn(object, 'inherited') // проверяем наличие собственного свойства; результат: false
-Reflect.has(object, 'inherited') // проверяем наличие значения или ключа; результат: true
+'own' in object // true
+'inherited' in object // true
+Object.hasOwn(object, 'own') // true
+Object.hasOwn(object, 'inherited') // false
+Reflect.has(object, 'inherited') // true
 ```
 
 Проверка через значение не определяет наличие свойства:
 
 ```js
-object.own !== undefined // сравниваем значение с undefined, что не отличает отсутствующее свойство; результат: false
-Object.hasOwn(object, 'own') // проверяем наличие собственного свойства; результат: true
+object.own !== undefined // false
+Object.hasOwn(object, 'own') // true
 ```
 
 Свойство существует, но его значение равно `undefined`. Поэтому:
@@ -203,10 +203,10 @@ Object.hasOwn(object, 'own') // проверяем наличие собстве
 - `Object.groupBy(items, callback)` группирует элементы iterable-объекта по строковым или symbol-ключам.
 
 ```js
-const merged = Object.assign({}, defaults, settings) // объединяем настройки в новый объект
-const dictionary = Object.create(null) // создаём объект с указанным прототипом
+const merged = Object.assign({}, defaults, settings)
+const dictionary = Object.create(null)
 
-const usersByRole = Object.groupBy(users, (user) => user.role) // создаём функцию и сохраняем её в переменной
+const usersByRole = Object.groupBy(users, (user) => user.role)
 // { admin: [...], user: [...] }
 ```
 
@@ -217,11 +217,11 @@ const usersByRole = Object.groupBy(users, (user) => user.role) // создаём
 `Object.is()` почти совпадает с `===`, но иначе обрабатывает `NaN` и знаковые нули:
 
 ```js
-Object.is(NaN, NaN) // вызываем Object.is(); результат: true
-NaN === NaN // строгое равенство считает NaN неравным даже самому себе; результат: false
+Object.is(NaN, NaN) // true
+NaN === NaN // false — строгое равенство считает NaN неравным даже самому себе
 
-Object.is(0, -0) // вызываем Object.is(); результат: false
-0 === -0 // строгое равенство не различает положительный и отрицательный ноль; результат: true
+Object.is(0, -0) // false
+0 === -0 // true — строгое равенство не различает положительный и отрицательный ноль
 ```
 
 Объекты, как и при `===`, сравниваются по ссылке.
@@ -236,11 +236,11 @@ Descriptor описывает не только значение свойств�
 - `Object.defineProperties()` работает с несколькими свойствами.
 
 ```js
-Object.defineProperty(user, 'id', { // создаём свойство с явно заданными descriptor-флагами
-  value: 42, // задаём свойство value
-  writable: false, // задаём свойство writable
-  enumerable: false, // задаём свойство enumerable
-  configurable: false, // задаём свойство configurable
+Object.defineProperty(user, 'id', {
+  value: 42,
+  writable: false,
+  enumerable: false,
+  configurable: false,
 })
 ```
 
@@ -267,9 +267,9 @@ Object.defineProperty(user, 'id', { // создаём свойство с явн
 - `hasOwnProperty()` — старая проверка собственного свойства.
 
 ```js
-Object.prototype.toString.call([]) // вызываем функцию с явно заданным this; результат: '[object Array]'
-prototype.isPrototypeOf(user) // вызываем prototype.isPrototypeOf()
-user.propertyIsEnumerable('name') // вызываем user.propertyIsEnumerable()
+Object.prototype.toString.call([]) // '[object Array]'
+prototype.isPrototypeOf(user)
+user.propertyIsEnumerable('name')
 ```
 
 Для новых проверок собственного свойства используйте `Object.hasOwn()`, а для массива — `Array.isArray()`.
@@ -281,11 +281,11 @@ user.propertyIsEnumerable('name') // вызываем user.propertyIsEnumerable(
 При обычном присваивании копируется ссылка. Обе переменные указывают на один объект:
 
 ```js
-const original = { name: 'Alex' } // создаём объект и сохраняем ссылку в переменной
-const sameObject = original // копируем ссылку на тот же объект, а не сам объект
+const original = { name: 'Alex' }
+const sameObject = original // копируется ссылка, а не сам объект
 
-sameObject.name = 'Anna' // записываем 'Anna' в свойство name
-original.name // читаем свойство name; результат: 'Anna'
+sameObject.name = 'Anna'
+original.name // 'Anna'
 ```
 
 ### Поверхностная копия
@@ -293,18 +293,18 @@ original.name // читаем свойство name; результат: 'Anna'
 `Object.assign()` может создать новый объект, но копирует только первый уровень. Вложенные объекты остаются общими:
 
 ```js
-const original = { // создаём объект и сохраняем ссылку в переменной
-  name: 'Alex', // задаём свойство name
-  address: { city: 'Moscow' }, // задаём свойство address
+const original = {
+  name: 'Alex',
+  address: { city: 'Moscow' },
 }
 
-const assignCopy = Object.assign({}, original) // создаём поверхностную копию объекта через Object.assign()
+const assignCopy = Object.assign({}, original) // поверхностная копия
 
-assignCopy.name = 'Anna' // меняем собственное свойство только у копии
-assignCopy.address.city = 'Kazan' // меняем общий вложенный объект address
+assignCopy.name = 'Anna' // меняется только копия
+assignCopy.address.city = 'Kazan'
 
-original.name // читаем свойство name; результат: 'Alex'
-original.address.city // читаем свойство city; результат: 'Kazan'
+original.name // 'Alex'
+original.address.city // 'Kazan'
 ```
 
 Метод копирует собственные перечисляемые свойства, включая symbol-ключи. Он не сохраняет исходные descriptors и пользовательский прототип.
@@ -316,15 +316,15 @@ original.address.city // читаем свойство city; результат:
 `structuredClone()` рекурсивно копирует поддерживаемые данные, умеет работать с циклическими ссылками, `Date`, `Map`, `Set`, `ArrayBuffer` и typed arrays.
 
 ```js
-const original = { // создаём объект и сохраняем ссылку в переменной
-  createdAt: new Date(), // задаём свойство createdAt
-  address: { city: 'Moscow' }, // задаём свойство address
+const original = {
+  createdAt: new Date(),
+  address: { city: 'Moscow' },
 }
 
-const copy = structuredClone(original) // создаём глубокую копию поддерживаемой структуры
+const copy = structuredClone(original) // глубокая копия
 
-copy.address.city = 'Kazan' // записываем 'Kazan' в свойство city
-original.address.city // читаем свойство city; результат: 'Moscow'
+copy.address.city = 'Kazan'
+original.address.city // 'Moscow'
 ```
 
 Функции, symbol-значения, `WeakMap`, `WeakSet` и некоторые объекты среды клонировать нельзя. Descriptors, getters/setters и прототип экземпляра пользовательского класса также не следует ожидать в исходном виде.
@@ -334,9 +334,9 @@ original.address.city // читаем свойство city; результат:
 Поверхностную копию с тем же прототипом, getter/setter и флагами свойств можно создать так:
 
 ```js
-const copy = Object.create( // создаём копию с тем же прототипом и descriptors
-  Object.getPrototypeOf(original), // получаем прототип объекта
-  Object.getOwnPropertyDescriptors(original), // вызываем Object.getOwnPropertyDescriptors()
+const copy = Object.create( // сохраняет прототип и дескрипторы свойств
+  Object.getPrototypeOf(original),
+  Object.getOwnPropertyDescriptors(original),
 )
 ```
 
@@ -347,11 +347,11 @@ const copy = Object.create( // создаём копию с тем же прот
 Когда нужно скопировать только часть бизнес-объекта или преобразовать данные, явная функция часто понятнее универсального клонирования:
 
 ```js
-function copyUser(user) { // объявляем функцию copyUser()
-  return { // возвращаем вызывающему коду значение выражения {
-    id: user.id, // задаём свойство id
-    name: user.name, // задаём свойство name
-    address: user.address ? { ...user.address } : null, // задаём свойство address
+function copyUser(user) {
+  return {
+    id: user.id,
+    name: user.name,
+    address: user.address ? { ...user.address } : null,
   }
 }
 ```
@@ -370,13 +370,13 @@ function copyUser(user) { // объявляем функцию copyUser()
 `Proxy` перехватывает операции над объектом: чтение, запись, проверку `in`, удаление, вызов функции и другие.
 
 ```js
-const user = new Proxy({ age: 20 }, { // создаём новый экземпляр и сохраняем его в переменной
-  set(target, key, value) { // объявляем метод set()
-    if (key === 'age' && value < 0) { // проверяем условие и выполняем блок, если оно истинно
-      throw new RangeError('Возраст не может быть отрицательным') // создаём ошибку и передаём её вызывающему коду
+const user = new Proxy({ age: 20 }, {
+  set(target, key, value) {
+    if (key === 'age' && value < 0) {
+      throw new RangeError('Возраст не может быть отрицательным')
     }
 
-    return Reflect.set(target, key, value) // выполняем обычную запись свойства и возвращаем её успешность
+    return Reflect.set(target, key, value)
   },
 })
 ```
@@ -394,15 +394,15 @@ const user = new Proxy({ age: 20 }, { // создаём новый экземп�
 Стек вызовов (call stack) хранит активные вызовы функций — stack frames. Каждый frame содержит информацию, необходимую для продолжения функции: её параметры, локальные привязки и адрес возврата. После завершения функции её frame снимается со стека.
 
 ```js
-function first() { // объявляем функцию first()
-  second() // вызываем second()
+function first() {
+  second()
 }
 
-function second() { // объявляем функцию second()
-  console.trace() // вызываем console.trace()
+function second() {
+  console.trace()
 }
 
-first() // вызываем first()
+first()
 ```
 
 Слишком глубокая рекурсия переполняет стек и приводит к ошибке вроде `RangeError: Maximum call stack size exceeded`.

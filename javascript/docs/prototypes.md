@@ -14,14 +14,14 @@
 4. возвращает `undefined`, если цепочка закончилась на `null`.
 
 ```js
-const animal = { // создаём объект и сохраняем ссылку в переменной
-  speak() { // объявляем метод speak()
-    return 'звук' // возвращаем вызывающему коду значение выражения 'звук'
+const animal = {
+  speak() {
+    return 'звук'
   },
 }
 
-const dog = Object.create(animal) // создаём объект с указанным прототипом
-dog.name = 'Бим' // записываем 'Бим' в свойство name
+const dog = Object.create(animal)
+dog.name = 'Бим'
 dog.speak() // 'звук'
 ```
 
@@ -30,14 +30,14 @@ dog.speak() // 'звук'
 Собственное свойство скрывает одноимённое унаследованное свойство, но не удаляет его из прототипа:
 
 ```js
-const settings = { theme: 'light' } // создаём объект и сохраняем ссылку в переменной
-const userSettings = Object.create(settings) // создаём объект с указанным прототипом
+const settings = { theme: 'light' }
+const userSettings = Object.create(settings)
 
-userSettings.theme = 'dark' // записываем 'dark' в свойство theme
+userSettings.theme = 'dark'
 
-userSettings.theme // читаем свойство theme; результат: 'dark'
-delete userSettings.theme // удаляем собственное свойство theme у userSettings
-userSettings.theme // читаем свойство theme; результат: 'light'
+userSettings.theme // 'dark'
+delete userSettings.theme
+userSettings.theme // 'light'
 ```
 
 Циклическую цепочку создать нельзя: объект не может стать прототипом самого себя прямо или косвенно.
@@ -47,19 +47,19 @@ userSettings.theme // читаем свойство theme; результат: '
 Предпочтительнее задавать прототип во время создания объекта:
 
 ```js
-const dog = Object.create(animal) // создаём объект с указанным прототипом
+const dog = Object.create(animal)
 
-const cat = { // создаём объект и сохраняем ссылку в переменной
-  __proto__: animal, // задаём свойство __proto__
-  name: 'Мурка', // задаём свойство name
+const cat = {
+  __proto__: animal,
+  name: 'Мурка',
 }
 ```
 
 Современные методы чтения и изменения прототипа:
 
 ```js
-Object.getPrototypeOf(dog) === animal // получаем прототип объекта; результат: true
-Object.setPrototypeOf(dog, otherPrototype) // изменяем прототип объекта
+Object.getPrototypeOf(dog) === animal // true
+Object.setPrototypeOf(dog, otherPrototype)
 ```
 
 `Object.setPrototypeOf()` изменяет прототип уже существующего объекта. Такая операция может ухудшить производительность, поэтому обычно структуру задают заранее через `Object.create()`, функцию-конструктор или `class`.
@@ -69,7 +69,7 @@ Object.setPrototypeOf(dog, otherPrototype) // изменяем прототип 
 `__proto__` — устаревший accessor, унаследованный от `Object.prototype`. Он предоставляет доступ к внутреннему `[[Prototype]]`, но сам не является этим внутренним слотом.
 
 ```js
-dog.__proto__ === Object.getPrototypeOf(dog) // получаем прототип объекта; результат: true
+dog.__proto__ === Object.getPrototypeOf(dog) // true
 ```
 
 В новом коде для чтения и изменения используют `Object.getPrototypeOf()` и `Object.setPrototypeOf()`. Особая запись `__proto__` внутри литерала объекта всё ещё может использоваться для задания прототипа при создании.
@@ -84,17 +84,17 @@ dog.__proto__ === Object.getPrototypeOf(dog) // получаем прототи�
 - `Constructor.prototype` — обычное свойство функции-конструктора, которое `new` назначит прототипом будущих экземпляров.
 
 ```js
-function User(name) { // объявляем функцию User()
-  this.name = name // сохраняем name в свойстве экземпляра name
+function User(name) {
+  this.name = name
 }
 
-User.prototype.greet = function () { // записываем function () { в свойство greet
-  return `Привет, ${this.name}` // возвращаем вызывающему коду значение выражения `Привет, ${this.name}`
+User.prototype.greet = function () {
+  return `Привет, ${this.name}`
 }
 
-const user = new User('Анна') // создаём новый экземпляр и сохраняем его в переменной
+const user = new User('Анна')
 
-Object.getPrototypeOf(user) === User.prototype // получаем прототип объекта; результат: true
+Object.getPrototypeOf(user) === User.prototype // true
 user.greet()                                   // 'Привет, Анна'
 ```
 
@@ -103,10 +103,10 @@ user.greet()                                   // 'Привет, Анна'
 По умолчанию `User.prototype` содержит свойство `constructor`, ссылающееся на `User`. Если полностью заменить объект прототипа, ссылку обычно восстанавливают:
 
 ```js
-User.prototype = { // записываем { в свойство prototype
-  constructor: User, // задаём свойство constructor
-  greet() { // объявляем метод greet()
-    return `Привет, ${this.name}` // возвращаем вызывающему коду значение выражения `Привет, ${this.name}`
+User.prototype = {
+  constructor: User,
+  greet() {
+    return `Привет, ${this.name}`
   },
 }
 ```
@@ -129,11 +129,11 @@ User.prototype = { // записываем { в свойство prototype
 Встроенные объекты также используют прототипные цепочки:
 
 ```js
-const numbers = [1, 2, 3] // создаём массив с начальными элементами
+const numbers = [1, 2, 3]
 
-Object.getPrototypeOf(numbers) === Array.prototype // получаем прототип объекта; результат: true
-Object.getPrototypeOf(Array.prototype) === Object.prototype // получаем прототип объекта; результат: true
-Object.getPrototypeOf(Object.prototype) === null // получаем прототип объекта; результат: true
+Object.getPrototypeOf(numbers) === Array.prototype // true
+Object.getPrototypeOf(Array.prototype) === Object.prototype // true
+Object.getPrototypeOf(Object.prototype) === null // true
 ```
 
 Метод `numbers.map()` находится в `Array.prototype`, а `numbers.toString()` в итоге доступен через цепочку прототипов. Функции, даты, регулярные выражения, Map и другие встроенные объекты имеют собственные прототипы.
@@ -145,29 +145,29 @@ Object.getPrototypeOf(Object.prototype) === null // получаем прото�
 До появления `class` наследование часто настраивали вручную:
 
 ```js
-function Animal(name) { // объявляем функцию Animal()
-  this.name = name // сохраняем name в свойстве экземпляра name
+function Animal(name) {
+  this.name = name
 }
 
-Animal.prototype.speak = function () { // записываем function () { в свойство speak
-  return `${this.name} издаёт звук` // возвращаем вызывающему коду значение выражения `${this.name} издаёт звук`
+Animal.prototype.speak = function () {
+  return `${this.name} издаёт звук`
 }
 
-function Dog(name, breed) { // объявляем функцию Dog()
-  Animal.call(this, name) // вызываем функцию с явно заданным this
-  this.breed = breed // сохраняем breed в свойстве экземпляра breed
+function Dog(name, breed) {
+  Animal.call(this, name)
+  this.breed = breed
 }
 
-Dog.prototype = Object.create(Animal.prototype) // создаём объект с указанным прототипом
-Dog.prototype.constructor = Dog // записываем Dog в свойство constructor
+Dog.prototype = Object.create(Animal.prototype)
+Dog.prototype.constructor = Dog
 
-Dog.prototype.bark = function () { // записываем function () { в свойство bark
-  return 'Гав' // возвращаем вызывающему коду значение выражения 'Гав'
+Dog.prototype.bark = function () {
+  return 'Гав'
 }
 
-const dog = new Dog('Бим', 'корги') // создаём новый экземпляр и сохраняем его в переменной
-dog.speak() // вызываем dog.speak()
-dog.bark() // вызываем dog.bark()
+const dog = new Dog('Бим', 'корги')
+dog.speak()
+dog.bark()
 ```
 
 Здесь `Animal.call(this, name)` инициализирует собственные поля, а `Object.create(Animal.prototype)` связывает прототипы. Современный `class Dog extends Animal` делает ту же основную настройку декларативнее.
@@ -177,11 +177,11 @@ dog.bark() // вызываем dog.bark()
 `instanceof` проверяет, находится ли `Constructor.prototype` в цепочке прототипов объекта:
 
 ```js
-dog instanceof Dog // проверяем наличие прототипа класса в цепочке объекта; результат: true
-dog instanceof Animal // проверяем наличие прототипа класса в цепочке объекта; результат: true
-dog instanceof Object // проверяем наличие прототипа класса в цепочке объекта; результат: true
+dog instanceof Dog // true
+dog instanceof Animal // true
+dog instanceof Object // true
 
-Dog.prototype.isPrototypeOf(dog) // вызываем Dog.prototype.isPrototypeOf(); результат: true
+Dog.prototype.isPrototypeOf(dog) // true
 ```
 
 `instanceof` не проверяет набор полей или методов объекта. Он отвечает только на вопрос о цепочке прототипов, поэтому результат может измениться после замены `Constructor.prototype` и отличаться для объектов из другого окна браузера.

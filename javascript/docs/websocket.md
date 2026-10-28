@@ -9,7 +9,7 @@ WebSocket создаёт постоянное двустороннее соед�
 В браузере соединение создаётся встроенным классом `WebSocket`. Для защищённой страницы используют адрес с протоколом `wss`, который шифрует передаваемые данные.
 
 ```js
-const socket = new WebSocket('wss://example.com/ws/chat') // начинаем подключение к WebSocket-серверу
+const socket = new WebSocket('wss://example.com/ws/chat')
 ```
 
 Конструктор возвращает объект сразу, не дожидаясь подключения. Результат установки соединения приходит позже через событие `open` или `error`.
@@ -26,27 +26,27 @@ const socket = new WebSocket('wss://example.com/ws/chat') // начинаем п
 Метод `send()` принимает строку, `Blob`, `ArrayBuffer` или один из typed arrays. JavaScript-объект перед отправкой обычно преобразуют в JSON, а полученную строку — обратно в объект.
 
 ```js
-const socket = new WebSocket('wss://example.com/ws/chat') // создаём подключение; пока оно находится в состоянии CONNECTING
+const socket = new WebSocket('wss://example.com/ws/chat')
 
-socket.addEventListener('open', () => { // дожидаемся успешного подключения
-  const message = { type: 'join', roomId: 42 } // формируем сообщение о входе в комнату
-  socket.send(JSON.stringify(message)) // превращаем объект в строку и отправляем серверу
+socket.addEventListener('open', () => {
+  const message = { type: 'join', roomId: 42 }
+  socket.send(JSON.stringify(message))
 })
 
-socket.addEventListener('message', (event) => { // обрабатываем каждое сообщение от сервера
-  const message = JSON.parse(event.data) // преобразуем полученную JSON-строку в объект
+socket.addEventListener('message', (event) => {
+  const message = JSON.parse(event.data)
 
-  if (message.type === 'new_message') { // проверяем назначение сообщения
-    console.log(message.text) // выводим текст нового сообщения
+  if (message.type === 'new_message') {
+    console.log(message.text)
   }
 })
 
-socket.addEventListener('error', () => { // замечаем ошибку транспортного соединения
-  console.error('Ошибка WebSocket') // сообщаем пользователю или системе журналирования о проблеме
+socket.addEventListener('error', () => {
+  console.error('Ошибка WebSocket')
 })
 
-socket.addEventListener('close', (event) => { // узнаём, что соединение завершилось
-  console.log(event.code, event.reason) // выводим код и текстовую причину закрытия
+socket.addEventListener('close', (event) => {
+  console.log(event.code, event.reason)
 })
 ```
 
@@ -68,13 +68,13 @@ socket.addEventListener('close', (event) => { // узнаём, что соеди
 Если сообщение отправляется не из обработчика `open`, состояние нужно проверить явно:
 
 ```js
-function sendMessage(socket, message) { // объявляем безопасную отправку одного сообщения
-  if (socket.readyState !== WebSocket.OPEN) { // убеждаемся, что соединение уже установлено
-    return false // сообщаем вызывающему коду, что сообщение не отправлено
+function sendMessage(socket, message) {
+  if (socket.readyState !== WebSocket.OPEN) {
+    return false // сообщение не отправлено
   }
 
-  socket.send(JSON.stringify(message)) // сериализуем объект и отправляем его серверу
-  return true // сообщаем об успешной передаче сообщения в буфер WebSocket
+  socket.send(JSON.stringify(message))
+  return true
 }
 ```
 
@@ -85,7 +85,7 @@ function sendMessage(socket, message) { // объявляем безопасну
 Соединение следует закрывать, когда оно больше не нужно, например при выходе пользователя из чата.
 
 ```js
-socket.close(1000, 'Пользователь вышел из чата') // корректно закрываем соединение с кодом нормального завершения
+socket.close(1000, 'Пользователь вышел из чата') // 1000 — код нормального завершения
 ```
 
 Код `1000` означает нормальное закрытие. Пользовательские коды приложения выбирают из диапазона `3000–4999`. Причина закрытия должна быть короткой строкой.

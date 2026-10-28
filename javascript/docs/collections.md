@@ -7,16 +7,16 @@
 `Map` хранит пары ключ–значение, допускает ключи любого типа и сохраняет порядок добавления:
 
 ```js
-const roles = new Map() // создаём новый экземпляр и сохраняем его в переменной
-const user = { id: 1 } // создаём объект и сохраняем ссылку в переменной
+const roles = new Map()
+const user = { id: 1 }
 
-roles.set(user, 'admin') // сохраняем значение в коллекции
-roles.get(user) // получаем значение из коллекции; результат: 'admin'
-roles.has(user) // проверяем наличие значения или ключа; результат: true
-roles.size // читаем свойство size; результат: 1
+roles.set(user, 'admin')
+roles.get(user) // 'admin'
+roles.has(user) // true
+roles.size // 1
 
-roles.delete(user) // удаляем значение или ключ из коллекции
-roles.clear() // полностью очищаем коллекцию
+roles.delete(user)
+roles.clear()
 ```
 
 `set()` возвращает саму коллекцию, поэтому вызовы можно объединять в цепочку. `get()` возвращает значение или `undefined`, `has()` и `delete()` — boolean.
@@ -28,13 +28,13 @@ roles.clear() // полностью очищаем коллекцию
 При переборе `Map` сохраняет порядок добавления записей. По умолчанию каждая итерация возвращает пару `[key, value]`, которую удобно сразу деструктурировать.
 
 ```js
-for (const [key, value] of roles) { // перебираем значения в цикле
-  console.log(key, value) // выводим значение в консоль
+for (const [key, value] of roles) {
+  console.log(key, value)
 }
 
-roles.keys() // получаем iterator ключей
-roles.values() // получаем iterator значений
-roles.entries() // получаем iterator пар ключ–значение
+roles.keys()
+roles.values()
+roles.entries()
 ```
 
 Сам `Map` и его `entries()` возвращают пары `[key, value]`.
@@ -42,8 +42,8 @@ roles.entries() // получаем iterator пар ключ–значение
 `forEach()` у `Map` получает аргументы `(value, key, map)`, то есть значение идёт раньше ключа:
 
 ```js
-roles.forEach((value, key) => { // выполняем callback для каждого элемента
-  console.log(key, value) // выводим значение в консоль
+roles.forEach((value, key) => {
+  console.log(key, value)
 })
 ```
 
@@ -52,20 +52,20 @@ roles.forEach((value, key) => { // выполняем callback для каждо
 `Set` хранит уникальные значения и сохраняет порядок добавления:
 
 ```js
-const tags = new Set(['js', 'vue', 'js']) // создаём новый экземпляр и сохраняем его в переменной
+const tags = new Set(['js', 'vue', 'js'])
 
-tags.size // читаем свойство size; результат: 2
-tags.has('vue') // проверяем наличие значения или ключа; результат: true
+tags.size // 2
+tags.has('vue') // true
 tags.add('html') // возвращает tags
-tags.delete('js') // удаляем значение или ключ из коллекции
-tags.clear() // полностью очищаем коллекцию
+tags.delete('js')
+tags.clear()
 ```
 
 Объекты считаются одинаковыми только при совпадении ссылки. Частый пример удаления повторяющихся примитивов:
 
 ```js
-const unique = [...new Set([1, 1, 2, 3])] // удаляем повторы через Set и снова создаём массив
-unique // смотрим получившийся массив; результат: [1, 2, 3]
+const unique = [...new Set([1, 1, 2, 3])] // Set убирает повторы
+unique // [1, 2, 3]
 ```
 
 `Set` перебирается через `for...of`, `values()`, `keys()` или `forEach()`. Для совместимости с `Map` методы `keys()` и `values()` у `Set` ведут себя одинаково.
@@ -75,15 +75,15 @@ unique // смотрим получившийся массив; результа
 `WeakMap` хранит значения по слабым ключам. Ключами могут быть объекты или незарегистрированные symbols, значениями — любые данные.
 
 ```js
-const metadata = new WeakMap() // создаём новый экземпляр и сохраняем его в переменной
-let button = document.querySelector('button') // находим первый элемент по CSS-селектору
+const metadata = new WeakMap()
+let button = document.querySelector('button')
 
-metadata.set(button, { clicks: 0 }) // сохраняем значение в коллекции
-metadata.get(button) // получаем значение из коллекции
-metadata.has(button) // проверяем наличие значения или ключа
-metadata.delete(button) // удаляем значение или ключ из коллекции
+metadata.set(button, { clicks: 0 })
+metadata.get(button)
+metadata.has(button)
+metadata.delete(button)
 
-button = null // записываем null в переменную button
+button = null
 ```
 
 Методы:
@@ -100,14 +100,14 @@ button = null // записываем null в переменную button
 `WeakSet` хранит слабые значения — объекты или незарегистрированные symbols.
 
 ```js
-const processed = new WeakSet() // создаём новый экземпляр и сохраняем его в переменной
-let user = { id: 1 } // создаём объект, который затем будет храниться в WeakSet
+const processed = new WeakSet()
+let user = { id: 1 }
 
-processed.add(user) // вызываем processed.add()
-processed.has(user) // проверяем наличие значения или ключа; результат: true
-processed.delete(user) // удаляем значение или ключ из коллекции
+processed.add(user)
+processed.has(user) // true
+processed.delete(user)
 
-user = null // записываем null в переменную user
+user = null
 ```
 
 Методы `add()`, `has()` и `delete()` похожи на соответствующие методы `Set`. `WeakSet` полезен для отметки уже обработанных объектов без продления их времени жизни.
@@ -150,18 +150,18 @@ Weak-коллекции нельзя перебирать, у них нет `siz
 Итерируемый объект предоставляет метод с ключом `Symbol.iterator`. Этот метод возвращает iterator с методом `next()`:
 
 ```js
-const range = { // создаём объект и сохраняем ссылку в переменной
-  from: 1, // задаём свойство from
-  to: 3, // задаём свойство to
+const range = {
+  from: 1,
+  to: 3,
 
-  *[Symbol.iterator]() { // объявляем генератор, который делает объект итерируемым
-    for (let value = this.from; value <= this.to; value += 1) { // перебираем значения в цикле
-      yield value // возвращаем очередное значение генератора и приостанавливаем его
+  *[Symbol.iterator]() {
+    for (let value = this.from; value <= this.to; value += 1) {
+      yield value
     }
   },
 }
 
-[...range] // смотрим текущее значение [...range]; результат: [1, 2, 3]
+[...range] // [1, 2, 3]
 ```
 
 `next()` возвращает объект `{ value, done }`. Значение `done: true` означает, что перебор закончен.
@@ -171,16 +171,16 @@ const range = { // создаём объект и сохраняем ссылк�
 Функция `function*` может приостанавливать выполнение через `yield` и продолжать его после `next()`. Вызов генератора возвращает iterator, а не выполняет всё тело сразу.
 
 ```js
-function* ids() { // объявляем функцию-генератор
-  yield 1 // возвращаем очередное значение генератора и приостанавливаем его
-  yield 2 // возвращаем очередное значение генератора и приостанавливаем его
+function* ids() {
+  yield 1
+  yield 2
 }
 
-const iterator = ids() // создаём iterator вызовом функции-генератора
+const iterator = ids()
 
-iterator.next() // получаем следующее значение iterator; результат: { value: 1, done: false }
-iterator.next() // получаем следующее значение iterator; результат: { value: 2, done: false }
-iterator.next() // получаем следующее значение iterator; результат: { value: undefined, done: true }
+iterator.next() // { value: 1, done: false }
+iterator.next() // { value: 2, done: false }
+iterator.next() // { value: undefined, done: true }
 ```
 
 Генератор одновременно является iterable и iterator, поэтому его можно перебирать через `for...of`.

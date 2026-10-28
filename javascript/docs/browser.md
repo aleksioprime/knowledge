@@ -10,16 +10,16 @@
 - `sessionStorage` хранит данные только в рамках текущей вкладки до её закрытия.
 
 ```js
-const settings = { theme: 'dark', pageSize: 20 } // создаём объект с настройками приложения
-const json = JSON.stringify(settings) // превращаем объект в строку, пригодную для хранения
+const settings = { theme: 'dark', pageSize: 20 }
+const json = JSON.stringify(settings)
 
-localStorage.setItem('settings', json) // записываем строку под ключом settings
+localStorage.setItem('settings', json)
 
-const savedJson = localStorage.getItem('settings') // читаем строку; получим null, если ключа нет
-const savedSettings = savedJson === null ? null : JSON.parse(savedJson) // восстанавливаем объект только при наличии данных
+const savedJson = localStorage.getItem('settings')
+const savedSettings = savedJson === null ? null : JSON.parse(savedJson)
 
-localStorage.removeItem('settings') // удаляем одну запись по ключу
-localStorage.clear() // удаляем все записи localStorage для текущего сайта
+localStorage.removeItem('settings')
+localStorage.clear()
 ```
 
 Хранилища работают синхронно: во время чтения или записи основной поток ждёт завершения операции. Поэтому туда не следует помещать большие объёмы данных. Для сложных структур и большого количества записей используют асинхронную базу данных IndexedDB.
@@ -35,20 +35,20 @@ localStorage.clear() // удаляем все записи localStorage для �
 `setTimeout()` планирует один вызов функции. Метод сразу возвращает идентификатор таймера, по которому вызов можно отменить.
 
 ```js
-const timeoutId = setTimeout(() => { // планируем однократный запуск callback не раньше чем через секунду
-  console.log('Прошла как минимум секунда') // выводим сообщение, когда браузер доберётся до callback
+const timeoutId = setTimeout(() => { // не раньше чем через секунду
+  console.log('Прошла как минимум секунда')
 }, 1000)
 
-clearTimeout(timeoutId) // отменяем таймер, если callback ещё не был вызван
+clearTimeout(timeoutId) // отменит, если callback ещё не вызван
 ```
 
 Дополнительные аргументы после задержки браузер передаёт callback, но замыкание обычно читается понятнее:
 
 ```js
-const userName = 'Анна' // сохраняем имя, которое понадобится callback
+const userName = 'Анна'
 
-setTimeout(() => { // создаём callback, который запоминает userName из внешней области
-  console.log(`Привет, ${userName}`) // выводим приветствие после истечения задержки
+setTimeout(() => {
+  console.log(`Привет, ${userName}`)
 }, 500)
 ```
 
@@ -57,14 +57,14 @@ setTimeout(() => { // создаём callback, который запоминае
 `setInterval()` пытается запускать callback через равные промежутки времени, пока интервал не будет отменён. Если сама операция выполняется долго, новые вызовы могут идти не с тем ритмом, который ожидался.
 
 ```js
-let ticks = 0 // храним количество уже выполненных вызовов
+let ticks = 0
 
-const intervalId = setInterval(() => { // планируем повторный запуск callback примерно раз в секунду
-  ticks += 1 // увеличиваем счётчик при каждом запуске
-  console.log(ticks) // выводим текущее количество запусков
+const intervalId = setInterval(() => {
+  ticks += 1
+  console.log(ticks)
 
-  if (ticks === 3) { // проверяем, достигли ли нужного количества повторений
-    clearInterval(intervalId) // прекращаем дальнейшие вызовы после третьего запуска
+  if (ticks === 3) {
+    clearInterval(intervalId)
   }
 }, 1000)
 ```
@@ -72,12 +72,12 @@ const intervalId = setInterval(() => { // планируем повторный 
 Когда следующую операцию нужно запускать только после завершения предыдущей, удобнее рекурсивный `setTimeout()`. Такой подход не создаёт наложения медленных вызовов:
 
 ```js
-async function poll() { // объявляем один шаг периодического обновления
-  await loadUpdates() // ждём завершения текущей загрузки
-  setTimeout(poll, 5000) // планируем следующий шаг только после завершения загрузки
+async function poll() {
+  await loadUpdates()
+  setTimeout(poll, 5000) // следующий шаг — только после завершения загрузки
 }
 
-poll() // запускаем первый шаг вручную
+poll()
 ```
 
 ## Планирование работы
@@ -85,11 +85,11 @@ poll() // запускаем первый шаг вручную
 Для визуальных изменений лучше подходит `requestAnimationFrame()`. Браузер вызывает переданный callback перед ближайшей отрисовкой и передаёт ему время с момента запуска страницы.
 
 ```js
-const animationId = requestAnimationFrame((time) => { // просим вызвать callback перед следующим кадром
-  box.style.transform = `translateX(${time / 20}px)` // меняем положение элемента перед отрисовкой
+const animationId = requestAnimationFrame((time) => {
+  box.style.transform = `translateX(${time / 20}px)`
 })
 
-cancelAnimationFrame(animationId) // отменяем callback, если кадр ещё не начался
+cancelAnimationFrame(animationId) // отменит, если кадр ещё не начался
 ```
 
 `requestIdleCallback()` позволяет выполнять необязательную фоновую работу в свободное время браузера, но поддерживается не во всех средах. Он не подходит для действий, которые должны произойти к конкретному сроку.

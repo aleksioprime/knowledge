@@ -19,7 +19,7 @@ JSON поддерживает объекты, массивы, строки, ко
 Преобразует поддерживаемое JavaScript-значение в JSON-строку:
 
 ```js
-const json = JSON.stringify({ id: 42, name: 'Alex' }) // преобразуем значение JavaScript в строку JSON
+const json = JSON.stringify({ id: 42, name: 'Alex' })
 // '{"id":42,"name":"Alex"}'
 ```
 
@@ -39,15 +39,15 @@ const json = JSON.stringify({ id: 42, name: 'Alex' }) // преобразуем 
 Массив разрешает оставить только выбранные свойства:
 
 ```js
-JSON.stringify(user, ['id', 'name']) // преобразуем значение JavaScript в строку JSON
+JSON.stringify(user, ['id', 'name'])
 ```
 
 Функция может преобразовывать или исключать значения. Возврат `undefined` исключает свойство:
 
 ```js
-const json = JSON.stringify(user, (key, value) => { // преобразуем значение JavaScript в строку JSON
-  if (key === 'password') return undefined // проверяем условие и выполняем блок, если оно истинно
-  return value // возвращаем вызывающему коду значение выражения value
+const json = JSON.stringify(user, (key, value) => {
+  if (key === 'password') return undefined
+  return value
 })
 ```
 
@@ -56,7 +56,7 @@ const json = JSON.stringify(user, (key, value) => { // преобразуем з
 Третий аргумент `JSON.stringify()` задаёт отступы и делает результат удобным для чтения человеком.
 
 ```js
-JSON.stringify(user, null, 2) // преобразуем значение JavaScript в строку JSON
+JSON.stringify(user, null, 2)
 ```
 
 Третий аргумент добавляет отступы для чтения человеком. Для передачи по сети обычно используют компактный вариант без отступов.
@@ -66,16 +66,16 @@ JSON.stringify(user, null, 2) // преобразуем значение JavaScr
 Если у объекта есть метод `toJSON()`, `JSON.stringify()` сериализует возвращённое им значение:
 
 ```js
-const user = { // создаём объект и сохраняем ссылку в переменной
-  id: 42, // задаём свойство id
-  password: 'secret', // задаём свойство password
+const user = {
+  id: 42,
+  password: 'secret',
 
-  toJSON() { // объявляем метод toJSON()
-    return { id: this.id } // возвращаем вызывающему коду значение выражения { id: this.id }
+  toJSON() {
+    return { id: this.id }
   },
 }
 
-JSON.stringify(user) // преобразуем значение JavaScript в строку JSON; результат: '{"id":42}'
+JSON.stringify(user) // '{"id":42}'
 ```
 
 Так работают, например, объекты `Date`. Для безопасности API всё равно лучше формировать публичные данные явно, а не полагаться только на `toJSON()`.
@@ -85,7 +85,7 @@ JSON.stringify(user) // преобразуем значение JavaScript в с
 Преобразует JSON-строку в JavaScript-значение:
 
 ```js
-const user = JSON.parse('{"id":42,"name":"Alex"}') // преобразуем JSON-строку в значение JavaScript
+const user = JSON.parse('{"id":42,"name":"Alex"}')
 ```
 
 Сигнатура: `JSON.parse(text, reviver?)`. Некорректный JSON вызывает `SyntaxError`. Поэтому данные из внешнего источника нельзя считать корректными заранее: возможную ошибку разбора следует обработать на границе получения данных.
@@ -97,9 +97,9 @@ const user = JSON.parse('{"id":42,"name":"Alex"}') // преобразуем JSO
 Функция `reviver(key, value)` вызывается для разобранных значений и может восстановить нужные типы:
 
 ```js
-const data = JSON.parse(text, (key, value) => { // преобразуем JSON-строку в значение JavaScript
-  if (key === 'createdAt') return new Date(value) // проверяем условие и выполняем блок, если оно истинно
-  return value // возвращаем вызывающему коду значение выражения value
+const data = JSON.parse(text, (key, value) => {
+  if (key === 'createdAt') return new Date(value)
+  return value
 })
 ```
 

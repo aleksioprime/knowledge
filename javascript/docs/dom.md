@@ -47,9 +47,9 @@ DOM предоставляет браузер, а не язык ECMAScript. На
 Полезные точки входа:
 
 ```js
-document.documentElement // читаем свойство documentElement; результат: <html>
-document.head // читаем свойство head; результат: <head>
-document.body // читаем свойство body; результат: <body>
+document.documentElement // <html>
+document.head // <head>
+document.body // <body>
 ```
 
 ## Навигация по DOM
@@ -75,12 +75,12 @@ DOM можно обходить по родителям, дочерним узл
 | `previousElementSibling`, `nextElementSibling` | соседний элемент |
 
 ```js
-const list = document.querySelector('.user-list') // находим первый элемент по CSS-селектору
+const list = document.querySelector('.user-list')
 
-list.parentElement // читаем свойство parentElement
-list.children // читаем свойство children
-list.firstElementChild // читаем свойство firstElementChild
-list.nextElementSibling // читаем свойство nextElementSibling
+list.parentElement
+list.children
+list.firstElementChild
+list.nextElementSibling
 ```
 
 На практике свойства с `Element` в названии часто удобнее, потому что они пропускают текстовые узлы с пробелами и переносами строк.
@@ -97,7 +97,7 @@ list.nextElementSibling // читаем свойство nextElementSibling
 ```
 
 ```js
-const users = document.querySelector('#users') // находим первый элемент по CSS-селектору
+const users = document.querySelector('#users')
 
 users.childNodes // содержит также текстовые узлы с переносами и пробелами
 users.children   // содержит только два элемента <li>
@@ -110,13 +110,13 @@ users.children   // содержит только два элемента <li>
 Живая коллекция автоматически отражает последующие изменения DOM:
 
 ```js
-const liveItems = document.getElementsByClassName('item') // получаем живую коллекцию элементов с указанным классом
-console.log(liveItems.length) // выводим значение в консоль; результат: 2
+const liveItems = document.getElementsByClassName('item')
+console.log(liveItems.length) // 2
 
-document.body.append(document.createElement('div')) // добавляем узлы или текст в конец элемента
-document.body.lastElementChild.className = 'item' // записываем 'item' в свойство className
+document.body.append(document.createElement('div'))
+document.body.lastElementChild.className = 'item'
 
-console.log(liveItems.length) // выводим значение в консоль; результат: 3
+console.log(liveItems.length) // 3
 ```
 
 Основные различия:
@@ -145,9 +145,9 @@ console.log(liveItems.length) // выводим значение в консол
 | `querySelectorAll(selector)` | статический `NodeList` всех совпадений |
 
 ```js
-const form = document.getElementById('profile-form') // находим элемент по уникальному id
-const activeButtons = document.querySelectorAll('.button.is-active') // находим все элементы по CSS-селектору
-const emailInput = form.querySelector('[name="email"]') // находим первый элемент по CSS-селектору
+const form = document.getElementById('profile-form')
+const activeButtons = document.querySelectorAll('.button.is-active')
+const emailInput = form.querySelector('[name="email"]')
 ```
 
 `querySelector()` и `querySelectorAll()` можно вызывать не только у `document`, но и у элемента. Тогда поиск ограничивается его потомками.
@@ -190,9 +190,9 @@ document.querySelectorAll('.item') // все .item на момент вызов�
 Содержимое элемента можно менять как обычный текст либо как HTML-разметку. Выбор свойства влияет на безопасность и на то, будет ли браузер разбирать теги.
 
 ```js
-const status = document.querySelector('[data-status]') // находим первый элемент по CSS-селектору
+const status = document.querySelector('[data-status]')
 
-status.textContent = 'Сохранено' // записываем 'Сохранено' в свойство textContent
+status.textContent = 'Сохранено'
 ```
 
 Основные свойства:
@@ -215,7 +215,7 @@ status.innerHTML = '<strong>Готово</strong>'   // создаёт элем�
 `innerHTML` работает с HTML-разметкой. При записи браузер разбирает строку, удаляет прежних потомков элемента и создаёт новые DOM-узлы:
 
 ```js
-element.innerHTML = '<button>Сохранить</button>' // записываем '<button>Сохранить</button>' в свойство innerHTML
+element.innerHTML = '<button>Сохранить</button>'
 ```
 
 `innerText` работает с текстом так, как он отображается пользователю. При чтении он учитывает CSS и обычно не включает текст скрытых элементов:
@@ -228,7 +228,7 @@ element.innerHTML = '<button>Сохранить</button>' // записывае�
 ```
 
 ```js
-const message = document.querySelector('#message') // находим первый элемент по CSS-селектору
+const message = document.querySelector('#message')
 
 message.innerText   // 'Видимый текст'
 message.textContent // содержит также 'Скрытый текст'
@@ -249,16 +249,16 @@ message.textContent // содержит также 'Скрытый текст'
 Новый элемент создаётся методом `document.createElement()`:
 
 ```js
-const item = document.createElement('li') // создаём новый DOM-элемент, пока не вставляя его в документ
-item.classList.add('user-item') // добавляем CSS-класс
-item.dataset.userId = '42' // записываем '42' в свойство userId
-item.textContent = 'Анна' // записываем 'Анна' в свойство textContent
+const item = document.createElement('li') // элемент ещё не вставлен в документ
+item.classList.add('user-item')
+item.dataset.userId = '42'
+item.textContent = 'Анна'
 ```
 
 Отдельный текстовый узел можно создать через `document.createTextNode()`:
 
 ```js
-const text = document.createTextNode('Анна') // создаём отдельный текстовый DOM-узел
+const text = document.createTextNode('Анна')
 ```
 
 Созданный узел ещё не находится на странице. Его нужно вставить в DOM.
@@ -268,20 +268,20 @@ const text = document.createTextNode('Анна') // создаём отдель�
 Свойство `className` читает или заменяет всю строку атрибута `class`:
 
 ```js
-const button = document.querySelector('.button') // находим первый элемент по CSS-селектору
+const button = document.querySelector('.button')
 
-button.className = 'button button--primary' // записываем 'button button--primary' в свойство className
-console.log(button.className) // выводим значение в консоль; результат: 'button button--primary'
+button.className = 'button button--primary'
+console.log(button.className) // 'button button--primary'
 ```
 
 Присваивание `className` перезаписывает прежний набор классов. Для изменения отдельных классов удобнее `classList` — объект `DOMTokenList`:
 
 ```js
-button.classList.add('is-active', 'is-visible') // добавляем CSS-класс
-button.classList.remove('is-loading') // удаляем DOM-узел
-button.classList.contains('is-active') // вызываем button.classList.contains(); результат: true
-button.classList.toggle('is-open') // переключаем CSS-класс
-button.classList.replace('button--primary', 'button--danger') // заменяем найденный фрагмент
+button.classList.add('is-active', 'is-visible')
+button.classList.remove('is-loading')
+button.classList.contains('is-active') // true
+button.classList.toggle('is-open')
+button.classList.replace('button--primary', 'button--danger')
 ```
 
 В `classList` имя передаётся без точки. Точка нужна только внутри CSS-селектора:
@@ -294,7 +294,7 @@ button.matches('.button.is-active')     // CSS-селектор
 У `toggle()` есть необязательный второй аргумент, который явно задаёт итоговое состояние:
 
 ```js
-button.classList.toggle('is-disabled', shouldDisable) // переключаем CSS-класс
+button.classList.toggle('is-disabled', shouldDisable)
 ```
 
 Если `shouldDisable` истинно, класс будет добавлен, иначе — удалён. Это удобнее ручного `if`.
@@ -304,7 +304,7 @@ button.classList.toggle('is-disabled', shouldDisable) // переключаем 
 После создания узел существует только в памяти. Чтобы он появился на странице, его нужно вставить в выбранное место DOM-дерева.
 
 ```js
-const list = document.querySelector('.user-list') // находим первый элемент по CSS-селектору
+const list = document.querySelector('.user-list')
 
 list.append(item)  // в конец
 list.prepend(item) // в начало
@@ -325,10 +325,10 @@ item.after(note)   // после item
 | Возвращает | `undefined` | вставленный узел |
 
 ```js
-list.append('Пользователи: ', firstItem, secondItem) // добавляем узлы или текст в конец элемента
+list.append('Пользователи: ', firstItem, secondItem)
 
-const appendedItem = list.appendChild(item) // добавляем один дочерний DOM-узел
-appendedItem === item // сравниваем ссылки и убеждаемся, что appendChild() вернул вставленный узел; результат: true
+const appendedItem = list.appendChild(item)
+appendedItem === item // true
 ```
 
 ### Вставка перед другим элементом
@@ -336,13 +336,13 @@ appendedItem === item // сравниваем ссылки и убеждаемс
 Современный способ:
 
 ```js
-referenceElement.before(newElement) // вызываем referenceElement.before()
+referenceElement.before(newElement)
 ```
 
 Классический способ через родителя:
 
 ```js
-parentElement.insertBefore(newElement, referenceElement) // вызываем parentElement.insertBefore()
+parentElement.insertBefore(newElement, referenceElement)
 ```
 
 `insertBefore()` принимает вставляемый узел и существующий дочерний узел, перед которым нужна вставка. Если вторым аргументом передать `null`, узел добавится в конец.
@@ -352,8 +352,8 @@ parentElement.insertBefore(newElement, referenceElement) // вызываем par
 Метод `cloneNode(deep)` создаёт копию узла:
 
 ```js
-const shallowCopy = item.cloneNode(false) // клонируем только сам узел без потомков
-const deepCopy = item.cloneNode(true) // глубоко клонируем узел вместе с потомками
+const shallowCopy = item.cloneNode(false) // только сам узел, без потомков
+const deepCopy = item.cloneNode(true) // вместе с потомками
 ```
 
 - `false` или пропущенный аргумент копирует только сам узел;
@@ -362,8 +362,8 @@ const deepCopy = item.cloneNode(true) // глубоко клонируем уз�
 - копия не вставляется в DOM автоматически.
 
 ```js
-const copy = item.cloneNode(true) // глубоко клонируем узел вместе с потомками
-list.append(copy) // добавляем узлы или текст в конец элемента
+const copy = item.cloneNode(true) // вместе с потомками
+list.append(copy)
 ```
 
 Обработчики, добавленные через `addEventListener()`, не копируются. Обработчики из HTML-атрибутов вроде `onclick` копируются как атрибуты, но такой способ регистрации лучше не использовать.
@@ -377,13 +377,13 @@ list.append(copy) // добавляем узлы или текст в конец
 Современный способ удаляет сам узел:
 
 ```js
-item.remove() // удаляем DOM-узел
+item.remove()
 ```
 
 Через родителя:
 
 ```js
-const removedItem = list.removeChild(item) // удаляем дочерний узел и сохраняем ссылку на него
+const removedItem = list.removeChild(item) // возвращает удалённый узел
 ```
 
 `removeChild()` требует, чтобы переданный узел был непосредственным ребёнком, и возвращает удалённый узел. Удалённый объект продолжает существовать, пока на него остаются ссылки, и его можно вставить снова.
@@ -391,7 +391,7 @@ const removedItem = list.removeChild(item) // удаляем дочерний у
 Для удаления всего содержимого элемента удобно присвоить пустую строку `textContent` или вызвать `replaceChildren()`:
 
 ```js
-list.replaceChildren() // вызываем list.replaceChildren()
+list.replaceChildren()
 ```
 
 ## Небольшой итоговый пример
@@ -399,15 +399,15 @@ list.replaceChildren() // вызываем list.replaceChildren()
 Следующий пример связывает поиск контейнера, создание элементов и безопасную запись текста в одну небольшую функцию отображения списка.
 
 ```js
-function addUser(user) { // объявляем функцию addUser()
-  const list = document.querySelector('.user-list') // находим первый элемент по CSS-селектору
-  const item = document.createElement('li') // создаём новый DOM-элемент, пока не вставляя его в документ
+function addUser(user) {
+  const list = document.querySelector('.user-list')
+  const item = document.createElement('li') // элемент ещё не вставлен в документ
 
-  item.className = 'user-item' // записываем 'user-item' в свойство className
-  item.dataset.userId = String(user.id) // записываем String(user.id) в свойство userId
-  item.textContent = user.name // записываем user.name в свойство textContent
+  item.className = 'user-item'
+  item.dataset.userId = String(user.id)
+  item.textContent = user.name
 
-  list.append(item) // добавляем узлы или текст в конец элемента
+  list.append(item)
 }
 ```
 

@@ -17,10 +17,10 @@
 Обработчик события (event handler, listener) — функция, вызываемая при наступлении события. Подписку на события также называют прослушиванием событий.
 
 ```js
-const button = document.querySelector('[data-save]') // находим первый элемент по CSS-селектору
+const button = document.querySelector('[data-save]')
 
-button.addEventListener('click', (event) => { // подписываемся на событие
-  console.log('Кнопка нажата', event) // выводим значение в консоль
+button.addEventListener('click', (event) => {
+  console.log('Кнопка нажата', event)
 })
 ```
 
@@ -39,15 +39,15 @@ button.addEventListener('click', (event) => { // подписываемся на
 DOM-элемент имеет свойства вроде `onclick`. В такое свойство можно записать одну функцию-обработчик; следующая запись заменит предыдущую.
 
 ```js
-button.onclick = function (event) { // записываем function (event) { в свойство onclick
-  console.log(event.type) // выводим значение в консоль
+button.onclick = function (event) {
+  console.log(event.type)
 }
 ```
 
 В свойстве может находиться только один обработчик. Новое присваивание заменяет предыдущий, а `null` удаляет его:
 
 ```js
-button.onclick = null // записываем null в свойство onclick
+button.onclick = null
 ```
 
 ### `addEventListener()`
@@ -55,20 +55,20 @@ button.onclick = null // записываем null в свойство onclick
 Этот способ позволяет независимо зарегистрировать несколько обработчиков одного события и передать дополнительные настройки подписки.
 
 ```js
-function handleClick(event) { // объявляем функцию handleClick()
-  console.log(event.currentTarget) // выводим значение в консоль
+function handleClick(event) {
+  console.log(event.currentTarget)
 }
 
-button.addEventListener('click', handleClick) // подписываемся на событие
+button.addEventListener('click', handleClick)
 ```
 
 `addEventListener(type, listener, options)` — основной способ регистрации. Он позволяет добавить несколько независимых обработчиков одного события и настроить их поведение.
 
 ```js
-button.addEventListener('click', handleClick, { // подписываемся на событие
-  capture: false, // задаём свойство capture
-  once: true, // задаём свойство once
-  passive: false, // задаём свойство passive
+button.addEventListener('click', handleClick, {
+  capture: false,
+  once: true,
+  passive: false,
 })
 ```
 
@@ -82,38 +82,38 @@ button.addEventListener('click', handleClick, { // подписываемся н
 Для `removeEventListener()` нужны тот же тип события, та же функция и то же значение `capture`:
 
 ```js
-function handleClick(event) { // объявляем функцию handleClick()
-  console.log(event.type) // выводим значение в консоль
+function handleClick(event) {
+  console.log(event.type)
 }
 
-button.addEventListener('click', handleClick) // подписываемся на событие
-button.removeEventListener('click', handleClick) // удаляем ранее зарегистрированный обработчик
+button.addEventListener('click', handleClick)
+button.removeEventListener('click', handleClick)
 ```
 
 Следующий вариант не удалит listener, потому что две стрелочные функции — разные объекты:
 
 ```js
-button.addEventListener('click', () => save()) // подписываемся на событие
+button.addEventListener('click', () => save())
 button.removeEventListener('click', () => save()) // не сработает
 ```
 
 Обработчик можно удалить автоматически после первого вызова:
 
 ```js
-button.addEventListener('click', save, { once: true }) // подписываемся на событие
+button.addEventListener('click', save, { once: true })
 ```
 
 Или объединить жизненный цикл нескольких обработчиков одним сигналом:
 
 ```js
-const controller = new AbortController() // создаём новый экземпляр и сохраняем его в переменной
+const controller = new AbortController()
 
-button.addEventListener('click', save, { // подписываемся на событие
-  signal: controller.signal, // задаём свойство signal
+button.addEventListener('click', save, {
+  signal: controller.signal,
 })
 
-window.addEventListener('resize', updateLayout, { // подписываемся на событие
-  signal: controller.signal, // задаём свойство signal
+window.addEventListener('resize', updateLayout, {
+  signal: controller.signal,
 })
 
 controller.abort() // удалит оба обработчика
@@ -140,10 +140,10 @@ controller.abort() // удалит оба обработчика
 | `stopImmediatePropagation()` | дополнительно не даёт вызваться следующим listeners текущего объекта |
 
 ```js
-document.addEventListener('click', (event) => { // подписываемся на событие
-  console.log(event.type) // выводим значение в консоль
-  console.log(event.target) // выводим значение в консоль
-  console.log(event.currentTarget) // выводим значение в консоль
+document.addEventListener('click', (event) => {
+  console.log(event.type)
+  console.log(event.target)
+  console.log(event.currentTarget)
 })
 ```
 
@@ -174,11 +174,11 @@ window ← document ← body ← list ← button
 Обычный listener вызывается на фазе target или bubble. Для capture передают `{ capture: true }`:
 
 ```js
-document.addEventListener('click', handleCapture, { // подписываемся на событие
-  capture: true, // задаём свойство capture
+document.addEventListener('click', handleCapture, {
+  capture: true,
 })
 
-document.addEventListener('click', handleBubble) // подписываемся на событие
+document.addEventListener('click', handleBubble)
 ```
 
 Значения `event.eventPhase`:
@@ -194,16 +194,16 @@ document.addEventListener('click', handleBubble) // подписываемся �
 `stopPropagation()` не даёт событию продолжить путь к следующим объектам дерева:
 
 ```js
-button.addEventListener('click', (event) => { // подписываемся на событие
-  event.stopPropagation() // вызываем event.stopPropagation()
+button.addEventListener('click', (event) => {
+  event.stopPropagation()
 })
 ```
 
 Он не отменяет стандартное действие и не останавливает другие listeners того же элемента. Для остановки следующих listeners на текущем объекте используют `stopImmediatePropagation()`:
 
 ```js
-button.addEventListener('click', (event) => { // подписываемся на событие
-  event.stopImmediatePropagation() // вызываем event.stopImmediatePropagation()
+button.addEventListener('click', (event) => {
+  event.stopImmediatePropagation()
 })
 ```
 
@@ -221,18 +221,18 @@ button.addEventListener('click', (event) => { // подписываемся на
 `preventDefault()` отменяет такое действие, если `event.cancelable === true`:
 
 ```js
-const form = document.querySelector('form') // находим первый элемент по CSS-селектору
+const form = document.querySelector('form')
 
-form.addEventListener('submit', (event) => { // подписываемся на событие
-  event.preventDefault() // вызываем event.preventDefault()
-  saveForm(new FormData(form)) // вызываем saveForm()
+form.addEventListener('submit', (event) => {
+  event.preventDefault()
+  saveForm(new FormData(form))
 })
 ```
 
 ```js
-link.addEventListener('click', (event) => { // подписываемся на событие
-  event.preventDefault() // вызываем event.preventDefault()
-  router.navigate(link.href) // вызываем router.navigate()
+link.addEventListener('click', (event) => {
+  event.preventDefault()
+  router.navigate(link.href)
 })
 ```
 
@@ -252,16 +252,16 @@ link.addEventListener('click', (event) => { // подписываемся на �
 ```
 
 ```js
-const list = document.querySelector('.user-list') // находим первый элемент по CSS-селектору
+const list = document.querySelector('.user-list')
 
-list.addEventListener('click', (event) => { // подписываемся на событие
-  if (!(event.target instanceof Element)) return // проверяем условие и выполняем блок, если оно истинно
+list.addEventListener('click', (event) => {
+  if (!(event.target instanceof Element)) return
 
-  const button = event.target.closest('[data-user-id]') // ищем ближайший подходящий элемент среди себя и предков
+  const button = event.target.closest('[data-user-id]')
 
-  if (!button || !list.contains(button)) return // проверяем условие и выполняем блок, если оно истинно
+  if (!button || !list.contains(button)) return
 
-  openUser(button.dataset.userId) // вызываем openUser()
+  openUser(button.dataset.userId)
 })
 ```
 
@@ -284,28 +284,28 @@ list.addEventListener('click', (event) => { // подписываемся на �
 Обычное событие создают через `Event`, а событие с данными — через `CustomEvent`:
 
 ```js
-const event = new CustomEvent('cart:add', { // создаём новый экземпляр и сохраняем его в переменной
-  detail: { // задаём свойство detail
-    productId: 42, // задаём свойство productId
-    quantity: 2, // задаём свойство quantity
+const event = new CustomEvent('cart:add', {
+  detail: {
+    productId: 42,
+    quantity: 2,
   },
-  bubbles: true, // задаём свойство bubbles
-  cancelable: true, // задаём свойство cancelable
+  bubbles: true,
+  cancelable: true,
 })
 ```
 
 Подписка ничем не отличается от встроенного события:
 
 ```js
-document.addEventListener('cart:add', (event) => { // подписываемся на событие
-  console.log(event.detail.productId) // выводим значение в консоль
+document.addEventListener('cart:add', (event) => {
+  console.log(event.detail.productId)
 })
 ```
 
 Событие инициируется методом `dispatchEvent()`:
 
 ```js
-const wasNotCanceled = element.dispatchEvent(event) // отправляем пользовательское событие и сохраняем признак его отмены
+const wasNotCanceled = element.dispatchEvent(event)
 ```
 
 `dispatchEvent()` вызывает обработчики синхронно. Он возвращает `false`, если событие было отменено через `preventDefault()`, и `true` в остальных случаях.
