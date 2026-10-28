@@ -2,7 +2,7 @@
 
 **Vue Router** — это официальный маршрутизатор (router) для Vue.js, который позволяет создавать одностраничные приложения (SPA) с разными “страницами” и навигацией по ним без перезагрузки браузера.
 
-Подробно маршруты, `RouterView`, `RouterLink`, параметры и navigation guards разобраны в разделе [Vue Router](vue_router.md).
+Подробно маршруты, `RouterView`, `RouterLink`, параметры и navigation guards разобраны в разделе [Vue Router](router.md).
 
 Установите Vue Router:
 

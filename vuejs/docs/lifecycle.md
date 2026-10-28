@@ -82,9 +82,10 @@ console.log('Компонент инициализируется')
 
 ```vue
 <script setup>
-import { ref, onBeforeMount, onMounted } from 'vue'
+import { onBeforeMount, onMounted, useTemplateRef } from 'vue'
 
-const inputRef = ref(null)
+// Vue 3.5+: строка должна совпадать со значением ref в шаблоне.
+const inputRef = useTemplateRef('input')
 
 onBeforeMount(() => {
   console.log(inputRef.value) // null: input ещё не создан
@@ -97,11 +98,11 @@ onMounted(() => {
 </script>
 
 <template>
-  <input ref="inputRef">
+  <input ref="input">
 </template>
 ```
 
-`onMounted` используют, когда нужен готовый DOM, browser API или библиотека, которая работает с DOM. Этот хук не выполняется во время серверного рендеринга.
+`onMounted` используют, когда нужен готовый DOM, browser API или библиотека, которая работает с DOM. Этот хук не выполняется во время серверного рендеринга. Подробнее: [Template refs и `useTemplateRef`](template_refs.md).
 
 ### 3. Обновление
 

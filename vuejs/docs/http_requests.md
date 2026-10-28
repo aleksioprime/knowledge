@@ -1,6 +1,6 @@
 # HTTP-запросы во Vue
 
-Базовая работа с HTTP, `fetch`, Axios, JSON, статусами и CORS описана в разделе [HTTP-запросы в JavaScript](../../javascript/docs/http_requests.md).
+Базовая работа с HTTP, `fetch`, Axios, JSON, статусами и CORS описана в разделе [HTTP-запросы в JavaScript](../../javascript/docs/requests.md).
 
 Здесь рассматривается только интеграция запросов с Vue-приложением.
 

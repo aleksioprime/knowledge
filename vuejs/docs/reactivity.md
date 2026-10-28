@@ -195,11 +195,11 @@ console.log(element.textContent)
 
 ```vue
 <script setup>
-import { ref, nextTick } from 'vue'
+import { nextTick, ref, useTemplateRef } from 'vue'
 
 const isOpen = ref(false)
 // Ссылка на DOM-элемент input после его появления в шаблоне
-const inputRef = ref(null)
+const inputRef = useTemplateRef('input')
 
 async function open() {
   // Меняем состояние: после этого input должен появиться в DOM
@@ -214,9 +214,11 @@ async function open() {
 <template>
   <button @click="open">Открыть</button>
   <!-- input появится только после isOpen = true -->
-  <input v-if="isOpen" ref="inputRef" />
+  <input v-if="isOpen" ref="input" />
 </template>
 ```
+
+`useTemplateRef()` доступен начиная с Vue 3.5. Подробности и вариант для предыдущих версий: [Template refs и `useTemplateRef`](template_refs.md).
 
 ## Потеря реактивности
 

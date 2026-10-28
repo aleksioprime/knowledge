@@ -151,7 +151,49 @@ Vue Router автоматически добавляет активным ссы
 }
 ```
 
-`router-link-active` применяется и к родительским совпадениям. `router-link-exact-active` требует точного совпадения маршрута.
+`router-link-active` применяется и к ссылкам на родительские маршруты. `router-link-exact-active` добавляется только при точном совпадении и не включает родительские маршруты.
+
+Например, если маршрут `/users/:id` содержит дочерний маршрут `settings` и открыт адрес `/users/7/settings`, ссылки на `/users/7` и `/users/7/settings` получат `router-link-active`. Класс `router-link-exact-active` получит только ссылка на `/users/7/settings`.
+
+Названия классов можно изменить для отдельной ссылки через props `active-class` и `exact-active-class`:
+
+```vue
+<RouterLink
+  :to="{ name: 'posts' }"
+  active-class="nav-link--active"
+  exact-active-class="nav-link--exact"
+>
+  Посты
+</RouterLink>
+```
+
+```css
+.nav-link--active {
+  color: royalblue;
+}
+
+.nav-link--exact {
+  font-weight: bold;
+}
+```
+
+- `active-class` заменяет стандартный класс `router-link-active` для этой ссылки;
+- `exact-active-class` заменяет стандартный класс `router-link-exact-active` для этой ссылки.
+
+При точном совпадении ссылка обычно получает оба указанных класса. Эти props изменяют только имена CSS-классов, но не правила сопоставления маршрутов.
+
+Чтобы переименовать классы сразу для всех `RouterLink`, задайте `linkActiveClass` и `linkExactActiveClass` при создании роутера:
+
+```js
+const router = createRouter({
+  history: createWebHistory(),
+  routes,
+  linkActiveClass: 'nav-link--active',
+  linkExactActiveClass: 'nav-link--exact',
+})
+```
+
+При определении активной ссылки Vue Router сравнивает записи маршрутов и значения `params`. Параметры строки запроса (`query`) при этом не учитываются.
 
 ## Динамические параметры
 
