@@ -189,4 +189,4 @@ PostgreSQL строит граф ожидания, обнаруживает ци
 - [Запросы (SELECT, JOIN, агрегации)](docs/query.ipynb)
 - [Транзакции и уровни изоляции](docs/transaction.ipynb)
 - [Дополнительные возможности](docs/extra.ipynb)
-- [Практические задачи](docs/tasks.ipynb)
+- [Практические задачи](docs/tasks.ipynb) — дубликаты, NOT IN и NULL, top-N в группе, индексы и EXPLAIN, keyset-пагинация, upsert, потерянные обновления, очередь на SKIP LOCKED, смена типа колонки без простоя
