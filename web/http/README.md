@@ -13,6 +13,7 @@
 
 ## Содержание
 
+- [TCP-соединения и порты](tcp_connections.md)
 - [Структура запросов и ответов](request_response.md)
 - [HTTP/1.1, HTTP/2 и HTTP/3](versions.md)
 - [Заголовки, cookies и кеширование](headers_cookies_cache.md)
