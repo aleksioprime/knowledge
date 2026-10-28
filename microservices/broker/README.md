@@ -32,4 +32,4 @@
 
 - [RabbitMQ](rabbitmq/README.md) — классический брокер на AMQP
 - [Apache Kafka](kafka/README.md) — распределённый журнал событий
-- [NATS](nuts/README.md) — лёгкий cloud-native брокер
+- [NATS](nats/README.md) — лёгкий cloud-native брокер

@@ -43,7 +43,7 @@ RabbitMQ — это брокер сообщений с открытым исхо
 ### Объявление очереди:
 
 - `queue = await channel.declare_queue("tasks")` - простое объявление, аовторный вызов не создаёт новую очередь
-- `queue = await channel.declare_queue("tasks", durable=True)` - очередь cохраняется после перезапуска RabbitMQ
+- `queue = await channel.declare_queue("tasks", durable=True)` - очередь сохраняется после перезапуска RabbitMQ
 - `queue = await channel.declare_queue("temp", auto_delete=True)` - очередь удаляется, когда перестают использовать
 - дополнительные аргументы (TTL, DLQ, etc.):
   ```python
@@ -143,12 +143,12 @@ message = Message(
 - В заголовках сообщений обязательно передавать параметр X-Request-Id — тот самый, который генерируется при любом входящем HTTP-запросе от пользователя и прокидывается во все зависимые запросы.
 - Не должно быть очередей, которые долго не разгребаются и бесконтрольно растут. Очереди должны мониториться на возраст самого старого сообщения: нужно алертить, если этот возраст больше допустимого.
 
-## Cценарий Remote Procedure Call (RPC)
+## Сценарий Remote Procedure Call (RPC)
 
 RPC позволяет одному сервису (Клиенту) вызывать функцию или процедуру в другом сервисе (Сервере), как если бы эта функция выполнялась локально, но на самом деле вызов происходит через сеть с помощью обмена сообщениями
 
 1. Подготовка
-    - Cервис "Исполнитель" (Server) подключается к RabbitMQ, cоздаёт очередь запросов (например, `rpc_queue`), начинает слушать её, ожидая входящие задания.
+    - Сервис "Исполнитель" (Server) подключается к RabbitMQ, создаёт очередь запросов (например, `rpc_queue`), начинает слушать её, ожидая входящие задания.
     - Сервис "Заказчик" (Client): подключается к RabbitMQ, создаёт личную временную очередь (`callback queue`) для получения ответов (в RabbitMQ такие очереди обычно анонимные и удаляются автоматически), начинает слушать её, ожидая ответы от сервера
 
 2. Клиент отправляет вопрос
@@ -237,10 +237,10 @@ volumes:
 ```
 ## Содержание
 
-- [Пример: simple_queue (точка-точка)](examples/simple_queue/README.md)
-- [Пример: simple_pub_sub (fanout)](examples/simple_pub_sub/README.md)
-- [Пример: simple_topic (topic exchange)](examples/simple_topic/README.md)
-- [Пример: simple_rpc (RPC pattern)](examples/simple_rpc/README.md)
-- [Пример: simple_delay (отложенная доставка)](examples/simple_delay/README.md)
-- [Пример: simple_dlq (Dead Letter Queue)](examples/simple_dlq/README.md)
+- [Пример: simple_queue (точка-точка)](examples/simple_queue/)
+- [Пример: simple_pub_sub (fanout)](examples/simple_pub_sub/)
+- [Пример: simple_topic (topic exchange)](examples/simple_topic/)
+- [Пример: simple_rpc (RPC pattern)](examples/simple_rpc/)
+- [Пример: simple_delay (отложенная доставка)](examples/simple_delay/)
+- [Пример: simple_dlq (Dead Letter Queue)](examples/simple_dlq/)
 - [Пример: fastapi_rpc (интеграция с FastAPI)](examples/fastapi_rpc/README.md)
