@@ -15,7 +15,7 @@
 - [DevTools](devtools/README.md) — Docker, Git, линтеры, Poetry, uv, pyenv
 - [Linux](linux/README.md) — администрирование и настройка сервера
 - [Computer Vision](cv/README.md) — NumPy, OpenCV
-- [Machine Learning](ml/README.md) — классическое ML и нейронные сети
+- [Machine Learning](ml/README.md) — pandas, первая модель, метрики, переобучение, модель в FastAPI
 - [Мониторинг и аналитика](analyze/README.md) — Prometheus, Grafana
 - [Системный дизайн](design/README.md) — принципы и паттерны проектирования
 - [JavaScript](javascript/README.md) — основы языка, коллекции, асинхронность, модули и браузерные API
