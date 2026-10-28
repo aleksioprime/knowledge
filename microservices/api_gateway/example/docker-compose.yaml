@@ -1,0 +1,37 @@
+services:
+  gateway:
+    image: traefik:v3.6
+    command:
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --entrypoints.web.address=:80
+      - --api.dashboard=true
+      - --api.insecure=true
+      - --accesslog=true
+    ports:
+      - "8090:80"     # вход в систему
+      - "8091:8080"   # панель Traefik
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+  tasks:
+    image: traefik/whoami:v1.10
+    command: --name tasks
+    deploy:
+      replicas: 2
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.tasks.rule=PathPrefix(`/api/tasks`)
+      - traefik.http.routers.tasks.middlewares=tasks-strip,tasks-ratelimit
+      - traefik.http.middlewares.tasks-strip.stripprefix.prefixes=/api/tasks
+      - traefik.http.middlewares.tasks-ratelimit.ratelimit.average=5
+      - traefik.http.middlewares.tasks-ratelimit.ratelimit.burst=10
+
+  users:
+    image: traefik/whoami:v1.10
+    command: --name users
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.users.rule=PathPrefix(`/api/users`)
+      - traefik.http.routers.users.middlewares=users-strip
+      - traefik.http.middlewares.users-strip.stripprefix.prefixes=/api/users

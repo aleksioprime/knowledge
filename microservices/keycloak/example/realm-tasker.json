@@ -1,0 +1,54 @@
+{
+  "realm": "tasker",
+  "enabled": true,
+  "accessTokenLifespan": 300,
+  "roles": {
+    "realm": [
+      {"name": "user", "description": "Обычный пользователь"},
+      {"name": "admin", "description": "Администратор"}
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "tasker-api",
+      "publicClient": true,
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": true,
+      "redirectUris": ["http://localhost:5173/*"],
+      "webOrigins": ["http://localhost:5173"],
+      "protocolMappers": [
+        {
+          "name": "audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "config": {
+            "included.client.audience": "tasker-api",
+            "access.token.claim": "true"
+          }
+        }
+      ]
+    }
+  ],
+  "users": [
+    {
+      "username": "anna",
+      "email": "anna@example.com",
+      "firstName": "Анна",
+      "lastName": "Иванова",
+      "emailVerified": true,
+      "enabled": true,
+      "credentials": [{"type": "password", "value": "secret123", "temporary": false}],
+      "realmRoles": ["user"]
+    },
+    {
+      "username": "boris",
+      "email": "boris@example.com",
+      "firstName": "Борис",
+      "lastName": "Петров",
+      "emailVerified": true,
+      "enabled": true,
+      "credentials": [{"type": "password", "value": "secret123", "temporary": false}],
+      "realmRoles": ["user", "admin"]
+    }
+  ]
+}
