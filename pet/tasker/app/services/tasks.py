@@ -2,6 +2,7 @@ from redis.asyncio import Redis
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.metrics import TASKS_CREATED
 from app.models import Task, User
 from app.schemas import TaskCreate, TaskUpdate
 from app.services.stats import invalidate_stats
@@ -35,6 +36,7 @@ async def create_task(session: AsyncSession, cache: Redis, owner: User, data: Ta
     await session.commit()
     await session.refresh(task)
     await invalidate_stats(cache, owner)
+    TASKS_CREATED.inc()
     return task
 
 

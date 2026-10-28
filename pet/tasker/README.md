@@ -2,7 +2,7 @@
 
 Учебный API для списка задач. Проект небольшой, но на нём удобно показывать, как складываются вместе темы из базы знаний: каждая заметка добавляет в него одну деталь.
 
-Сейчас в нём есть регистрация и вход по JWT, задачи пользователя в PostgreSQL, миграции Alembic, кэш и ограничение попыток входа на Redis, напоминания о сроках через Celery, тесты.
+Сейчас в нём есть регистрация и вход по JWT, задачи пользователя в PostgreSQL, миграции Alembic, кэш и ограничение попыток входа на Redis, напоминания о сроках через Celery, метрики Prometheus, тесты и CI.
 
 ## Запуск
 
@@ -41,6 +41,16 @@ curl localhost:8000/tasks/stats -H "Authorization: Bearer $TOKEN"
 # {"total":1,"done":1} — ответ кэшируется в Redis на минуту
 ```
 
+## Мониторинг
+
+```bash
+docker compose -f docker-compose.yaml -f docker-compose.monitoring.yaml up -d --build
+```
+
+- Grafana: http://localhost:3000 → дашборд «Задачник» (запросы, время ответа, ошибки, логи);
+- Prometheus: http://localhost:9090, метрики приложения — http://localhost:8000/metrics;
+- логи всех контейнеров проекта собирает Grafana Alloy в Loki.
+
 ## Структура
 
 ```text
@@ -54,6 +64,7 @@ app/
 │   ├── database.py    # подключение к БД и сессия
 │   ├── cache.py       # клиент Redis
 │   ├── email.py       # отправка писем (учебная заглушка)
+│   ├── metrics.py     # метрики Prometheus
 │   └── security.py    # хэширование паролей и JWT
 ├── api/
 │   ├── deps.py        # зависимости: сессия БД, Redis, текущий пользователь, лимит попыток входа
@@ -61,6 +72,8 @@ app/
 └── services/          # бизнес-логика и запросы к БД
 migrations/            # миграции Alembic
 tests/                 # тесты API на отдельной тестовой базе
+postman/               # коллекция Postman для проверки работающего API
+monitoring/            # Prometheus, Grafana, Loki и Alloy
 ```
 
 Почему так разложено — в заметке [Структура проекта FastAPI](../../framework/fast_api/docs/structure.md).
@@ -80,6 +93,15 @@ pytest
 
 Адреса можно поменять переменными `TEST_DATABASE_URL` и `TEST_REDIS_URL`.
 
+Проверка работающего API коллекцией Postman:
+
+```bash
+docker run --rm -v "$PWD/postman":/etc/newman postman/newman:6-alpine \
+  run tasker.postman_collection.json --env-var baseUrl=http://host.docker.internal:8000
+```
+
+Всё это — линтер, тесты и проверка API в Docker — запускается в [GitHub Actions](../../.github/workflows/tasker.yml) при каждом изменении проекта.
+
 ## Как растёт проект
 
 | Что добавляется | Заметка |
@@ -91,7 +113,7 @@ pytest
 | Кэш и ограничение частоты запросов | [Redis](../../data/redis/docs/fastapi.md) |
 | Напоминания о сроках в фоне | [Celery](../../framework/celery/docs/first_task.md) |
 | Вложения к задачам | [S3](../../data/s3/README.md) — пока отдельным примером, в проект не встроено |
-| CI | GitHub Actions |
-| Метрики и дашборд | Prometheus, Grafana |
+| Проверка работающего API | [Postman и Newman](../../tests/postman/README.md) |
+| CI | [GitHub Actions](../../ci_cd/github/README.md) |
+| Метрики, дашборд и логи | [Prometheus](../../analyze/prometheus/README.md), [Grafana](../../analyze/grafana/README.md), [Loki](../../analyze/logging/README.md) |
 
-Заметки без ссылок ещё не написаны.

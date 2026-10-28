@@ -16,7 +16,7 @@ async def register(session: SessionDep, data: UserCreate) -> UserRead:
     try:
         user = await users.create_user(session, data)
     except users.EmailTakenError:
-        raise HTTPException(status.HTTP_409_CONFLICT, detail='Пользователь с таким email уже есть')
+        raise HTTPException(status.HTTP_409_CONFLICT, detail='Пользователь с таким email уже есть') from None
     return UserRead.model_validate(user)
 
 

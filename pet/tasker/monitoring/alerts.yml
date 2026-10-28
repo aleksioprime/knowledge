@@ -1,0 +1,13 @@
+groups:
+  - name: tasker
+    rules:
+      - alert: HighErrorRate
+        # Доля ответов 5xx за последнюю минуту больше 5%
+        expr: |
+          sum(rate(http_requests_total{status=~"5.."}[1m]))
+            / sum(rate(http_requests_total[1m])) > 0.05
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: 'Больше 5% запросов к «Задачнику» завершаются ошибкой 5xx'

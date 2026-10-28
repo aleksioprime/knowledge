@@ -4,6 +4,10 @@ services:
     ports:
       - "8000:8000"
     env_file: .env
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 5s
+      retries: 10
     depends_on:
       db:
         condition: service_healthy
