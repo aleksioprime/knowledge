@@ -5,7 +5,7 @@
 ## Разделы
 
 - [Математика](math/README.md) — теория чисел, степени и логарифмы, e и экспонента, производные, интегралы
-- [Python](python/README.md) — основы языка, ООП, функции, алгоритмы, многозадачность, livecoding
+- [Python](python/README.md) — основы языка, ООП, функции, типизация, импорты, стандартная библиотека, алгоритмы, многозадачность, livecoding
 - [Фреймворки](framework/README.md) — FastAPI, Django, Celery, Dramatiq
 - [Базы данных и хранилища](data/README.md) — PostgreSQL, SQLAlchemy, MongoDB, Redis, ClickHouse, Elasticsearch, S3, Airflow
 - [Микросервисы](microservices/README.md) — брокеры сообщений, HTTPX, API Gateway, Keycloak
@@ -21,3 +21,9 @@
 - [JavaScript](javascript/README.md) — основы языка, коллекции, асинхронность, модули и браузерные API
 - [Frontend (Vue.js)](vuejs/README.md) — заметки по фронтенду
 - [Pet-проекты](pet/README.md) — учебные сервисы и эксперименты
+
+## Как устроены заметки
+
+Новые заметки пишутся по [шаблону](_template.md): задача → минимальный пример → как работает → частые ошибки → когда не использовать. Там же правила стиля для текста и кода.
+
+Сквозной учебный проект — [«Задачник»](pet/tasker/README.md): на нём показаны FastAPI, базы данных, кэш, фоновые задачи и мониторинг.
