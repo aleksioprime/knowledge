@@ -19,6 +19,7 @@
 - [Заголовки, cookies и кеширование](headers_cookies_cache.md)
 - [HTTPS и TLS](https_tls.md)
 - [Передача файлов](file_transfer.md)
+- [Проектирование API: REST, версионирование, gRPC](api_design.md)
 
 ## Связанные инструменты
 

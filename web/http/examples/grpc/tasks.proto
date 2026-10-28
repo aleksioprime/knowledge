@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package tasker.v1;
+
+service TaskService {
+  rpc GetTask(GetTaskRequest) returns (Task);
+  rpc ListTasks(ListTasksRequest) returns (ListTasksResponse);
+  rpc CreateTask(CreateTaskRequest) returns (Task);
+}
+
+message Task {
+  // Поле 4 когда-то было `priority`: номер и имя заняты навсегда.
+  reserved 4;
+  reserved "priority";
+
+  int64 id = 1;
+  string title = 2;
+  bool done = 3;
+  repeated string labels = 5;
+}
+
+message GetTaskRequest {
+  int64 id = 1;
+}
+
+message ListTasksRequest {
+  bool only_open = 1;
+  int32 limit = 2;
+}
+
+message ListTasksResponse {
+  repeated Task tasks = 1;
+}
+
+message CreateTaskRequest {
+  string title = 1;
+  repeated string labels = 2;
+}

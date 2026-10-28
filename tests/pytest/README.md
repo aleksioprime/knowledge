@@ -464,6 +464,7 @@ skip_covered = true
 
 ## Содержание
 
+- [Функциональные тесты в Docker Compose](docs/functional.md) — тесты сервиса снаружи по HTTP, ожидание зависимостей, изоляция данных
 - [Пример: simple (минимальный)](examples/simple/README.md)
 - Пример: backend_simple — `examples/backend_simple/`
 - Пример: backend_repo (репозиторий-паттерн) — `examples/backend_repo/`

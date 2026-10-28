@@ -1,0 +1,6 @@
+# Код генерируется из tasks.proto командой из README
+*_pb2.py
+*_pb2.pyi
+*_pb2_grpc.py
+__pycache__/
+.venv/

@@ -1,0 +1,10 @@
+{
+  "properties": {
+    "title": {"type": "text", "analyzer": "russian"},
+    "description": {"type": "text", "analyzer": "russian"},
+    "done": {"type": "boolean"},
+    "owner": {"type": "keyword"},
+    "tags": {"type": "keyword"},
+    "modified": {"type": "date"}
+  }
+}
