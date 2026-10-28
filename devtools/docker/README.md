@@ -154,3 +154,4 @@ docker compose down -v           # + удалить тома
 ## Содержание
 
 - [Установка Docker на сервер Ubuntu](docs/install.md)
+- [Docker Compose на практике](docs/compose.md) — проверки здоровья, имена сервисов, `.env`, override для разработки, масштабирование

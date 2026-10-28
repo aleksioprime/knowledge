@@ -6,4 +6,4 @@
 
 - [Pytest](pytest/README.md) — основной фреймворк для unit/integration-тестов в Python
 - [Locust](locust/README.md) — нагрузочное тестирование на Python
-- [Postman](postman/README.md) — ручное тестирование и автотесты HTTP API
+- [Postman](postman/README.md) — коллекции, переменные и проверки, запуск через Newman в CI

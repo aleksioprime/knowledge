@@ -12,6 +12,6 @@ CI/CD — это подход в разработке программного �
 
 ## Содержание
 
-- [GitHub Actions](github/README.md) — CI/CD на платформе GitHub
-- [Kubernetes](kubernetes/README.md) — оркестрация контейнеров
+- [GitHub Actions](github/README.md) — линтер, тесты с PostgreSQL и Redis, проверка API в Docker, шаблон деплоя
+- [Kubernetes](kubernetes/README.md) — Deployment, Service, Ingress, проверки здоровья, обновление без остановки на k3s в Docker
 - [Portainer](portainer/README.md) — UI для управления Docker / Kubernetes
