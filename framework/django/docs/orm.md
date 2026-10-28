@@ -146,6 +146,76 @@ with self.assertNumQueries(3):
     self.client.get('/api/tasks/')
 ```
 
+## Как увидеть SQL-запросы
+
+`print(qs.query)` показывает один запрос. Чтобы найти N+1, нужно видеть все запросы, которые выполнил участок кода или целая страница.
+
+**`connection.queries`** — список запросов текущего соединения. Django ведёт его только при `DEBUG = True`, иначе список всегда пуст:
+
+```python
+from django.db import connection, reset_queries
+
+reset_queries()
+for task in Task.objects.all():
+    task.owner.username
+len(connection.queries)    # 3 — для двух задач: 1 за задачами + 2 за владельцами
+connection.queries[-1]
+# {'sql': 'SELECT "auth_user"."id", ... FROM "auth_user" WHERE "auth_user"."id" = 1 LIMIT 21', 'time': '0.000'}
+```
+
+`reset_queries()` очищает список перед замером. В тестах удобнее `assertNumQueries` (выше) или `CaptureQueriesContext` из `django.test.utils`.
+
+**Логгер `django.db.backends`** пишет каждый запрос в лог, удобно смотреть в консоли `runserver`:
+
+```python
+# config/settings.py
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'filters': {
+        'require_debug_true': {'()': 'django.utils.log.RequireDebugTrue'},
+    },
+    'handlers': {
+        'sql': {'class': 'logging.StreamHandler', 'filters': ['require_debug_true']},
+    },
+    'loggers': {
+        'django.db.backends': {'handlers': ['sql'], 'level': 'DEBUG', 'propagate': False},
+    },
+}
+```
+
+```text
+(0.001) SELECT COUNT(*) AS "__count" FROM "tasks_task" WHERE (NOT "tasks_task"."done" AND "tasks_task"."priority" >= 3); args=(3,); alias=default
+```
+
+В скобках — время запроса в секундах. Фильтр `RequireDebugTrue` выключает этот вывод при `DEBUG = False`. Впрочем, Django и сам пишет запросы в этот логгер только в режиме отладки.
+
+**`django-debug-toolbar`** — панель поверх HTML-страниц, включая админку и страницы DRF в браузере. На вкладке SQL видны все запросы страницы, их время, `EXPLAIN` и пометки о похожих и повторяющихся запросах (similar, duplicated) — так N+1 видно сразу.
+
+```bash
+pip install django-debug-toolbar
+```
+
+```python
+# config/settings.py
+if DEBUG:
+    INSTALLED_APPS += ['debug_toolbar']
+    MIDDLEWARE.insert(0, 'debug_toolbar.middleware.DebugToolbarMiddleware')
+    INTERNAL_IPS = ['127.0.0.1']
+```
+
+```python
+# config/urls.py
+from django.conf import settings
+
+if settings.DEBUG:
+    from debug_toolbar.toolbar import debug_toolbar_urls
+
+    urlpatterns += debug_toolbar_urls()
+```
+
+Панель показывается только запросам с адресов из `INTERNAL_IPS`. В Docker запрос приходит не с `127.0.0.1`, а с адреса шлюза сети контейнеров, поэтому панель «молча» не появляется. Для чистого JSON-API без HTML панель бесполезна: там остаются логгер и `assertNumQueries`.
+
 ## Частые ошибки
 
 - **Сохранение по чтению.** `task.priority += 1; task.save()` в двух параллельных запросах потеряет одно увеличение. Используйте `F()` или `update()`.
@@ -157,6 +227,8 @@ with self.assertNumQueries(3):
 ## Связанные темы
 
 - [Структура проекта](project.md)
+- [Миграции](migrations.md)
+- [Транзакции, массовые операции и сырой SQL](transactions.md)
 - [Django REST Framework](drf.md)
 - [SQLAlchemy: связи и N+1](../../../data/sqlalchemy/docs/relationships.md) — та же проблема в другом ORM
 - [Потерянные обновления в PostgreSQL](../../../data/postgres/docs/tasks.ipynb)

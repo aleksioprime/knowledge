@@ -88,6 +88,77 @@ TIME_ZONE = 'Europe/Moscow'
 {"title": ["Это поле не может быть пустым."], "priority": ["Убедитесь, что это значение меньше либо равно 5."]}
 ```
 
+### `DEBUG` и `ALLOWED_HOSTS`
+
+Переменные окружения — всегда строки. Частая ошибка:
+
+```python
+DEBUG = os.environ.get('DEBUG', False)
+# DEBUG=False в окружении → 'False' → непустая строка → истина
+```
+
+Сервер запущен с `DEBUG=False`, а Django работает в отладочном режиме и показывает трассировки посетителям. Сравнивайте строку явно, как в примере выше: `os.environ.get('DJANGO_DEBUG', '1') == '1'`.
+
+`ALLOWED_HOSTS` — список доменов, на которые сервер готов отвечать (проверяется заголовок `Host`). При `DEBUG = True` и пустом списке разрешены только `localhost`, `127.0.0.1` и `[::1]`. При `DEBUG = False` пустой список ничего не разрешает: `runserver` не запустится (`CommandError: You must set settings.ALLOWED_HOSTS if DEBUG is False.`), а запрос с чужим `Host` получит `400 Bad Request`. Значение тоже берут из окружения: `ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '').split(',')`.
+
+## Настройки в нескольких файлах
+
+Один `settings.py` к середине проекта вырастает до сотен строк: база, DRF, логирование, Celery, кэш. А разработке, тестам и продакшену нужны разные значения. Есть два распространённых подхода.
+
+**Пакет `settings/` с наследованием.** Общие настройки — в `base.py`, окружения импортируют их и переопределяют нужное:
+
+```text
+config/settings/
+├── __init__.py
+├── base.py
+├── dev.py      # from .base import *  и  DEBUG = True
+└── prod.py     # from .base import *  и  DEBUG = False, ALLOWED_HOSTS = [...]
+```
+
+Нужный файл выбирают переменной `DJANGO_SETTINGS_MODULE=config.settings.prod`. Подход простой, но звёздочный импорт прячет, откуда взялась настройка, и разнести по файлам *темы* (база отдельно, DRF отдельно) так неудобно.
+
+**`django-split-settings`.** Настройки делят по темам, а `__init__.py` склеивает их, как если бы это был один файл:
+
+```python
+# config/settings/__init__.py
+from pathlib import Path
+
+from dotenv import load_dotenv
+from split_settings.tools import include, optional
+
+load_dotenv(Path(__file__).resolve().parents[2] / '.env')
+
+include(
+    'components/base.py',
+    'components/database.py',
+    'components/drf.py',
+    'components/logging.py',
+    optional('local.py'),
+)
+```
+
+```python
+# config/settings/components/database.py
+import os
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('POSTGRES_DB', 'tasks'),
+        'USER': os.environ.get('POSTGRES_USER', 'postgres'),
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD', ''),
+        'HOST': os.environ.get('POSTGRES_HOST', 'localhost'),
+        'PORT': os.environ.get('POSTGRES_PORT', '5432'),
+    }
+}
+```
+
+- Файлы выполняются по порядку в общем пространстве имён: компонент может читать и дополнять то, что объявлено выше (`if DEBUG: INSTALLED_APPS += [...]`).
+- `.env` загружают **до** `include`, иначе компоненты прочитают пустое окружение и возьмут значения по умолчанию.
+- `optional('local.py')` подключает файл, только если он есть: личные настройки разработчика, которые не попадают в git.
+- `__file__` внутри компонента указывает на `settings/__init__.py`, а не на сам компонент. Поэтому `BASE_DIR = Path(__file__).resolve().parents[2]` в `components/base.py` даёт корень проекта.
+- Пути в `include` считаются от папки `__init__.py`.
+
 ## Команды `manage.py`
 
 ```bash
@@ -117,7 +188,77 @@ python manage.py makemigrations tasks
 python manage.py migrate
 ```
 
-Файлы миграций коммитят в репозиторий вместе с изменением модели.
+Файлы миграций коммитят в репозиторий вместе с изменением модели. Как устроен файл миграции, откат, миграции данных и ловушки — в отдельной заметке о [миграциях](migrations.md).
+
+## Переводы
+
+`LANGUAGE_CODE = 'ru-ru'` переводит то, что уже переведено в самом Django: админку, сообщения валидации. Свои строки — названия полей, моделей, приложения — нужно пометить и перевести самим. Если интерфейс только русский, достаточно писать строки сразу по-русски, как в [примере](../example/tasks/models.py). Переводы нужны, когда языков несколько.
+
+Строки помечают функцией `_`:
+
+```python
+# tasks/models.py
+from django.utils.translation import gettext_lazy as _
+
+
+class Tag(models.Model):
+    name = models.CharField(_('name'), max_length=50, unique=True)
+
+    class Meta:
+        verbose_name = _('tag')
+        verbose_name_plural = _('tags')
+```
+
+```python
+# tasks/apps.py
+from django.utils.translation import gettext_lazy as _
+
+
+class TasksConfig(AppConfig):
+    name = 'tasks'
+    verbose_name = _('Tasks')    # заголовок раздела в админке
+```
+
+В моделях, формах и настройках нужен именно `gettext_lazy`. Эти строки вычисляются при импорте модуля, когда язык запроса ещё неизвестен. Ленивая версия возвращает объект-обещание, который переведётся в момент вывода — уже на языке конкретного пользователя. Обычный `gettext` годится внутри функций и представлений.
+
+Дальше — три шага:
+
+```python
+# config/settings.py
+LOCALE_PATHS = [BASE_DIR / 'locale']
+```
+
+```bash
+mkdir locale
+python manage.py makemessages -l ru       # собрать строки в locale/ru/LC_MESSAGES/django.po
+```
+
+```text
+#: tasks/models.py:12
+msgid "tags"
+msgstr "метки"
+```
+
+`msgid` — исходная строка из кода, `msgstr` — перевод, его заполняют руками или в редакторе вроде Poedit.
+
+```bash
+python manage.py compilemessages --ignore=.venv    # .po → .mo
+```
+
+Django читает только скомпилированные `.mo`: пока их нет, переводы из `.po` не работают. Обе команды вызывают утилиты GNU gettext, которые ставят отдельно (`brew install gettext`, `apt install gettext`). Без них `compilemessages` падает с `CommandError: Can't find msgfmt`.
+
+Проверка:
+
+```python
+from django.utils import translation
+
+with translation.override('ru'):
+    str(Tag._meta.verbose_name_plural)    # 'метки'
+with translation.override('en'):
+    str(Tag._meta.verbose_name_plural)    # 'tags'
+```
+
+Две неочевидные вещи. `compilemessages` без `--ignore` обходит все папки от текущей, включая `.venv`, и перекомпилирует `.po` всех установленных пакетов. А строка без своего перевода может получить перевод из каталога самого Django: до компиляции `_('name')` уже показывался как `'имя'`, потому что такая строка есть в переводах Django.
 
 ## Частые ошибки
 
@@ -130,6 +271,7 @@ python manage.py migrate
 ## Связанные темы
 
 - [ORM](orm.md)
+- [Миграции](migrations.md)
 - [Админка](admin.md)
 - [Django REST Framework](drf.md)
 - [Структура проекта FastAPI](../../fast_api/docs/structure.md) — для сравнения
