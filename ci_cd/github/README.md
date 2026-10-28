@@ -23,8 +23,8 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
       - run: pip install ruff==0.8.4
@@ -71,8 +71,8 @@ jobs:
           --health-interval 5s
           --health-retries 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
           cache: pip
@@ -94,7 +94,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: test
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: cp .env.example .env
       - run: docker compose up -d --build --wait
       - run: |
@@ -127,13 +127,13 @@ jobs:
       contents: read
       packages: write   # право публиковать образ в ghcr.io
     steps:
-      - uses: actions/checkout@v4
-      - uses: docker/login-action@v3
+      - uses: actions/checkout@v7
+      - uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - uses: docker/build-push-action@v6
+      - uses: docker/build-push-action@v7
         with:
           context: pet/tasker
           push: true
@@ -165,7 +165,8 @@ jobs:
 ## Частые ошибки
 
 - **Секреты в YAML.** Пароль, вписанный прямо в workflow, виден всем, у кого есть доступ к репозиторию. Только `${{ secrets.ИМЯ }}`. GitHub скрывает значения секретов в логах, но не защищает от `echo $SECRET | base64`.
-- **Плавающие версии действий и образов.** `uses: some/action@main` может однажды измениться и сломать сборку, а то и выполнить чужой код с доступом к секретам. Указывайте версию (`@v4`), а для сторонних действий — полный хэш коммита.
+- **Плавающие версии действий и образов.** `uses: some/action@main` может однажды измениться и сломать сборку, а то и выполнить чужой код с доступом к секретам. Указывайте версию (`@v7`), а для сторонних действий — полный хэш коммита.
+- **Устаревшие версии действий.** Старые мажорные версии перестают поддерживаться. Например, `actions/checkout@v4` и `actions/setup-python@v5` собраны под Node 20, и GitHub выводит предупреждение `Node.js 20 is deprecated`. Периодически поднимайте мажорные версии — после этого прогон этого workflow проходит без предупреждений. Помогает Dependabot с `package-ecosystem: github-actions`.
 - **`localhost` для service containers при запуске в контейнере.** Если сам job запускается в контейнере (`container:`), сервисы доступны по имени (`postgres`), а не через `localhost`.
 - **Тесты ждут, что база уже есть.** Без `--health-cmd` шаги стартуют раньше, чем PostgreSQL готов принимать подключения.
 - **Workflow запускается на каждый чих.** Без `paths` любая правка README гоняет все проверки и тратит минуты.
