@@ -7,8 +7,10 @@
 - [Базовый Python](base/README.md)
 - [ООП](oop/README.md)
 - [Функции](function/README.md)
+- [Типизация и модели данных](typing/README.md) — type hints, dataclasses, Pydantic
+- [Модули и пакеты](modules/README.md) — как работают импорты
 - [Алгоритмы и структуры данных](algorithms/README.md)
 - [Многозадачность](multitask/README.md)
 - [Продвинутые темы](master/README.md)
-- [Дополнительно: даты, файлы](extra/README.md)
+- [Стандартная библиотека: даты, файлы, пути, строки, логирование](extra/README.md)
 - [Livecoding-задачи](livecoding/README.md)
