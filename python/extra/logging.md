@@ -141,5 +141,5 @@ logging.config.dictConfig(LOGGING)
 
 ## Связанные темы
 
-- [Исключения в Python](../base/base.ipynb)
+- [Исключения в Python](../base/base.md)
 - [Централизованное логирование](../../analyze/logging/README.md)

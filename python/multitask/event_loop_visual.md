@@ -103,10 +103,10 @@ await asyncio.gather(heartbeat(), heavy())
 
 ## Когда не использовать
 
-Если программа в основном считает (CPU-bound), asyncio не ускорит её: поток один, и считать параллельно он не умеет. Для вычислений нужны процессы — см. [Multiprocessing](multiprocessing.ipynb).
+Если программа в основном считает (CPU-bound), asyncio не ускорит её: поток один, и считать параллельно он не умеет. Для вычислений нужны процессы — см. [Multiprocessing](multiprocessing.md).
 
 ## Связанные темы
 
 - [Многозадачность в Python](README.md)
-- [Асинхронность (asyncio)](async.ipynb)
-- [Event Loop своими руками](event_loop.ipynb) — планировщик на генераторах и `selectors`
+- [Асинхронность (asyncio)](async.md)
+- [Event Loop своими руками](event_loop.md) — планировщик на генераторах и `selectors`

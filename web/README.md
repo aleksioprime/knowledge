@@ -14,5 +14,5 @@
 - [HTTPX](../microservices/httpx/README.md) — HTTP-клиент для Python
 - [API Gateway](../microservices/api_gateway/README.md) — единая точка входа в микросервисную систему
 - [Postman](../tests/postman/README.md) — ручное и автоматизированное тестирование HTTP API
-- [Сокеты в Python](../python/multitask/sockets.ipynb) — низкоуровневое сетевое взаимодействие
+- [Сокеты в Python](../python/multitask/sockets.md) — низкоуровневое сетевое взаимодействие
 - [Установка NGINX на Ubuntu](../linux/docs/nginx_install.md) — эксплуатационная инструкция

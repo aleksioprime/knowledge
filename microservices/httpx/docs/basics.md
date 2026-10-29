@@ -164,5 +164,5 @@ get_with_retries(client, '/flaky').json()
 ## Связанные темы
 
 - [Как проходит HTTP-запрос](../../../web/http/README.md)
-- [Асинхронность в Python](../../../python/multitask/async.ipynb)
+- [Асинхронность в Python](../../../python/multitask/async.md)
 - [API Gateway](../../api_gateway/README.md)

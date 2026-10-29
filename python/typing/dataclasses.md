@@ -136,4 +136,4 @@ asdict(Task('Отчёт'))  # {'title': 'Отчёт'}
 
 - [Подсказки типов](type_hints.md)
 - [Pydantic](pydantic.md)
-- [ООП в Python](../oop/oop.ipynb)
+- [ООП в Python](../oop/oop.md)

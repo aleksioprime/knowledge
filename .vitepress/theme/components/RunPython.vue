@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { runPython, stopPython } from '../python-runner'
 
-const props = defineProps<{ code: string }>()
+const props = defineProps<{ code: string; session?: string }>()
 
+const root = ref<HTMLElement>()
 const original = decodeURIComponent(props.code).replace(/\n$/, '')
 const source = ref(original)
 const editing = ref(false)
@@ -13,22 +14,39 @@ const lines = ref<{ kind: 'out' | 'err'; text: string }[]>([])
 
 const changed = computed(() => source.value !== original)
 
+// Код блоков той же цепочки, стоящих на странице выше этого (с учётом правок читателя)
+function prelude() {
+  if (!props.session) return []
+  const blocks = [...document.querySelectorAll<HTMLElement>(`.run-python[data-session="${props.session}"]`)]
+  return blocks.slice(0, blocks.indexOf(root.value!)).map((el) => el.dataset.source ?? '')
+}
+
+const continuation = ref(false)
+onMounted(() => (continuation.value = prelude().length > 0))
+
+// Вывод приходит кусками как есть; подряд идущие куски одного потока склеиваем
+function append(kind: 'out' | 'err', text: string) {
+  const last = lines.value.at(-1)
+  if (last?.kind === kind) last.text += text
+  else lines.value.push({ kind, text })
+}
+
 function run() {
   lines.value = []
   running.value = true
   runPython(source.value, (m) => {
     if (m.type === 'status') status.value = m.text
-    else if (m.type === 'stdout') lines.value.push({ kind: 'out', text: m.text })
-    else if (m.type === 'stderr') lines.value.push({ kind: 'err', text: m.text })
+    else if (m.type === 'stdout') append('out', m.text)
+    else if (m.type === 'stderr') append('err', m.text)
     else {
       running.value = false
       if (m.type === 'done') status.value = `Готово за ${m.text} с`
       else {
         status.value = 'Ошибка'
-        lines.value.push({ kind: 'err', text: lastLines(m.text) })
+        append('err', (lines.value.length && !lines.value.at(-1)!.text.endsWith('\n') ? '\n' : '') + lastLines(m.text))
       }
     }
-  })
+  }, prelude())
 }
 
 // У Pyodide в трассировке есть служебные кадры — оставляем то, что относится к коду заметки
@@ -52,7 +70,8 @@ function onKeydown(e: KeyboardEvent) {
 </script>
 
 <template>
-  <div class="run-python">
+  <div ref="root" class="run-python" :data-session="session" :data-source="source">
+    <div v-if="continuation" class="session">Продолжение примера: перед запуском молча выполняются блоки выше</div>
     <div v-show="!editing" class="view"><slot /></div>
     <textarea
       v-if="editing"
@@ -71,8 +90,7 @@ function onKeydown(e: KeyboardEvent) {
       <span v-if="editing" class="hint">Ctrl/⌘ + Enter — запуск</span>
     </div>
     <pre v-if="lines.length || running" class="output"><span
-      v-for="(l, i) in lines" :key="i" :class="l.kind">{{ l.text }}
-</span><span v-if="running" class="cursor">▍</span></pre>
+      v-for="(l, i) in lines" :key="i" :class="l.kind">{{ l.text }}</span><span v-if="running" class="cursor">▍</span></pre>
   </div>
 </template>
 
@@ -82,6 +100,13 @@ function onKeydown(e: KeyboardEvent) {
   border: 1px solid var(--vp-c-divider);
   border-radius: 8px;
   overflow: hidden;
+}
+.session {
+  padding: 6px 16px;
+  font-size: 12px;
+  color: var(--vp-c-text-2);
+  border-bottom: 1px solid var(--vp-c-divider);
+  background: var(--vp-c-bg-soft);
 }
 .view :deep(div[class*='language-']) {
   margin: 0 !important;

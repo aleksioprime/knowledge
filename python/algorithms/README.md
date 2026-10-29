@@ -10,22 +10,22 @@
 
 ### Основа
 
-- [Big O Notation](big_o_notation.ipynb) — все классы сложности с примерами, время vs память, сложность операций встроенных структур Python
-- [Поиск](searching.ipynb) — линейный, бинарный, `bisect`
-- [Сортировки](sorting.ipynb) — bubble, selection, insertion, merge, quick, Timsort
-- [Рекурсия](recursion.ipynb) — база и шаг, мемоизация, backtracking (N ферзей, перестановки)
+- [Big O Notation](big_o_notation.md) — все классы сложности с примерами, время vs память, сложность операций встроенных структур Python
+- [Поиск](searching.md) — линейный, бинарный, `bisect`
+- [Сортировки](sorting.md) — bubble, selection, insertion, merge, quick, Timsort
+- [Рекурсия](recursion.md) — база и шаг, мемоизация, backtracking (N ферзей, перестановки)
 
 ### Структуры данных
 
-- [Линейные структуры](linear_structures.ipynb) — связные списки, стек, очередь, дек
-- [Хеш-таблицы](hash_table.ipynb) — `dict`, `set`, коллизии, реализация с цепочками
-- [Деревья и кучи](trees.ipynb) — бинарное дерево, BST, обходы (pre/in/post/level-order), heap, `heapq`
+- [Линейные структуры](linear_structures.md) — связные списки, стек, очередь, дек
+- [Хеш-таблицы](hash_table.md) — `dict`, `set`, коллизии, реализация с цепочками
+- [Деревья и кучи](trees.md) — бинарное дерево, BST, обходы (pre/in/post/level-order), heap, `heapq`
 
 ### Графы и алгоритмы
 
-- [Графы](graphs.ipynb) — представления, BFS, DFS, кратчайший путь, Дейкстра, топологическая сортировка
+- [Графы](graphs.md) — представления, BFS, DFS, кратчайший путь, Дейкстра, топологическая сортировка
 
 ### Продвинутое
 
-- [Динамическое программирование](dynamic_programming.ipynb) — top-down vs bottom-up, Фибоначчи, монеты, рюкзак, LCS, LIS
-- [Паттерны для собеседований](interview_patterns.ipynb) — два указателя, скользящее окно, префиксные суммы, битовые операции
+- [Динамическое программирование](dynamic_programming.md) — top-down vs bottom-up, Фибоначчи, монеты, рюкзак, LCS, LIS
+- [Паттерны для собеседований](interview_patterns.md) — два указателя, скользящее окно, префиксные суммы, битовые операции

@@ -88,6 +88,6 @@ config = BASE_DIR / 'config.toml'
 
 ## Связанные темы
 
-- [Работа с файлами и JSON](file.ipynb)
+- [Работа с файлами и JSON](file.md)
 - [Строки и f-строки](strings.md)
 - [Передача файлов по HTTP](../../web/http/file_transfer.md)

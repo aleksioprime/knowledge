@@ -4,5 +4,5 @@
 
 ## Содержание
 
-- [Unicode и кодировки](unicode.ipynb)
+- [Unicode и кодировки](unicode.md)
 - [Память: ссылки, сборщик мусора, `__slots__`](memory.md)

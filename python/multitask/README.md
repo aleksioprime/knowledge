@@ -75,10 +75,10 @@ IPC (Inter-Process Communication или межпроцессная переда�
 ## Содержание
 
 - [Цикл событий asyncio наглядно](event_loop_visual.md) — анимация и запуск кода в браузере
-- [Асинхронность (asyncio)](async.ipynb)
-- [Event Loop](event_loop.ipynb)
-- [Многопоточность (threading)](multithreading.ipynb)
-- [Multiprocessing](multiprocessing.ipynb)
-- [Thread Pool](thread_pool.ipynb)
-- [Сокеты](sockets.ipynb)
+- [Асинхронность (asyncio)](async.md)
+- [Цикл событий своими руками](event_loop.md) — планировщик на генераторах и selectors
+- [Многопоточность (threading)](multithreading.md)
+- [Процессы (multiprocessing)](multiprocessing.md)
+- [Пул потоков (ThreadPoolExecutor)](thread_pool.md)
+- [Сокеты](sockets.md)
 - [Demo: multiprocessing](demo/mp_demo_1.py)

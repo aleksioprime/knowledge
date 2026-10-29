@@ -114,12 +114,14 @@ export default defineConfig({
       const defaultFence = md.renderer.rules.fence!
       md.renderer.rules.fence = (tokens, idx, options, env, self) => {
         const token = tokens[idx]
-        // ```python run — блок с кнопкой «Запустить»
-        const m = token.info.match(/^python\s+run\b/)
+        // ```python run — блок с кнопкой «Запустить»;
+        // ```python run session=имя — перед запуском выполняются предыдущие блоки с тем же именем
+        const m = token.info.match(/^python\s+run\b(?:.*\bsession=([\w-]+))?/)
         if (!m) return defaultFence(tokens, idx, options, env, self)
         token.info = 'python'
         const html = defaultFence(tokens, idx, options, env, self)
-        return `<RunPython code="${encodeURIComponent(token.content)}">${html}</RunPython>`
+        const session = m[1] ? ` session="${m[1]}"` : ''
+        return `<RunPython code="${encodeURIComponent(token.content)}"${session}>${html}</RunPython>`
       }
 
       const defaultRender = md.renderer.rules.link_open

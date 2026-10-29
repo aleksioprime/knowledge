@@ -142,4 +142,4 @@ app.dependency_overrides[get_session] = get_test_session
 
 - [Авторизация по JWT](auth_jwt.md) — `CurrentUser` на настоящих токенах
 - [Структура проекта](structure.md)
-- [Менеджеры контекста](../../../python/function/function.ipynb)
+- [Менеджеры контекста](../../../python/function/function.md)

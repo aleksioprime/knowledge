@@ -39,4 +39,4 @@ cat /proc/sys/net/ipv4/ip_local_port_range
 
 - [Как проходит HTTP-запрос](README.md)
 - [HTTP/1.1, HTTP/2 и HTTP/3](versions.md) — переиспользование соединений и мультиплексирование
-- [Сокеты в Python](../../python/multitask/sockets.ipynb)
+- [Сокеты в Python](../../python/multitask/sockets.md)

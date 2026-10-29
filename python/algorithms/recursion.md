@@ -1,0 +1,133 @@
+# Рекурсия
+
+Некоторые задачи естественно описываются через саму себя: факториал `n` — это `n`, умноженное на факториал `n - 1`. **Рекурсия** — приём, при котором функция вызывает сама себя.
+
+В рекурсивной функции обязательны две части:
+
+1. **База** — условие выхода. Без неё вызовы не прекратятся, и Python упадёт с `RecursionError`.
+2. **Шаг** — вызов с уменьшенными данными, который ведёт к базе.
+
+## Факториал
+
+```python run
+def factorial(n):
+    if n <= 1:                    # база
+        return 1
+    return n * factorial(n - 1)   # шаг
+
+factorial(5)   # 120
+```
+
+## Числа Фибоначчи: наивная рекурсия за O(2ⁿ)
+
+Одно и то же значение `fib(k)` пересчитывается много раз, поэтому сложность экспоненциальная.
+
+```python run
+def fib(n):
+    if n < 2:
+        return n
+    return fib(n - 1) + fib(n - 2)
+
+fib(10)   # 55
+```
+
+## Мемоизация — O(n)
+
+**Мемоизация** (memoization) — кеширование результата для каждого `n`. Готовый декоратор для этого — `functools.lru_cache`.
+
+```python run
+from functools import lru_cache
+
+@lru_cache(maxsize=None)
+def fib(n):
+    if n < 2:
+        return n
+    return fib(n - 1) + fib(n - 2)
+
+fib(100)   # мгновенно; без кеша считалось бы вечность
+```
+
+## Лимит рекурсии в Python
+
+По умолчанию глубина рекурсии ограничена примерно 1000 вызовами. Python не оптимизирует **хвостовую рекурсию** (tail recursion), поэтому слишком глубокая рекурсия падает с `RecursionError`.
+
+```python run
+import sys
+print(sys.getrecursionlimit())   # 1000
+# sys.setrecursionlimit(10_000)  # можно повысить, но лучше переписать на цикл
+```
+
+## Когда рекурсия — естественный выбор
+
+- Структуры с самоповторением: деревья, графы, JSON, синтаксические деревья (AST).
+- Алгоритмы «разделяй и властвуй» (divide and conquer): сортировка слиянием, быстрая сортировка, бинарный поиск.
+- **Поиск с возвратом** (backtracking): перебор вариантов с откатом — перестановки, расстановка ферзей, судоку.
+
+## Поиск с возвратом: все перестановки
+
+```python run
+def permutations(arr):
+    result = []
+    def backtrack(path, remaining):
+        if not remaining:
+            result.append(path)
+            return
+        for i, x in enumerate(remaining):
+            backtrack(path + [x], remaining[:i] + remaining[i+1:])
+    backtrack([], arr)
+    return result
+
+permutations([1, 2, 3])
+```
+
+## Поиск с возвратом: задача о N ферзях
+
+Нужно расставить N ферзей на доске N×N так, чтобы они не били друг друга.
+
+```python run
+def solve_n_queens(n):
+    result = []
+    cols = set()
+    diag1 = set()   # row - col
+    diag2 = set()   # row + col
+    board = [-1] * n
+
+    def backtrack(row):
+        if row == n:
+            result.append(board.copy())
+            return
+        for col in range(n):
+            if col in cols or (row - col) in diag1 or (row + col) in diag2:
+                continue
+            cols.add(col); diag1.add(row - col); diag2.add(row + col)
+            board[row] = col
+            backtrack(row + 1)
+            cols.remove(col); diag1.remove(row - col); diag2.remove(row + col)
+
+    backtrack(0)
+    return result
+
+print(f'Решений для N=4: {len(solve_n_queens(4))}')   # 2
+print(f'Решений для N=8: {len(solve_n_queens(8))}')   # 92
+```
+
+## Как переписать рекурсию на цикл
+
+Любую рекурсию можно переписать через цикл и явный стек (`list`). Иногда это необходимо из-за лимита глубины в Python. Факториалу стек даже не нужен:
+
+```python run
+def factorial_iter(n):
+    result = 1
+    for i in range(2, n + 1):
+        result *= i
+    return result
+
+factorial_iter(5)
+```
+
+## Связанные темы
+
+- [Динамическое программирование](dynamic_programming.md)
+- [Деревья](trees.md)
+- [Сортировки](sorting.md)
+- [Нотация «О большое»](big_o_notation.md)

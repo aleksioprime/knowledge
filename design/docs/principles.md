@@ -124,4 +124,4 @@ backup(ReadOnlyStorage())  # PermissionError: только для чтения
 
 - [Структура проекта FastAPI](../../framework/fast_api/docs/structure.md) — разделение ответственности на практике
 - [Подсказки типов: Protocol](../../python/typing/type_hints.md)
-- [ООП в Python](../../python/oop/oop.ipynb)
+- [ООП в Python](../../python/oop/oop.md)

@@ -12,14 +12,14 @@ function getWorker() {
   return worker
 }
 
-export function runPython(code: string, onMessage: (m: Message) => void) {
+export function runPython(code: string, onMessage: (m: Message) => void, prelude: string[] = []) {
   // Предыдущий запуск ещё идёт — прерываем его вместе с потоком
   if (current) stopPython()
   current = (m) => {
     onMessage(m)
     if (m.type === 'done' || m.type === 'error') current = null
   }
-  getWorker().postMessage({ code })
+  getWorker().postMessage({ code, prelude })
 }
 
 export function stopPython() {

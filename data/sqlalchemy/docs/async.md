@@ -118,5 +118,5 @@ async def get_session() -> AsyncIterator[AsyncSession]:
 
 - [Модели и сессия](basics.md)
 - [Связи и проблема N+1](relationships.md)
-- [Асинхронность в Python](../../../python/multitask/async.ipynb)
+- [Асинхронность в Python](../../../python/multitask/async.md)
 - [Учебный проект «Задачник»](../../../pet/tasker/README.md)
