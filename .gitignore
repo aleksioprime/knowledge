@@ -9,3 +9,6 @@ __pycache__
 *.pyc
 *.pyo
 *.pyd
+node_modules
+.vitepress/cache
+.vitepress/dist

@@ -1,0 +1,13 @@
+:root {
+  --demo-ready: #3b82f6;
+  --demo-running: #16a34a;
+  --demo-waiting: #d97706;
+  --demo-done: #6b7280;
+}
+
+.dark {
+  --demo-ready: #60a5fa;
+  --demo-running: #4ade80;
+  --demo-waiting: #fbbf24;
+  --demo-done: #9ca3af;
+}
