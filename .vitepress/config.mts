@@ -6,14 +6,14 @@ const ROOT = path.resolve(__dirname, '..')
 const REPO = 'https://github.com/aleksioprime/knowledge'
 const EXCLUDE = ['node_modules', '.git', '.vitepress', '.claude', '.github', '.vscode']
 
-// Разделы берутся из главного README: группы — заголовки «### Группа»,
+// Разделы берутся из главного README: группы — заголовки «## Группа»,
 // разделы — строки «- [Название](папка/README.md) — описание» под ними
 function readSections() {
   const readme = fs.readFileSync(path.join(ROOT, 'README.md'), 'utf8')
   const sections: { text: string; dir: string; group: string }[] = []
   let group = 'Разделы'
   for (const line of readme.split('\n')) {
-    const heading = line.match(/^###\s+(.+)/)
+    const heading = line.match(/^##\s+(.+)/)
     if (heading) group = heading[1].trim()
     const m = line.match(/^- \[(.+?)\]\(([\w-]+)\/README\.md\)/)
     if (m) sections.push({ text: m[1], dir: m[2], group })
@@ -108,6 +108,11 @@ export default defineConfig({
   markdown: {
     theme: { light: 'github-light', dark: 'github-dark' },
     config(md) {
+      // Блок между <!-- site:hide --> и <!-- /site:hide --> виден только в репозитории:
+      // там техническая информация (локальный запуск, оформление блоков кода)
+      md.core.ruler.before('normalize', 'site_hide', (state) => {
+        state.src = state.src.replace(/<!--\s*site:hide[\s\S]*?<!--\s*\/site:hide\s*-->/g, '')
+      })
       // Заметки пишутся для GitHub: «<username>» в тексте — это плейсхолдер, а не тег.
       // Пропускаем только безопасный HTML и компоненты сайта, остальное показываем как текст
       md.core.ruler.push('escape_unknown_html', (state) => {
