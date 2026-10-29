@@ -1,21 +1,22 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { defineConfig, type DefaultTheme } from 'vitepress'
+import { readContents, contentsTarget } from './contents.mjs'
 
 const ROOT = path.resolve(__dirname, '..')
+const DOCS = path.join(ROOT, 'docs') // база знаний; в корне репозитория только служебные файлы
 const REPO = 'https://github.com/aleksioprime/knowledge'
-const EXCLUDE = ['node_modules', '.git', '.vitepress', '.claude', '.github', '.vscode']
 
 // Разделы берутся из главного README: группы — заголовки «## Группа»,
-// разделы — строки «- [Название](папка/README.md) — описание» под ними
+// разделы — строки «- [Название](группа/раздел/README.md) — описание» под ними
 function readSections() {
-  const readme = fs.readFileSync(path.join(ROOT, 'README.md'), 'utf8')
+  const readme = fs.readFileSync(path.join(DOCS, 'README.md'), 'utf8')
   const sections: { text: string; dir: string; group: string }[] = []
   let group = 'Разделы'
   for (const line of readme.split('\n')) {
     const heading = line.match(/^##\s+(.+)/)
     if (heading) group = heading[1].trim()
-    const m = line.match(/^- \[(.+?)\]\(([\w-]+)\/README\.md\)/)
+    const m = line.match(/^- \[(.+?)\]\(([\w-]+(?:\/[\w-]+)*)\/README\.md\)/)
     if (m) sections.push({ text: m[1], dir: m[2], group })
   }
   return sections
@@ -36,42 +37,28 @@ function buildNav(sections: ReturnType<typeof readSections>): DefaultTheme.NavIt
   )
 }
 
-function titleOf(file: string) {
-  const text = fs.readFileSync(file, 'utf8')
-  const m = text.match(/^#\s+(.+)$/m)
-  return m ? m[1].replace(/`/g, '') : path.basename(file, '.md')
-}
-
 function toLink(file: string) {
-  const rel = path.relative(ROOT, file).split(path.sep).join('/')
+  const rel = path.relative(DOCS, file).split(path.sep).join('/')
   return '/' + rel.replace(/(^|\/)README\.md$/, '$1').replace(/\.md$/, '')
 }
 
-// Дерево сайдбара повторяет дерево папок: README папки — её страница, остальные .md — пункты
-function buildTree(dir: string): DefaultTheme.SidebarItem[] {
-  const items: DefaultTheme.SidebarItem[] = []
-  const entries = fs.readdirSync(dir, { withFileTypes: true })
-    .filter((e) => !e.name.startsWith('.') && !EXCLUDE.includes(e.name))
-    .sort((a, b) => a.name.localeCompare(b.name))
-
-  for (const e of entries) {
-    const full = path.join(dir, e.name)
-    if (e.isFile() && e.name.endsWith('.md') && e.name !== 'README.md') {
-      items.push({ text: titleOf(full), link: toLink(full) })
-    } else if (e.isDirectory()) {
-      const children = buildTree(full)
-      const readme = path.join(full, 'README.md')
-      const hasReadme = fs.existsSync(readme)
-      if (!hasReadme && children.length === 0) continue
-      items.push({
-        text: hasReadme ? titleOf(readme) : e.name,
-        link: hasReadme ? toLink(readme) : undefined,
-        items: children.length ? children : undefined,
-        collapsed: children.length ? true : undefined,
-      })
+// Боковое меню повторяет блок «## Содержание» README папки: тот же порядок, те же названия,
+// подзаголовки «###» становятся группами, ссылка на README вложенной папки — вложенным меню
+function contentsTree(dir: string): DefaultTheme.SidebarItem[] {
+  const readme = path.join(dir, 'README.md')
+  if (!fs.existsSync(readme)) return []
+  const groups = new Map<string | null, DefaultTheme.SidebarItem[]>()
+  for (const entry of readContents(readme) ?? []) {
+    const file = contentsTarget(dir, entry)
+    if (!file || !fs.existsSync(file)) continue
+    const item: DefaultTheme.SidebarItem = { text: entry.text, link: toLink(file) }
+    if (path.basename(file) === 'README.md') {
+      const children = contentsTree(path.dirname(file))
+      if (children.length) Object.assign(item, { items: children, collapsed: true })
     }
+    groups.set(entry.group, [...(groups.get(entry.group) ?? []), item])
   }
-  return items
+  return [...groups].flatMap(([group, items]) => (group ? [{ text: group, items }] : items))
 }
 
 const HTML_TAGS = new Set([
@@ -99,7 +86,7 @@ function isDir(p: string) {
 const sections = readSections()
 const sidebar: DefaultTheme.Sidebar = {}
 for (const s of sections) {
-  sidebar[`/${s.dir}/`] = [{ text: s.text, link: `/${s.dir}/`, items: buildTree(path.join(ROOT, s.dir)) }]
+  sidebar[`/${s.dir}/`] = [{ text: s.text, link: `/${s.dir}/`, items: contentsTree(path.join(DOCS, s.dir)) }]
 }
 
 export default defineConfig({
@@ -107,24 +94,20 @@ export default defineConfig({
   title: 'База знаний',
   description: 'Конспекты и примеры кода',
   base: process.env.BASE ?? '/',
+  srcDir: 'docs',
   cleanUrls: true,
   lastUpdated: true,
-  srcExclude: ['**/node_modules/**', '_template.md', '**/CLAUDE.md'],
+  srcExclude: ['**/node_modules/**', '**/dist/**'],
   // README.md в каждой папке становится её индексной страницей
   rewrites: (id) => id.replace(/(^|\/)README\.md$/, '$1index.md'),
   // Битая ссылка на заметку роняет сборку; ссылки на localhost из инструкций по запуску — не битые.
-  // Якоря и ссылки на файлы репозитория после сборки проверяет .vitepress/check-links.mjs
+  // Якоря, ссылки на файлы репозитория и полноту содержаний после сборки проверяет .vitepress/check-links.mjs
   ignoreDeadLinks: 'localhostLinks',
   markdown: {
     theme: { light: 'github-light', dark: 'github-dark' },
     // Якоря заголовков как на GitHub: ссылки вида #3-ограничение-частоты работают и в репозитории, и на сайте
     anchor: { slugify: githubSlug },
     config(md) {
-      // Блок между <!-- site:hide --> и <!-- /site:hide --> виден только в репозитории:
-      // там техническая информация (локальный запуск, оформление блоков кода)
-      md.core.ruler.before('normalize', 'site_hide', (state) => {
-        state.src = state.src.replace(/<!--\s*site:hide[\s\S]*?<!--\s*\/site:hide\s*-->/g, '')
-      })
       // Заметки пишутся для GitHub: «<username>» в тексте — это плейсхолдер, а не тег.
       // Пропускаем только безопасный HTML и компоненты сайта, остальное показываем как текст
       md.core.ruler.push('escape_unknown_html', (state) => {
@@ -172,17 +155,17 @@ export default defineConfig({
           // README.md папки стал её index-страницей: ссылка ведёт на папку, а не на /README
           const target = path.posix.normalize(path.posix.join(dir, readme[1] || '.'))
           tokens[idx].attrSet('href', (target === '.' ? '/' : `/${target}/`) + (readme[2] ?? ''))
-        } else if (href && !/^[a-z]+:|^#|^\//i.test(href) && isDir(path.join(ROOT, dir, href.split('#')[0]))) {
+        } else if (href && !/^[a-z]+:|^#|^\//i.test(href) && isDir(path.join(DOCS, dir, href.split('#')[0]))) {
           // Ссылка на папку: с README — её страница на сайте, без README (примеры кода) — папка на GitHub
           const target = path.posix.normalize(path.posix.join(dir, href.split('#')[0])).replace(/\/$/, '')
-          if (fs.existsSync(path.join(ROOT, target, 'README.md'))) {
+          if (fs.existsSync(path.join(DOCS, target, 'README.md'))) {
             tokens[idx].attrSet('href', `/${target}/` + (href.includes('#') ? '#' + href.split('#')[1] : ''))
           } else {
-            tokens[idx].attrSet('href', `${REPO}/tree/main/${target}`)
+            tokens[idx].attrSet('href', `${REPO}/tree/main/docs/${target}`)
             tokens[idx].attrSet('target', '_blank')
           }
         } else if (href && !/^[a-z]+:|^#|^\//i.test(href) && !/\.md(#|$)/.test(href) && /\.\w+(#|$)/.test(href)) {
-          tokens[idx].attrSet('href', `${REPO}/blob/main/${path.posix.normalize(path.posix.join(dir, href))}`)
+          tokens[idx].attrSet('href', `${REPO}/blob/main/docs/${path.posix.normalize(path.posix.join(dir, href))}`)
           tokens[idx].attrSet('target', '_blank')
         }
         return defaultRender(tokens, idx, options, env, self)
@@ -203,7 +186,7 @@ export default defineConfig({
       },
     },
     socialLinks: [{ icon: 'github', link: REPO }],
-    editLink: { pattern: `${REPO}/edit/main/:path`, text: 'Редактировать на GitHub' },
+    editLink: { pattern: `${REPO}/edit/main/docs/:path`, text: 'Редактировать на GitHub' },
     docFooter: { prev: 'Назад', next: 'Дальше' },
     lastUpdated: { text: 'Обновлено' },
     darkModeSwitchLabel: 'Тема',
