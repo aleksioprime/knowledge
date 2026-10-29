@@ -24,7 +24,7 @@ docker build --build-arg VERSION=1.0 -t hello-app:1.0 app
 docker save hello-app:1.0 | docker exec -i k3s ctr images import -
 ```
 
-Другие варианты для локальной работы — minikube, kind и Kubernetes, встроенный в Docker Desktop.
+Другие варианты для локальной работы — minikube, kind и Kubernetes, встроенный в Docker Desktop. Чем они отличаются и как поднять кластер из нескольких узлов на kind — в заметке [«Кластер Kubernetes»](docs/cluster.md#локальные-кластеры).
 
 ## Минимальный пример
 
@@ -201,6 +201,10 @@ k rollout history deployment/hello
 - **Нет `requests`.** Kubernetes не знает, сколько ресурсов нужно поду, и может поселить слишком много подов на одну машину.
 - **База данных в Deployment.** Для баз с данными на диске есть StatefulSet и PersistentVolume. А часто проще взять управляемую базу у облачного провайдера.
 - **Изменения через `kubectl edit` на живом кластере.** Через неделю никто не помнит, что меняли. Храните манифесты в репозитории и применяйте через `kubectl apply` или Helm и ArgoCD.
+
+## Содержание
+
+- [Кластер Kubernetes](docs/cluster.md) — оркестраторы, устройство кластера, локальные кластеры, kubeconfig и контексты, kubectl, namespace, падение узла
 
 ## Связанные темы
 

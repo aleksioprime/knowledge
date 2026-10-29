@@ -1,0 +1,18 @@
+http:
+  routers:
+    comments:
+      rule: "PathRegexp(`^/api/tasks/[0-9]+/comments`)"
+      service: monolith  # переключатель: monolith → comments
+    everything-else:
+      rule: "PathPrefix(`/`)"
+      service: monolith
+
+  services:
+    monolith:
+      loadBalancer:
+        servers:
+          - url: http://monolith:8000
+    comments:
+      loadBalancer:
+        servers:
+          - url: http://comments:8000

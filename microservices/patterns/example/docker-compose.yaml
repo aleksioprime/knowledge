@@ -1,0 +1,26 @@
+# docker compose -p kb-patterns up -d --build
+x-app: &app
+  build: .
+
+services:
+  gateway:
+    image: traefik:v3.6
+    command:
+      - --entrypoints.web.address=:80
+      - --providers.file.directory=/etc/traefik/routes
+      - --providers.file.watch=true
+    volumes:
+      - ./routes:/etc/traefik/routes:ro  # папка, а не файл: так Traefik видит правки
+    ports:
+      - "47080:80"
+    depends_on: [monolith, comments]
+
+  monolith:
+    <<: *app
+    command: uvicorn app.monolith:app --host 0.0.0.0 --port 8000 --no-access-log
+
+  comments:
+    <<: *app
+    command: uvicorn app.comments:app --host 0.0.0.0 --port 8000 --no-access-log
+    environment:
+      LEGACY_URL: http://monolith:8000

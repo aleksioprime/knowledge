@@ -20,6 +20,7 @@
 
 ## Содержание
 
+- [Паттерны микросервисной архитектуры](patterns/README.md) — монолит или микросервисы, декомпозиция, душитель и предохранительный слой, база на сервис, CQRS и Event Sourcing, обнаружение сервисов, blue-green
 - [Брокеры сообщений](broker/README.md) — RabbitMQ, Kafka, NATS
 - [HTTPX](httpx/README.md) — синхронный/асинхронный HTTP-клиент
 - [API Gateway](api_gateway/README.md) — единая точка входа в систему
