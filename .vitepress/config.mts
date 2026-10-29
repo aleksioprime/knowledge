@@ -2,10 +2,30 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { defineConfig, type DefaultTheme } from 'vitepress'
 import { readContents, contentsTarget } from './contents.mjs'
+import { exampleItems, exampleTitle } from './examples.mjs'
 
 const ROOT = path.resolve(__dirname, '..')
 const DOCS = path.join(ROOT, 'docs') // база знаний; в корне репозитория только служебные файлы
 const REPO = 'https://github.com/aleksioprime/knowledge'
+
+// Блок «Примеры кода» в конце страницы: ссылка на GitHub и архив для скачивания (архивы собирает
+// pack-examples.mjs после сборки). Показывается на README папки с examples/, на заметках, которые
+// упоминают examples/, и на страницах самих примеров
+function examplesSection(relativePath: string, src: string) {
+  const dir = path.posix.dirname(relativePath)
+  const line = (title: string, rel: string) =>
+    `- **${title}** — [на GitHub](${REPO}/tree/main/docs/${rel}) · [скачать zip](/${rel}.zip)`
+  const inExample = dir.match(/^(.*?\/|)examples(?:\/|$)/)
+  if (inExample) {
+    const item = exampleItems(path.join(DOCS, inExample[1], 'examples'), DOCS).find((i) => dir === i.rel || dir.startsWith(i.rel + '/'))
+    return item ? `\n\n## Скачать пример\n\n${line(exampleTitle(item), item.rel)}\n` : ''
+  }
+  const isReadme = path.posix.basename(relativePath) === 'README.md'
+  if (!isReadme && !/\bexamples\//.test(src)) return ''
+  const items = exampleItems(path.join(DOCS, dir, 'examples'), DOCS)
+  if (!items.length) return ''
+  return `\n\n## Примеры кода\n\n${items.map((i) => line(exampleTitle(i), i.rel)).join('\n')}\n`
+}
 
 // Разделы берутся из главного README: группы — заголовки «## Группа»,
 // разделы — строки «- [Название](группа/раздел/README.md) — описание» под ними
@@ -108,6 +128,9 @@ export default defineConfig({
     // Якоря заголовков как на GitHub: ссылки вида #3-ограничение-частоты работают и в репозитории, и на сайте
     anchor: { slugify: githubSlug },
     config(md) {
+      md.core.ruler.before('normalize', 'examples_section', (state) => {
+        if (state.env.relativePath) state.src += examplesSection(state.env.relativePath, state.src)
+      })
       // Заметки пишутся для GitHub: «<username>» в тексте — это плейсхолдер, а не тег.
       // Пропускаем только безопасный HTML и компоненты сайта, остальное показываем как текст
       md.core.ruler.push('escape_unknown_html', (state) => {
