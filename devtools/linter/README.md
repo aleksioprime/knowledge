@@ -239,4 +239,4 @@ jobs:
 
 ## Содержание
 
-- [Сценарии: миграция legacy → ruff, конфиги](scenarios.ipynb)
+- [Сценарии: миграция legacy → ruff, конфиги](scenarios.md)
