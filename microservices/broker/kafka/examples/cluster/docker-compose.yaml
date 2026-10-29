@@ -1,0 +1,87 @@
+# Кластер Kafka в режиме KRaft: один контроллер и три брокера.
+# Контроллер вынесен отдельно, чтобы можно было останавливать брокеры
+# и не терять кворум метаданных (в продакшене контроллеров три).
+
+x-broker: &broker
+  image: apache/kafka:4.1.0
+  depends_on:
+    - controller
+  healthcheck:
+    test: ["CMD-SHELL", "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 > /dev/null"]
+    interval: 5s
+    retries: 30
+
+x-broker-env: &broker-env
+  KAFKA_PROCESS_ROLES: broker
+  KAFKA_CONTROLLER_QUORUM_VOTERS: 1@controller:9093
+  KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+  KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT
+  KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+  KAFKA_LOG_DIRS: /var/lib/kafka/data
+  KAFKA_DEFAULT_REPLICATION_FACTOR: 3
+  KAFKA_MIN_INSYNC_REPLICAS: 2
+  KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+  KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+  KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
+  KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+  KAFKA_HEAP_OPTS: -Xms256m -Xmx256m
+
+services:
+  controller:
+    image: apache/kafka:4.1.0
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@controller:9093
+      KAFKA_LISTENERS: CONTROLLER://0.0.0.0:9093
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      # Настройки по умолчанию для новых топиков в KRaft берутся у контроллера
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 3
+      KAFKA_MIN_INSYNC_REPLICAS: 2
+      KAFKA_HEAP_OPTS: -Xms192m -Xmx192m
+    volumes:
+      - controller_data:/var/lib/kafka/data
+
+  kafka-1:
+    <<: *broker
+    ports:
+      - "39092:39092"
+    environment:
+      <<: *broker-env
+      KAFKA_NODE_ID: 101
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,EXTERNAL://0.0.0.0:39092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-1:9092,EXTERNAL://127.0.0.1:39092
+    volumes:
+      - kafka_1_data:/var/lib/kafka/data
+
+  kafka-2:
+    <<: *broker
+    ports:
+      - "39093:39093"
+    environment:
+      <<: *broker-env
+      KAFKA_NODE_ID: 102
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,EXTERNAL://0.0.0.0:39093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-2:9092,EXTERNAL://127.0.0.1:39093
+    volumes:
+      - kafka_2_data:/var/lib/kafka/data
+
+  kafka-3:
+    <<: *broker
+    ports:
+      - "39094:39094"
+    environment:
+      <<: *broker-env
+      KAFKA_NODE_ID: 103
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,EXTERNAL://0.0.0.0:39094
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-3:9092,EXTERNAL://127.0.0.1:39094
+    volumes:
+      - kafka_3_data:/var/lib/kafka/data
+
+volumes:
+  controller_data:
+  kafka_1_data:
+  kafka_2_data:
+  kafka_3_data:

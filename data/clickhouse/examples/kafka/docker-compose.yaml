@@ -1,0 +1,76 @@
+services:
+  kafka:
+    image: apache/kafka:4.1.0
+    ports:
+      - "39192:39192"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093,EXTERNAL://0.0.0.0:39192
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,EXTERNAL://127.0.0.1:39192
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_NUM_PARTITIONS: 3
+      KAFKA_HEAP_OPTS: -Xms256m -Xmx256m
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 > /dev/null"]
+      interval: 5s
+      retries: 30
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:26.3.62.3
+    restart: unless-stopped
+    ports:
+      - "38123:8123"
+    environment:
+      CLICKHOUSE_USER: ugc
+      CLICKHOUSE_PASSWORD: ugc
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+    volumes:
+      - ./clickhouse/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./clickhouse/low-memory.xml:/etc/clickhouse-server/config.d/low-memory.xml:ro
+      - ./research:/scripts:ro
+      - clickhouse_data:/var/lib/clickhouse
+      - bench_data:/research
+    ulimits:
+      nofile: 262144
+    depends_on:
+      kafka:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8123/ping || exit 1"]
+      interval: 5s
+      retries: 30
+
+  api:
+    build: ./api
+    image: kb-ugc-api:local
+    ports:
+      - "38000:8000"
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    depends_on:
+      kafka:
+        condition: service_healthy
+
+  # Только для сравнения хранилищ: docker compose --profile research up -d
+  postgres:
+    image: postgres:17-alpine
+    profiles: [research]
+    ports:
+      - "35432:5432"
+    environment:
+      POSTGRES_USER: ugc
+      POSTGRES_PASSWORD: ugc
+      POSTGRES_DB: ugc
+    volumes:
+      - ./research:/scripts:ro
+      - postgres_data:/var/lib/postgresql/data
+      - bench_data:/research
+
+volumes:
+  clickhouse_data:
+  postgres_data:
+  bench_data:  # CSV для сравнения хранилищ, чтобы не класть его в репозиторий

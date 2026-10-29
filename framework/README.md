@@ -5,6 +5,7 @@
 ## Содержание
 
 - [FastAPI](fast_api/README.md) — современный асинхронный веб-фреймворк
+- [Flask](flask/README.md) — минималистичный WSGI-фреймворк: контексты, фабрика и Blueprints, async view, gunicorn, тесты, поддержка legacy-кода
 - [Django](django/README.md) — «всё включено»: структура проекта, ORM, админка, Django REST Framework
 - [Celery](celery/README.md) — распределённая очередь фоновых задач
 - [Dramatiq](dramatiq/README.md) — простая и быстрая альтернатива Celery

@@ -1,0 +1,63 @@
+# Учебный шардированный кластер MongoDB 7.0:
+#   cfg       — config server (репликасет cfgrs из одной ноды)
+#   shard1a   — первый шард, репликасет rs1
+#   shard2a   — второй шард, репликасет rs2 из одной ноды
+#   mongos    — маршрутизатор, единственная точка входа для приложения: localhost:37017
+#   init      — одноразовый контейнер: инициализирует репликасеты и добавляет шарды
+#
+# С профилем replica к rs1 добавляются ещё две ноды (shard1b, shard1c) — на них видно выборы.
+# Каждый mongod занимает 150–300 МБ, поэтому по умолчанию кластер собран из одиночных нод.
+#
+# docker compose -p kb-mongo up -d
+# docker compose -p kb-mongo --profile replica up -d
+# docker compose -p kb-mongo --profile replica down -v
+
+x-mongod: &mongod
+  image: mongo:7.0
+  restart: unless-stopped
+
+services:
+  cfg:
+    <<: *mongod
+    command: mongod --configsvr --replSet cfgrs --port 27017 --bind_ip_all --wiredTigerCacheSizeGB 0.25
+    volumes: [cfg:/data/configdb]
+
+  shard1a:
+    <<: *mongod
+    command: mongod --shardsvr --replSet rs1 --port 27017 --bind_ip_all --wiredTigerCacheSizeGB 0.25
+    volumes: [shard1a:/data/db]
+  shard1b:
+    <<: *mongod
+    profiles: [replica]
+    command: mongod --shardsvr --replSet rs1 --port 27017 --bind_ip_all --wiredTigerCacheSizeGB 0.25
+    volumes: [shard1b:/data/db]
+  shard1c:
+    <<: *mongod
+    profiles: [replica]
+    command: mongod --shardsvr --replSet rs1 --port 27017 --bind_ip_all --wiredTigerCacheSizeGB 0.25
+    volumes: [shard1c:/data/db]
+
+  shard2a:
+    <<: *mongod
+    command: mongod --shardsvr --replSet rs2 --port 27017 --bind_ip_all --wiredTigerCacheSizeGB 0.25
+    volumes: [shard2a:/data/db]
+
+  mongos:
+    <<: *mongod
+    command: mongos --configdb cfgrs/cfg:27017 --port 27017 --bind_ip_all
+    ports: ["37017:27017"]
+    depends_on: [cfg]
+
+  init:
+    image: mongo:7.0
+    restart: "no"
+    volumes: [./init.sh:/init.sh:ro]
+    entrypoint: ["bash", "/init.sh"]
+    depends_on: [cfg, shard1a, shard2a, mongos]
+
+volumes:
+  cfg:
+  shard1a:
+  shard1b:
+  shard1c:
+  shard2a:

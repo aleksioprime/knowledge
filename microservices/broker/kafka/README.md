@@ -22,3 +22,5 @@ Kafka обеспечивает At most once и At least once модели гар
 - [Пример: simple](examples/simple/README.md)
 - [Kafka в FastAPI: события между сервисами](docs/fastapi.md) — ключи и партиции, группы потребителей, фиксация смещений, перечитывание истории
 - [Пример: fastapi](examples/fastapi/README.md) — сервис задач публикует события, сервис аналитики их считает
+- [Kafka изнутри: надёжность и хранение](docs/internals.md) — брокеры и KRaft, сегменты, репликация и ISR, `acks` и `min.insync.replicas`, retention и компакция, лаг, exactly once, число партиций
+- [Пример: cluster](examples/cluster/README.md) — три брокера: что теряется при отказах, компакция, лаг группы

@@ -1,0 +1,34 @@
+filebeat.autodiscover:
+  providers:
+    - type: docker
+      templates:
+        # Только app и nginx этого проекта, а не всё, что запущено в Docker
+        - condition:
+            regexp:
+              docker.container.name: "^kb-elk-(app|nginx)-"
+          config:
+            - type: filestream
+              id: container-${data.docker.container.id}
+              paths:
+                - /var/lib/docker/containers/${data.docker.container.id}/*.log
+              parsers:
+                - container: ~
+              fields:
+                # service — объект в схеме ECS, поэтому имя кладём в service.name, а не в service
+                service.name: ${data.docker.container.labels.com.docker.compose.service}
+              fields_under_root: true
+
+processors:
+  # Строка лога — JSON: раскладываем её поля в корень документа
+  - decode_json_fields:
+      fields: ["message"]
+      target: ""
+      overwrite_keys: true
+      add_error_key: true
+
+output.elasticsearch:
+  hosts: ["http://elasticsearch:9200"]
+
+setup.ilm.policy_name: logs-7d
+setup.ilm.policy_file: /usr/share/filebeat/ilm-policy.json
+setup.ilm.overwrite: true

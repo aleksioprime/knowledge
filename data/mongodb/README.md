@@ -8,8 +8,11 @@
 
 1. [Основы](docs/basics.md) — документы и коллекции, поиск, операторы изменения, индексы, вложение или ссылка
 2. [Агрегации](docs/aggregation.md) — конвейер `$match` → `$group` → `$sort`, `$unwind`, `$lookup`, `$facet`
+3. [Шардирование и кластер](docs/sharding.md) — репликасеты, `writeConcern`, mongos и config servers, ключ шардирования, чанки и балансировщик; пример кластера в [examples/cluster](examples/cluster/)
+4. [Пользовательский контент](docs/ugc.md) — оценки, комментарии и закладки: схема, уникальность и upsert, счётчики, пагинация, `AsyncMongoClient` и Beanie
 
 ## Связанные темы
 
 - [SQL](../sql/README.md) — реляционный подход для сравнения
 - [PostgreSQL: JSONB](../postgres/README.md) — документы внутри реляционной базы
+- [Как базы данных хранят данные](../storage/README.md) — B-дерево, LSM, сжатие

@@ -11,6 +11,8 @@
 - [MongoDB](mongodb/README.md) — документоориентированная NoSQL БД
 - [Redis](redis/README.md) — in-memory key-value store
 - [ClickHouse](clickhouse/README.md) — колоночная аналитическая СУБД
+- [Хранение данных](storage/README.md) — строки и колонки, B-дерево и LSM, алгоритмы сжатия
 - [Elasticsearch](elasticsearch/README.md) — поисковый движок и аналитика
 - [S3](s3/README.md) — объектное хранилище
 - [Airflow](airflow/README.md) — оркестратор пайплайнов данных
+- [Apache Spark](spark/README.md) — распределённая обработка больших данных, MapReduce, PySpark

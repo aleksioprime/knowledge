@@ -229,4 +229,8 @@ ClickHouse не лучший выбор, если:
 
 ## Содержание
 
-> Заметки и примеры будут добавляться по мере проработки темы.
+- [Из Kafka в ClickHouse](docs/kafka.md) — движок Kafka и materialized view, свой консьюмер с пачками, `Too many parts`, async insert, `ORDER BY` и `PARTITION BY` для событий
+- [Пример: kafka](examples/kafka/README.md) — FastAPI → Kafka → ClickHouse, нагрузка 100 тыс. событий
+- [Как выбрать аналитическое хранилище: исследование](docs/research.md) — методика и мини-замер ClickHouse против PostgreSQL на 10 млн событий
+- [Пример: simple](examples/simple/README.md) — один сервер и Python-клиент
+- [Пример: nodes](examples/nodes/README.md) — кластер из четырёх узлов
