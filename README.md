@@ -48,4 +48,4 @@ npm run check-links
 - `session=имя` связывает блоки одного языка в цепочку: перед запуском молча выполняются блоки выше с тем же именем;
 - `setup=имя` помечает подготовку (например, таблицы с данными), а `uses=имя` выполняет перед блоком только её — так примеры не тянут за собой все блоки выше. Их можно сочетать: `session=шаги uses=данные`.
 
-Пример анимации процесса — [цикл событий asyncio наглядно](docs/languages/python/concurrency/event_loop_visual.md).
+Анимации процессов — компоненты Vue в `.vitepress/theme/components/`, в заметку они вставляются тегом, например `<EventLoopDemo />`. Примеры: [цикл событий asyncio](docs/languages/python/concurrency/event_loop_visual.md), [гонка потоков и Lock](docs/languages/python/concurrency/race_visual.md), [партиции Kafka](docs/backend/microservices/broker/kafka/partitions_visual.md), [поиск по B-tree](docs/backend/databases/postgres/btree_visual.md).

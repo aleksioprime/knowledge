@@ -152,6 +152,7 @@ curl localhost:8011/stats
 
 ## Связанные темы
 
+- [Партиции и группы потребителей наглядно](partitions_visual.md)
 - [Apache Kafka: основные понятия](README.md)
 - [Простые примеры Kafka](examples/simple/README.md)
 - [NATS](../nats/README.md) — более лёгкая альтернатива для событий

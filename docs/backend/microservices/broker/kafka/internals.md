@@ -317,6 +317,7 @@ stats  task-events  0          0               0               0    -
 
 ## Связанные темы
 
+- [Партиции и группы потребителей наглядно](partitions_visual.md)
 - [Apache Kafka: основные понятия](README.md)
 - [Kafka в FastAPI](fastapi.md) — ключи, группы, фиксация смещений
 - [Пример: кластер из трёх брокеров](examples/cluster/README.md)

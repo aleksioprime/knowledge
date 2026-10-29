@@ -14,6 +14,7 @@
 - [Асинхронность (asyncio)](async.md)
 - [Цикл событий своими руками](event_loop.md) — планировщик на генераторах и selectors
 - [Многопоточность (threading)](multithreading.md)
+- [Гонка потоков и Lock наглядно](race_visual.md) — анимация потерянного обновления и критической секции
 - [Процессы (multiprocessing)](multiprocessing.md)
 - [Пул потоков (ThreadPoolExecutor)](thread_pool.md)
 - [Сокеты](sockets.md)

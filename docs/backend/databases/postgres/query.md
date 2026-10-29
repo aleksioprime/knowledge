@@ -341,6 +341,7 @@ INSERT INTO orders (order_number) VALUES ('A1');
 
 ## Связанные темы
 
+- [Поиск по индексу B-tree наглядно](btree_visual.md)
 - [Проектирование схемы](schema_design.md)
 - [Секционирование таблиц](partitioning.md)
 - [Транзакции](transaction.md)

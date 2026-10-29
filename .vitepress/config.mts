@@ -66,7 +66,7 @@ const HTML_TAGS = new Set([
   'details', 'summary', 'ul', 'ol', 'li', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'h1', 'h2', 'h3', 'h4',
   'blockquote', 'center', 'small', 'mark', 'figure', 'figcaption', 'picture', 'source', 'video',
 ])
-const COMPONENTS = new Set(['RunCode', 'EventLoopDemo'])
+const COMPONENTS = new Set(['RunCode', 'EventLoopDemo', 'RaceDemo', 'KafkaDemo', 'BTreeDemo'])
 
 function isAllowedHtml(html: string) {
   if (/^\s*<!--/.test(html)) return true

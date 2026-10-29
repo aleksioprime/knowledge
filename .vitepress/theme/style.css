@@ -11,3 +11,34 @@
   --demo-waiting: #fbbf24;
   --demo-done: #9ca3af;
 }
+
+/* Общая рамка анимаций: вкладки сценариев, пояснение к шагу, кнопки управления */
+.demo {
+  margin: 24px 0;
+  padding: 16px;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 12px;
+  background: var(--vp-c-bg-soft);
+}
+.demo .tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+.demo .tabs button {
+  padding: 4px 12px;
+  font-family: var(--vp-font-family-mono);
+  font-size: 13px;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 999px;
+  color: var(--vp-c-text-2);
+}
+.demo .tabs button.active { border-color: var(--vp-c-brand-1); color: var(--vp-c-brand-1); background: var(--vp-c-brand-soft); }
+.demo .note { min-height: 3.2em; margin: 16px 0 12px; line-height: 1.6; }
+.demo .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.demo .controls button {
+  min-width: 36px;
+  padding: 4px 10px;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 6px;
+  background: var(--vp-c-bg);
+}
+.demo .controls button:hover { border-color: var(--vp-c-brand-1); }
+.demo .controls .play { background: var(--vp-c-brand-3); border-color: var(--vp-c-brand-3); color: var(--vp-c-white); }
+.demo .counter-label { margin-left: auto; font-size: 12px; color: var(--vp-c-text-2); }

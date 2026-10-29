@@ -126,5 +126,6 @@ print(counter)
 ## Связанные темы
 
 - [Многозадачность в Python](README.md)
+- [Гонка потоков и Lock наглядно](race_visual.md) — анимация потерянного обновления
 - [Процессы](multiprocessing.md)
 - [Пул потоков](thread_pool.md)
