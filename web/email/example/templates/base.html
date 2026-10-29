@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="ru">
+<head><meta charset="utf-8"><title>{{ subject }}</title></head>
+<body style="font-family: Arial, sans-serif; color: #222;">
+  <div style="max-width: 560px; margin: 0 auto;">
+    <p style="font-size: 20px; font-weight: bold;">Задачник</p>
+    {% block content %}{% endblock %}
+    <hr>
+    <p style="font-size: 12px; color: #777;">
+      Вы получили письмо, потому что включили уведомления о задачах.
+      <a href="{{ unsubscribe_url }}">Отписаться</a>
+    </p>
+  </div>
+</body>
+</html>

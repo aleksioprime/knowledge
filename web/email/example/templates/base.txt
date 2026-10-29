@@ -1,0 +1,4 @@
+{% block content %}{% endblock %}
+
+--
+Задачник. Отписаться от уведомлений: {{ unsubscribe_url }}

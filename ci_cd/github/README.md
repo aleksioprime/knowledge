@@ -162,6 +162,119 @@ jobs:
 - **на сервере** — пользователь `deploy` с ключом, Docker и `docker-compose.yaml`, где у сервиса указан `image: ghcr.io/.../tasker:${TAG}` вместо `build: .`. Как подготовить сервер, описано в разделе [Linux](../../linux/README.md);
 - **окружение `production`** в Settings → Environments, если нужно ручное подтверждение деплоя.
 
+## Несколько версий Python, отчёты и сообщение о результате
+
+Ещё три вещи, которые часто добавляют в проверки pull request:
+
+- прогнать тесты на всех версиях Python, которые поддерживает проект;
+- сохранить отчёты, чтобы не искать причину падения в логах;
+- написать в чат команды, чем закончилась проверка.
+
+```yaml
+on:
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: tasker-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - run: pip install ruff==0.8.4 mypy==1.13.0
+      - name: Линтер
+        run: ruff check . --output-format=github
+      - name: Проверка типов
+        run: mypy app
+
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.12', '3.13']
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: pip install -r requirements-dev.txt
+      - name: Тесты
+        run: pytest --junitxml=report.xml --cov=app --cov-report=html
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: report-${{ matrix.python-version }}
+          path: |
+            pet/tasker/report.xml
+            pet/tasker/htmlcov/
+
+  notify:
+    runs-on: ubuntu-latest
+    needs: [lint, test]
+    if: always()
+    permissions:
+      actions: read
+    steps:
+      - name: Сообщить в Telegram
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          if echo "$RESULTS" | grep -qE 'failure|cancelled'; then
+            status='с ошибкой'
+            failed=$(gh api --paginate "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/jobs?per_page=100" \
+              --jq '.jobs[] | select(.conclusion == "failure")
+                    | "\(.name): \([.steps[] | select(.conclusion == "failure") | .name] | join(", "))"')
+          else
+            status='успешно'
+            failed=''
+          fi
+          text=$(printf '%s: пайплайн для %s завершился %s\n%s\n%s/%s/actions/runs/%s' \
+            "$GITHUB_REPOSITORY" "${SHA:0:7}" "$status" "$failed" \
+            "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID")
+          curl -sS --fail-with-body -o /dev/null "https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage" \
+            --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" --data-urlencode "text=${text}"
+```
+
+Это фрагмент, а не файл из репозитория: `defaults` и `paths` — как в минимальном примере выше. [actionlint](https://github.com/rhysd/actionlint) 1.7.12 замечаний к нему не нашёл.
+
+- **`strategy.matrix`** превращает один job в несколько: `test (3.12)` и `test (3.13)` идут параллельно. `fail-fast: false` не даёт остановить вторую версию, когда упала первая. Иначе не видно, ломается код везде или только на одной версии.
+- **`--output-format=github`** выводит замечания ruff так, что GitHub показывает их прямо в строках diff pull request.
+- **`upload-artifact`** с `if: always()` сохраняет отчёты и при упавших тестах: JUnit XML и HTML-отчёт о покрытии. Их можно скачать со страницы запуска. По умолчанию артефакты хранятся 90 дней, срок меняется параметром `retention-days`.
+- **`concurrency`** с `cancel-in-progress` отменяет старый запуск, если в тот же pull request пришёл новый коммит. Минуты не тратятся на проверку кода, который уже устарел.
+- **`notify`** ждёт остальные job (`needs`), а `if: always()` запускает его, даже когда они упали. Иначе сообщение приходило бы только об успехе. Результаты job берутся из `needs.*.result`. Названия упавших job и шагов `needs` не знает, поэтому скрипт берёт их из API запусков через `gh`. Для этого job нужно право `actions: read`.
+- **Секреты:** токен бота от `@BotFather` и id чата лежат в Secrets репозитория.
+- **Pull request из форков** секретов не получают, и сообщение не уйдёт. Для открытых проектов это нормально.
+
+Пример сообщения. Его собрал тот же скрипт: вместо отправки в Telegram был вывод на экран, разбирался настоящий упавший запуск из репозитория CPython:
+
+```text
+python/cpython: пайплайн для 0123456 завершился с ошибкой
+Sanitizers / TSan (free-threading): Tests
+All required checks pass: Check whether the needed jobs succeeded or failed
+https://github.com/python/cpython/actions/runs/40835280743
+```
+
+Слева от двоеточия — job, справа — упавший шаг. Хэш коммита в этой проверке подставной.
+
+**Запрет пушить в `main`** настраивается не в workflow, а в Settings → Rules → Rulesets для ветки `main`:
+
+- требовать pull request;
+- требовать успешных проверок (выбрать нужные job, например `lint` и `test (3.12)`);
+- запретить force push.
+
+Без этого проверки только информируют: слить красный pull request или запушить мимо него всё ещё можно.
+
 ## Частые ошибки
 
 - **Секреты в YAML.** Пароль, вписанный прямо в workflow, виден всем, у кого есть доступ к репозиторию. Только `${{ secrets.ИМЯ }}`. GitHub скрывает значения секретов в логах, но не защищает от `echo $SECRET | base64`.

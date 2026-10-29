@@ -1,0 +1,40 @@
+services:
+  rabbitmq:
+    image: rabbitmq:4-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: notify
+      RABBITMQ_DEFAULT_PASS: notify
+    ports:
+      - "45672:5672"
+      - "41567:15672"
+    mem_limit: 384m
+    healthcheck:
+      # проверка через HTTP API: rabbitmq-diagnostics от root может испортить права на .erlang.cookie
+      test: ["CMD-SHELL", "wget -qO- http://notify:notify@127.0.0.1:15672/api/health/checks/alarms"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: notify
+      POSTGRES_PASSWORD: notify
+      POSTGRES_DB: notify
+    ports:
+      - "45433:5432"
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    mem_limit: 192m
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "notify"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  mailpit:
+    image: axllent/mailpit:v1.24
+    ports:
+      - "42025:1025"
+      - "48026:8025"
+    mem_limit: 64m

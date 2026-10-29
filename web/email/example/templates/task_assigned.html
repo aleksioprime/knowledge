@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+{% block content %}
+<p>{{ user.name }}, здравствуйте!</p>
+<p>{{ author.name }} назначил(а) вам задачу <b>{{ task.title }}</b>.</p>
+<p>Срок: {{ task.due_at | localtime(user.timezone) }}.
+{% if task.labels %} Метки: {{ task.labels | join(', ') }}.{% endif %}</p>
+<p><a href="{{ task_url }}">Открыть задачу</a></p>
+{% endblock %}

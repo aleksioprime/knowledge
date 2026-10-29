@@ -1,0 +1,12 @@
+{% extends 'base.txt' %}
+{% block content %}
+{{ user.name }}, здравствуйте!
+
+{{ author.name }} назначил(а) вам задачу «{{ task.title }}».
+Срок: {{ task.due_at | localtime(user.timezone) }}.
+{% if task.labels %}
+Метки: {{ task.labels | join(', ') }}.
+{% endif %}
+
+Открыть задачу: {{ task_url }}
+{% endblock %}

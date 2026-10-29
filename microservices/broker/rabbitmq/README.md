@@ -237,6 +237,7 @@ volumes:
 ```
 ## Содержание
 
+- [Надёжная обработка в RabbitMQ](docs/reliability.md) — команды и события, именование, publisher confirms, ack и prefetch, повторы через TTL и DLX, DLQ, регулирование массовой рассылки
 - [Пример: simple_queue (точка-точка)](examples/simple_queue/)
 - [Пример: simple_pub_sub (fanout)](examples/simple_pub_sub/)
 - [Пример: simple_topic (topic exchange)](examples/simple_topic/)
@@ -244,3 +245,4 @@ volumes:
 - [Пример: simple_delay (отложенная доставка)](examples/simple_delay/)
 - [Пример: simple_dlq (Dead Letter Queue)](examples/simple_dlq/)
 - [Пример: fastapi_rpc (интеграция с FastAPI)](examples/fastapi_rpc/README.md)
+- [Пример: notifications (мини-система уведомлений: API, воркер с повторами и DLQ, планировщик)](examples/notifications/README.md)

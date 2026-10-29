@@ -15,6 +15,7 @@
 7. [Документация API](docs/openapi.md) — метаданные, описания эндпоинтов и полей, ошибки в схеме, выгрузка `openapi.json` и проверка в CI
 8. [Асинхронный сервис поиска на Elasticsearch](docs/elasticsearch.md) — `lifespan`, слой сервисов, кэш ответов, пагинация, запуск в продакшене; [пример](examples/search_api/README.md)
 9. [Сессии на JWT: refresh, выход, роли](docs/auth_sessions.md) — пара access + refresh, ротация и повторное использование refresh, выход и «выйти везде», история входов, RBAC и `require_permission`; [пример Auth-сервиса](examples/auth_service/README.md)
+10. [Уведомления в реальном времени](docs/realtime.md) — polling, long polling, SSE и WebSocket, менеджер соединений, токен при подключении и код 1008, доставка между экземплярами через Redis pub/sub, догрузка пропущенного, пинги и nginx, лимит сообщений; [пример](examples/realtime/README.md)
 
 ## Связанные темы
 
