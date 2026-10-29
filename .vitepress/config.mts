@@ -6,14 +6,34 @@ const ROOT = path.resolve(__dirname, '..')
 const REPO = 'https://github.com/aleksioprime/knowledge'
 const EXCLUDE = ['node_modules', '.git', '.vitepress', '.claude', '.github', '.vscode']
 
-// Разделы берутся из главного README: «- [Название](папка/README.md) — описание»
+// Разделы берутся из главного README: группы — заголовки «### Группа»,
+// разделы — строки «- [Название](папка/README.md) — описание» под ними
 function readSections() {
   const readme = fs.readFileSync(path.join(ROOT, 'README.md'), 'utf8')
-  const sections: { text: string; dir: string }[] = []
-  for (const m of readme.matchAll(/^- \[(.+?)\]\(([\w-]+)\/README\.md\)/gm)) {
-    sections.push({ text: m[1], dir: m[2] })
+  const sections: { text: string; dir: string; group: string }[] = []
+  let group = 'Разделы'
+  for (const line of readme.split('\n')) {
+    const heading = line.match(/^###\s+(.+)/)
+    if (heading) group = heading[1].trim()
+    const m = line.match(/^- \[(.+?)\]\(([\w-]+)\/README\.md\)/)
+    if (m) sections.push({ text: m[1], dir: m[2], group })
   }
   return sections
+}
+
+// Меню: группа из нескольких разделов — выпадающий список, из одного — простая ссылка
+function buildNav(sections: ReturnType<typeof readSections>): DefaultTheme.NavItem[] {
+  const groups = new Map<string, typeof sections>()
+  for (const s of sections) groups.set(s.group, [...(groups.get(s.group) ?? []), s])
+  return [...groups].map(([text, items]) =>
+    items.length === 1
+      ? { text, link: `/${items[0].dir}/`, activeMatch: `^/${items[0].dir}/` }
+      : {
+          text,
+          items: items.map((s) => ({ text: s.text, link: `/${s.dir}/`, activeMatch: `^/${s.dir}/` })),
+          activeMatch: `^/(${items.map((s) => s.dir).join('|')})/`,
+        },
+  )
 }
 
 function titleOf(file: string) {
@@ -128,8 +148,13 @@ export default defineConfig({
         ?? ((tokens, idx, options, _env, self) => self.renderToken(tokens, idx, options))
       md.renderer.rules.link_open = (tokens, idx, options, env, self) => {
         const href = tokens[idx].attrGet('href')
-        if (href && !/^[a-z]+:|^#|^\//i.test(href) && !/\.md(#|$)/.test(href) && /\.\w+(#|$)/.test(href)) {
-          const dir = path.posix.dirname(env.relativePath ?? '')
+        const dir = path.posix.dirname(env.relativePath ?? '')
+        const readme = href?.match(/^([^:#]*?)(?:^|\/)README\.md(#.*)?$/)
+        if (href && readme && !/^[a-z]+:|^\//i.test(href)) {
+          // README.md папки стал её index-страницей: ссылка ведёт на папку, а не на /README
+          const target = path.posix.normalize(path.posix.join(dir, readme[1] || '.'))
+          tokens[idx].attrSet('href', (target === '.' ? '/' : `/${target}/`) + (readme[2] ?? ''))
+        } else if (href && !/^[a-z]+:|^#|^\//i.test(href) && !/\.md(#|$)/.test(href) && /\.\w+(#|$)/.test(href)) {
           tokens[idx].attrSet('href', `${REPO}/blob/main/${path.posix.normalize(path.posix.join(dir, href))}`)
           tokens[idx].attrSet('target', '_blank')
         }
@@ -138,9 +163,7 @@ export default defineConfig({
     },
   },
   themeConfig: {
-    nav: [
-      { text: 'Разделы', items: sections.map((s) => ({ text: s.text, link: `/${s.dir}/` })) },
-    ],
+    nav: buildNav(sections),
     sidebar,
     outline: { level: [2, 3], label: 'На странице' },
     search: {
