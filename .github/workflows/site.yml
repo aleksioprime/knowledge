@@ -30,6 +30,10 @@ jobs:
       - run: npm run build
         env:
           BASE: /knowledge/
+      # Якоря и ссылки на файлы репозитория; битые ссылки на заметки роняет уже сама сборка
+      - run: npm run check-links
+        env:
+          BASE: /knowledge/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

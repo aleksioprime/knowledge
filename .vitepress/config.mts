@@ -87,6 +87,15 @@ function isAllowedHtml(html: string) {
   return tags.length > 0 && tags.every((t) => HTML_TAGS.has(t.toLowerCase()) || COMPONENTS.has(t))
 }
 
+// Алгоритм github-slugger: нижний регистр, убрать всё, кроме букв, цифр, «_», «-» и пробелов, пробелы → «-»
+function githubSlug(text: string) {
+  return text.trim().toLowerCase().replace(/[^\p{L}\p{M}\p{N}\p{Pc} -]/gu, '').replace(/ /g, '-')
+}
+
+function isDir(p: string) {
+  return fs.existsSync(p) && fs.statSync(p).isDirectory()
+}
+
 const sections = readSections()
 const sidebar: DefaultTheme.Sidebar = {}
 for (const s of sections) {
@@ -103,10 +112,13 @@ export default defineConfig({
   srcExclude: ['**/node_modules/**', '_template.md', '**/CLAUDE.md'],
   // README.md в каждой папке становится её индексной страницей
   rewrites: (id) => id.replace(/(^|\/)README\.md$/, '$1index.md'),
-  // Ссылки на ноутбуки и исходники ведут в репозиторий, остальные битые ссылки не роняют сборку
-  ignoreDeadLinks: true,
+  // Битая ссылка на заметку роняет сборку; ссылки на localhost из инструкций по запуску — не битые.
+  // Якоря и ссылки на файлы репозитория после сборки проверяет .vitepress/check-links.mjs
+  ignoreDeadLinks: 'localhostLinks',
   markdown: {
     theme: { light: 'github-light', dark: 'github-dark' },
+    // Якоря заголовков как на GitHub: ссылки вида #3-ограничение-частоты работают и в репозитории, и на сайте
+    anchor: { slugify: githubSlug },
     config(md) {
       // Блок между <!-- site:hide --> и <!-- /site:hide --> виден только в репозитории:
       // там техническая информация (локальный запуск, оформление блоков кода)
@@ -160,6 +172,15 @@ export default defineConfig({
           // README.md папки стал её index-страницей: ссылка ведёт на папку, а не на /README
           const target = path.posix.normalize(path.posix.join(dir, readme[1] || '.'))
           tokens[idx].attrSet('href', (target === '.' ? '/' : `/${target}/`) + (readme[2] ?? ''))
+        } else if (href && !/^[a-z]+:|^#|^\//i.test(href) && isDir(path.join(ROOT, dir, href.split('#')[0]))) {
+          // Ссылка на папку: с README — её страница на сайте, без README (примеры кода) — папка на GitHub
+          const target = path.posix.normalize(path.posix.join(dir, href.split('#')[0])).replace(/\/$/, '')
+          if (fs.existsSync(path.join(ROOT, target, 'README.md'))) {
+            tokens[idx].attrSet('href', `/${target}/` + (href.includes('#') ? '#' + href.split('#')[1] : ''))
+          } else {
+            tokens[idx].attrSet('href', `${REPO}/tree/main/${target}`)
+            tokens[idx].attrSet('target', '_blank')
+          }
         } else if (href && !/^[a-z]+:|^#|^\//i.test(href) && !/\.md(#|$)/.test(href) && /\.\w+(#|$)/.test(href)) {
           tokens[idx].attrSet('href', `${REPO}/blob/main/${path.posix.normalize(path.posix.join(dir, href))}`)
           tokens[idx].attrSet('target', '_blank')
