@@ -229,7 +229,7 @@ with pg.cursor() as cur:
     print(cur.rowcount)  # 1 — строка обновлена
 ```
 
-`DO NOTHING` пропускает существующие строки, `DO UPDATE` обновляет их. `EXCLUDED` — строка, которую пытались вставить. Пример upsert-счётчика есть в [практических задачах](tasks.ipynb), здесь — применение к переносу.
+`DO NOTHING` пропускает существующие строки, `DO UPDATE` обновляет их. `EXCLUDED` — строка, которую пытались вставить. Пример upsert-счётчика есть в [практических задачах](tasks.md), здесь — применение к переносу.
 
 `ON CONFLICT` есть у `INSERT`, но не у `COPY`. Чтобы получить и скорость `COPY`, и терпимость к повторам, грузят во временную таблицу, а уже из неё переливают одним `INSERT ... SELECT`:
 
@@ -333,7 +333,7 @@ SQL-команда `COPY content.task FROM '/path/tasks.csv'` без обрат�
 
 - [Проектирование схемы](schema_design.md)
 - [PostgreSQL: индексы, транзакции, MVCC](../README.md)
-- [Практические задачи: upsert, CREATE INDEX CONCURRENTLY](tasks.ipynb)
+- [Практические задачи: upsert, CREATE INDEX CONCURRENTLY](tasks.md)
 - [Транзакции и оптимизация](../../sql/docs/transactions-and-optimization.md)
 - [dataclasses](../../../python/typing/dataclasses.md)
 - [Django](../../../framework/django/README.md)

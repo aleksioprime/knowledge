@@ -89,5 +89,5 @@ async def pay(order_id: int, session: AsyncSession = Depends(get_session)):
 - [Линтеры и форматтеры](../linter/README.md) — что проверять автоматически
 - [Git](../git/README.md) — ветки, rebase, история
 - [Принципы проектирования](../../design/docs/principles.md) — на что опираться в спорах об устройстве кода
-- [Потерянные обновления в PostgreSQL](../../data/postgres/docs/tasks.ipynb) — как исправить гонку из примера
+- [Потерянные обновления в PostgreSQL](../../data/postgres/docs/tasks.md) — как исправить гонку из примера
 - [GitHub Actions](../../ci_cd/github/README.md) — проверки до ревью

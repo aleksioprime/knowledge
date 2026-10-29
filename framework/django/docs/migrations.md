@@ -282,4 +282,4 @@ python manage.py sqlmigrate tasks 0005
 - [ORM](orm.md)
 - [Транзакции, массовые операции и сырой SQL](transactions.md)
 - [Alembic](../../../data/alembic/README.md) — миграции для SQLAlchemy
-- [PostgreSQL](../../../data/postgres/README.md) — индексы и блокировки; смена типа колонки без простоя — в [практических задачах](../../../data/postgres/docs/tasks.ipynb)
+- [PostgreSQL](../../../data/postgres/README.md) — индексы и блокировки; смена типа колонки без простоя — в [практических задачах](../../../data/postgres/docs/tasks.md)

@@ -184,4 +184,4 @@ r.publish('tasks:events', 'task 42 done')  # 1 — число получател
 
 - [Основы Redis](basics.md)
 - [Redis в FastAPI](fastapi.md)
-- [Потерянные обновления в PostgreSQL](../../postgres/docs/tasks.ipynb) — та же проблема гонки в SQL
+- [Потерянные обновления в PostgreSQL](../../postgres/docs/tasks.md) — та же проблема гонки в SQL

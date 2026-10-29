@@ -244,7 +244,7 @@ Task.objects.annotate(clean=RegexpReplace(F('title'), Value(r'\s+'), Value(' '),
 - [ORM](orm.md) — `F()`, `update()` и проблема N+1
 - [Сигналы](signals.md)
 - [Миграции](migrations.md) — `RunSQL` и `RunPython`
-- [Транзакции и уровни изоляции в PostgreSQL](../../../data/postgres/docs/transaction.ipynb); очередь на `SKIP LOCKED` — в [практических задачах](../../../data/postgres/docs/tasks.ipynb)
+- [Транзакции и уровни изоляции в PostgreSQL](../../../data/postgres/docs/transaction.md); очередь на `SKIP LOCKED` — в [практических задачах](../../../data/postgres/docs/tasks.md)
 - [Celery](../../celery/README.md) — фоновые задачи, которые ставят из `on_commit`
 - [Быстрая загрузка данных в PostgreSQL](../../../data/postgres/docs/bulk_load.md) — когда `bulk_create` мало: `COPY` и замеры
 - [Распределённые транзакции: Saga и Outbox](../../../design/docs/transactions.md) — когда одной базы мало

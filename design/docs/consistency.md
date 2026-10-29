@@ -24,7 +24,7 @@ COMMIT;
 - **Isolation (изолированность)** — параллельные транзакции не мешают друг другу. Насколько строго — задаёт уровень изоляции;
 - **Durability (надёжность)** — после `COMMIT` данные не потеряются, даже если сервер сразу выключится.
 
-Уровни изоляции, аномалии и блокировки разобраны в [транзакциях PostgreSQL](../../data/postgres/docs/transaction.ipynb) и [справочнике SQL](../../data/sql/docs/transactions-and-optimization.md).
+Уровни изоляции, аномалии и блокировки разобраны в [транзакциях PostgreSQL](../../data/postgres/docs/transaction.md) и [справочнике SQL](../../data/sql/docs/transactions-and-optimization.md).
 
 ## CAP — выбор при разделении сети
 
@@ -72,4 +72,4 @@ COMMIT;
 
 - [Распределённые транзакции: Saga и Outbox](transactions.md) — как перевести деньги между сервисами
 - [Масштабирование и репликация](scaling.md)
-- [Транзакции PostgreSQL](../../data/postgres/docs/transaction.ipynb)
+- [Транзакции PostgreSQL](../../data/postgres/docs/transaction.md)

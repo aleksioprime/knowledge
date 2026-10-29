@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { runPython, stopPython } from '../python-runner'
+import { runCode, stopCode, type Lang } from '../runner'
 
-const props = defineProps<{ code: string; session?: string }>()
+const props = withDefaults(defineProps<{ code: string; lang?: Lang; session?: string; setup?: string; uses?: string }>(), {
+  lang: 'python',
+})
 
 const root = ref<HTMLElement>()
 const original = decodeURIComponent(props.code).replace(/\n$/, '')
@@ -10,15 +12,21 @@ const source = ref(original)
 const editing = ref(false)
 const running = ref(false)
 const status = ref('')
-const lines = ref<{ kind: 'out' | 'err'; text: string }[]>([])
+type Item = { kind: 'out' | 'err'; text: string } | { kind: 'table'; fields: string[]; rows: unknown[][] }
+const lines = ref<Item[]>([])
 
 const changed = computed(() => source.value !== original)
 
-// Код блоков той же цепочки, стоящих на странице выше этого (с учётом правок читателя)
+// Код, который нужно молча выполнить перед блоком (с учётом правок читателя):
+// подготовка (setup с именем из uses, а без uses — из session) и блоки той же цепочки session выше
 function prelude() {
-  if (!props.session) return []
-  const blocks = [...document.querySelectorAll<HTMLElement>(`.run-python[data-session="${props.session}"]`)]
-  return blocks.slice(0, blocks.indexOf(root.value!)).map((el) => el.dataset.source ?? '')
+  const setup = props.uses ?? props.session
+  if (!setup) return []
+  const blocks = [...document.querySelectorAll<HTMLElement>(`.run-code[data-lang="${props.lang}"]`)]
+  return blocks
+    .slice(0, blocks.indexOf(root.value!))
+    .filter((el) => el.dataset.setup === setup || (props.session && el.dataset.session === props.session))
+    .map((el) => el.dataset.source ?? '')
 }
 
 const continuation = ref(false)
@@ -27,15 +35,16 @@ onMounted(() => (continuation.value = prelude().length > 0))
 // Вывод приходит кусками как есть; подряд идущие куски одного потока склеиваем
 function append(kind: 'out' | 'err', text: string) {
   const last = lines.value.at(-1)
-  if (last?.kind === kind) last.text += text
+  if (last && last.kind === kind) last.text += text
   else lines.value.push({ kind, text })
 }
 
 function run() {
   lines.value = []
   running.value = true
-  runPython(source.value, (m) => {
-    if (m.type === 'status') status.value = m.text
+  runCode(props.lang, source.value, (m) => {
+    if (m.type === 'table') lines.value.push({ kind: 'table', fields: m.fields, rows: m.rows })
+    else if (m.type === 'status') status.value = m.text
     else if (m.type === 'stdout') append('out', m.text)
     else if (m.type === 'stderr') append('err', m.text)
     else {
@@ -43,10 +52,23 @@ function run() {
       if (m.type === 'done') status.value = `Готово за ${m.text} с`
       else {
         status.value = 'Ошибка'
-        append('err', (lines.value.length && !lines.value.at(-1)!.text.endsWith('\n') ? '\n' : '') + lastLines(m.text))
+        const last = lines.value.at(-1)
+        const gap = last && last.kind !== 'table' && !last.text.endsWith('\n') ? '\n' : ''
+        append('err', gap + lastLines(m.text))
       }
     }
   }, prelude())
+}
+
+// Ячейка таблицы: NULL, объекты (JSONB, массивы) и даты показываем читаемо
+function cell(value: unknown) {
+  if (value === null || value === undefined) return 'NULL'
+  if (value instanceof Date) {
+    const iso = value.toISOString()
+    return iso.endsWith('T00:00:00.000Z') ? iso.slice(0, 10) : iso.replace('T', ' ').replace(/\.000Z$|Z$/, '')
+  }
+  if (typeof value === 'object') return JSON.stringify(value)
+  return String(value)
 }
 
 // У Pyodide в трассировке есть служебные кадры — оставляем то, что относится к коду заметки
@@ -63,15 +85,25 @@ function onKeydown(e: KeyboardEvent) {
     e.preventDefault()
     const el = e.target as HTMLTextAreaElement
     const { selectionStart: s, selectionEnd: end } = el
-    source.value = source.value.slice(0, s) + '    ' + source.value.slice(end)
-    requestAnimationFrame(() => el.setSelectionRange(s + 4, s + 4))
+    const indent = props.lang === 'python' ? '    ' : '  '
+    source.value = source.value.slice(0, s) + indent + source.value.slice(end)
+    requestAnimationFrame(() => el.setSelectionRange(s + indent.length, s + indent.length))
   }
 }
 </script>
 
 <template>
-  <div ref="root" class="run-python" :data-session="session" :data-source="source">
-    <div v-if="continuation" class="session">Продолжение примера: перед запуском молча выполняются блоки выше</div>
+  <div
+    ref="root"
+    class="run-code"
+    :data-lang="lang"
+    :data-session="session"
+    :data-setup="setup"
+    :data-source="source"
+  >
+    <div v-if="continuation" class="session">
+      {{ uses && !session ? 'Перед запуском молча выполняется подготовка выше' : 'Продолжение примера: перед запуском молча выполняются блоки выше' }}
+    </div>
     <div v-show="!editing" class="view"><slot /></div>
     <textarea
       v-if="editing"
@@ -83,19 +115,34 @@ function onKeydown(e: KeyboardEvent) {
     />
     <div class="toolbar">
       <button v-if="!running" class="btn primary" @click="run">▶ Запустить</button>
-      <button v-else class="btn danger" @click="stopPython">■ Остановить</button>
+      <button v-else class="btn danger" @click="stopCode(lang)">■ Остановить</button>
       <button class="btn" @click="editing = !editing">{{ editing ? 'Готово' : 'Изменить' }}</button>
       <button v-if="changed" class="btn" @click="source = original">Вернуть пример</button>
       <span class="status">{{ status }}</span>
       <span v-if="editing" class="hint">Ctrl/⌘ + Enter — запуск</span>
     </div>
-    <pre v-if="lines.length || running" class="output"><span
-      v-for="(l, i) in lines" :key="i" :class="l.kind">{{ l.text }}</span><span v-if="running" class="cursor">▍</span></pre>
+    <div v-if="lines.length || running" class="output">
+      <template v-for="(l, i) in lines" :key="i">
+        <div v-if="l.kind === 'table'" class="table-wrap">
+          <table>
+            <thead><tr><th v-for="f in l.fields" :key="f">{{ f }}</th></tr></thead>
+            <tbody>
+              <tr v-for="(row, r) in l.rows" :key="r">
+                <td v-for="(v, c) in row" :key="c" :class="{ null: v === null }">{{ cell(v) }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="rows-count">Строк: {{ l.rows.length }}</div>
+        </div>
+        <pre v-else :class="l.kind">{{ l.text }}</pre>
+      </template>
+      <span v-if="running" class="cursor">▍</span>
+    </div>
   </div>
 </template>
 
 <style scoped>
-.run-python {
+.run-code {
   margin: 16px 0;
   border: 1px solid var(--vp-c-divider);
   border-radius: 8px;
@@ -164,7 +211,20 @@ function onKeydown(e: KeyboardEvent) {
   background: var(--vp-c-bg);
   white-space: pre-wrap;
 }
+.output pre {
+  margin: 0;
+  font: inherit;
+  white-space: pre-wrap;
+  background: none;
+}
 .output .err { color: var(--vp-c-danger-1); }
+.table-wrap { margin: 4px 0 12px; overflow-x: auto; }
+.table-wrap table { display: table; margin: 0; font-size: 12.5px; border-collapse: collapse; }
+.table-wrap th, .table-wrap td { padding: 4px 10px; border: 1px solid var(--vp-c-divider); white-space: pre; text-align: left; }
+.table-wrap th { background: var(--vp-c-bg-soft); font-weight: 600; }
+.table-wrap tr { background: none; border: none; }
+.table-wrap td.null { color: var(--vp-c-text-3); font-style: italic; }
+.rows-count { margin-top: 4px; font-size: 12px; color: var(--vp-c-text-3); }
 .cursor { animation: blink 1s steps(2) infinite; color: var(--vp-c-text-3); }
 @keyframes blink { 50% { opacity: 0; } }
 </style>

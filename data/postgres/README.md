@@ -185,11 +185,10 @@ PostgreSQL строит граф ожидания, обнаруживает ци
 
 ## Содержание
 
-- [Подключение к БД](docs/connect.ipynb)
-- [Запросы (SELECT, JOIN, агрегации)](docs/query.ipynb)
-- [Транзакции и уровни изоляции](docs/transaction.ipynb)
-- [Дополнительные возможности](docs/extra.ipynb)
+- [Подключение из Python](docs/connect.md) — asyncpg: одиночное соединение и пул, fetch, fetchrow, fetchval, execute, параметры запроса
+- [Выполнение запроса, индексы и EXPLAIN](docs/query.md) — путь запроса, чтение плана, B-tree, Hash, GIN, GiST, BRIN, составные, частичные и функциональные индексы; примеры запускаются в браузере
+- [Транзакции, изоляция и блокировки](docs/transaction.md) — ACID, SAVEPOINT, уровни изоляции и аномалии, MVCC, блокировки строк и таблиц, deadlock
 - [Проектирование схемы](docs/schema_design.md) — схемы и search_path, bigint или uuid в ключе, timestamptz, text и varchar, внешние ключи, таблица связи многие-ко-многим, идемпотентный DDL-скрипт
 - [Партицирование таблиц](docs/partitioning.md) — RANGE, LIST, HASH, DEFAULT-партиция, отсечение партиций, DETACH и DROP вместо DELETE, ключи и индексы, SQLAlchemy и Alembic, замеры на 5 млн строк
 - [Быстрая загрузка данных](docs/bulk_load.md) — перенос из SQLite пачками, executemany, многострочный INSERT, ON CONFLICT, COPY, индексы при загрузке, замеры
-- [Практические задачи](docs/tasks.ipynb) — дубликаты, NOT IN и NULL, top-N в группе, индексы и EXPLAIN, keyset-пагинация, upsert, потерянные обновления, очередь на SKIP LOCKED, смена типа колонки без простоя
+- [Практические задачи](docs/tasks.md) — дубликаты, NOT IN и NULL, top-N в группе, индексы и EXPLAIN, keyset-пагинация, upsert, потерянные обновления, очередь на SKIP LOCKED, смена типа колонки без простоя; решения запускаются в браузере

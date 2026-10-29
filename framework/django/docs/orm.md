@@ -231,4 +231,4 @@ if settings.DEBUG:
 - [Транзакции, массовые операции и сырой SQL](transactions.md)
 - [Django REST Framework](drf.md)
 - [SQLAlchemy: связи и N+1](../../../data/sqlalchemy/docs/relationships.md) — та же проблема в другом ORM
-- [Потерянные обновления в PostgreSQL](../../../data/postgres/docs/tasks.ipynb)
+- [Потерянные обновления в PostgreSQL](../../../data/postgres/docs/tasks.md)

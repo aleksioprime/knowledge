@@ -79,7 +79,7 @@ const HTML_TAGS = new Set([
   'details', 'summary', 'ul', 'ol', 'li', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'h1', 'h2', 'h3', 'h4',
   'blockquote', 'center', 'small', 'mark', 'figure', 'figcaption', 'picture', 'source', 'video',
 ])
-const COMPONENTS = new Set(['RunPython', 'EventLoopDemo'])
+const COMPONENTS = new Set(['RunCode', 'EventLoopDemo'])
 
 function isAllowedHtml(html: string) {
   if (/^\s*<!--/.test(html)) return true
@@ -134,14 +134,15 @@ export default defineConfig({
       const defaultFence = md.renderer.rules.fence!
       md.renderer.rules.fence = (tokens, idx, options, env, self) => {
         const token = tokens[idx]
-        // ```python run — блок с кнопкой «Запустить»;
-        // ```python run session=имя — перед запуском выполняются предыдущие блоки с тем же именем
-        const m = token.info.match(/^python\s+run\b(?:.*\bsession=([\w-]+))?/)
+        // ```python run / ```sql run — блок с кнопкой «Запустить». Связи между блоками одного языка:
+        // session=имя — перед запуском выполняются все блоки выше из этой цепочки;
+        // setup=имя — подготовка (например, таблицы с данными), uses=имя — перед запуском выполняется только она
+        const m = token.info.match(/^(python|sql)\s+run\b(.*)$/)
         if (!m) return defaultFence(tokens, idx, options, env, self)
-        token.info = 'python'
+        token.info = m[1]
         const html = defaultFence(tokens, idx, options, env, self)
-        const session = m[1] ? ` session="${m[1]}"` : ''
-        return `<RunPython code="${encodeURIComponent(token.content)}"${session}>${html}</RunPython>`
+        const attrs = [...m[2].matchAll(/\b(session|setup|uses)=([\w-]+)/g)].map(([, k, v]) => ` ${k}="${v}"`).join('')
+        return `<RunCode lang="${m[1]}" code="${encodeURIComponent(token.content)}"${attrs}>${html}</RunCode>`
       }
 
       const defaultRender = md.renderer.rules.link_open
