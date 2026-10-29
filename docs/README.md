@@ -6,7 +6,10 @@
 
 - [Python](languages/python/README.md) — основы языка, функции, ООП, типизация, модули, стандартная библиотека, алгоритмы, конкурентность, livecoding
 - [JavaScript](languages/javascript/README.md) — основы языка, коллекции, асинхронность, модули и браузерные API
-- [Vue.js](languages/vue/README.md) — компоненты, реактивность, роутер, Pinia, формы и авторизация
+
+## Фронтенд
+
+- [Vue.js](frontend/vue/README.md) — компоненты, реактивность, роутер, Pinia, формы и авторизация
 
 ## Бэкенд
 

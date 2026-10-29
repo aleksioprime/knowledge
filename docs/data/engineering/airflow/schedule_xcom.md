@@ -5,32 +5,39 @@
 ## Минимальный пример
 
 ```python
-@task
-def extract() -> list[dict]:
-    return httpx.get(API_URL, timeout=10).json()
+# dags/todo_report.py
+from datetime import datetime
+
+from airflow.sdk import dag, task
 
 
-@task
-def transform(todos: list[dict]) -> list[dict]:
-    ...
+@dag(schedule='@daily', start_date=datetime(2026, 10, 1), catchup=False)
+def todo_report():
+    @task
+    def extract() -> list[dict]:
+        return [{'user_id': 1, 'total': 20, 'done': 11}, {'user_id': 2, 'total': 20, 'done': 8}]
+
+    @task
+    def load(stats: list[dict], ds: str | None = None) -> int:
+        print(f'{ds}: загружено строк — {len(stats)}')  # 2026-10-28: загружено строк — 2
+        return len(stats)
+
+    load(extract())  # результат extract() попадёт в load() через XCom
 
 
-@task
-def load(stats: list[dict], ds: str | None = None) -> int:
-    ...  # ds — '2026-10-28', дата этого запуска
-
-
-load(transform(extract()))
+todo_report()
 ```
 
-В логах видно, как результат каждой задачи сохраняется:
+В логах видно, как результат каждой задачи сохраняется, а `ds` приходит из запуска:
 
 ```text
-Done. Returned value was: [{'user_id': 1, 'total': 20, 'done': 11}, ...]
-Pushing xcom   task_id='transform'
+Done. Returned value was: [{'user_id': 1, 'total': 20, 'done': 11}, {'user_id': 2, 'total': 20, 'done': 8}]
+Pushing xcom   task_id='extract'
 ```
 
-## XCom: как задачи передают данные
+## Как это работает
+
+### XCom: как задачи передают данные
 
 Задачи выполняются в разных процессах, а при распределённом запуске — на разных машинах. Обычной переменной между ними не передать. Когда функция `@task` возвращает значение, Airflow сохраняет его в своей базе метаданных как **XCom** (cross-communication), а следующая задача получает его оттуда.
 
@@ -52,7 +59,7 @@ def transform(key: str) -> str:
 
 Значения XCom должны сериализоваться в JSON. Объект SQLAlchemy или открытый файл вернуть нельзя.
 
-## Логическая дата и `ds`
+### Логическая дата и `ds`
 
 У каждого запуска есть **логическая дата** (logical date) — за какой момент он работает. Её можно получить, добавив параметр в функцию задачи:
 
@@ -63,7 +70,7 @@ def transform(key: str) -> str:
 
 **Что изменилось в Airflow 3.** В Airflow 2 запуск по расписанию `@daily` за 28 октября стартовал **после окончания** дня, 29-го в полночь: работа «за интервал данных». В Airflow 3 по умолчанию (`create_cron_data_intervals = False`) cron-расписание запускает DAG в указанный момент, и логическая дата — это момент запуска. Старые статьи и примеры часто описывают поведение Airflow 2, поэтому проверяйте, для какой версии написан материал.
 
-## Расписание
+### Расписание
 
 ```python
 # Варианты параметра schedule в @dag(...)
@@ -91,7 +98,7 @@ def load(stats: list[dict]) -> int: ...
 def weekly_report(): ...
 ```
 
-## Запуски за прошлые даты
+### Запуски за прошлые даты
 
 `start_date` — с какой даты DAG вообще может работать. Если `catchup=True`, при включении DAG Airflow создаст запуски за **все** пропущенные периоды от `start_date` до сегодня. С `start_date` год назад и `@daily` это 365 запусков сразу. Поэтому в примере `catchup=False`: Airflow выполнит только ближайший запуск.
 
@@ -111,15 +118,22 @@ airflow backfill create --dag-id todo_stats --from-date 2026-10-01 --to-date 202
 
 ## Частые ошибки
 
-- **Большие данные в XCom.** Пайплайн работает на тестовых данных и умирает на настоящих. Передавайте ссылки.
-- **`datetime.now()` внутри задачи.** Перезапуск за прошлый день обработает сегодняшние данные.
-- **Меняющийся `start_date`.** `start_date=datetime.now()` сбивает планировщик: дата сдвигается при каждом чтении файла. Указывайте фиксированную дату.
-- **`catchup=True` по умолчанию.** Включили DAG с давним `start_date` — и получили сотни запусков, которые нагрузили и Airflow, и внешний API.
-- **Неполный адрес Asset.** Провайдер PostgreSQL проверяет формат: `Asset('postgres://warehouse/todo_stats')` даст ошибку импорта DAG `URI format postgres:// must contain database, schema, and table names`. Нужен полный адрес: `postgres://хост:порт/база/схема/таблица`.
-- **Примеры для Airflow 2.** Импорты `from airflow.decorators import dag, task`, параметр `schedule_interval` и смысл `execution_date` изменились. В Airflow 3: `from airflow.sdk import dag, task`, `schedule` и `logical_date`.
+- Большие данные в XCom → пайплайн работает на тестовых данных и умирает на настоящих: база метаданных растёт, планировщик тормозит → класть данные в хранилище, а через XCom передавать путь или id.
+- `datetime.now()` внутри задачи → перезапуск за прошлый день обрабатывает сегодняшние данные → брать дату из параметра `ds` или `logical_date`.
+- Меняющийся `start_date` (`start_date=datetime.now()`) → планировщик сбивается: дата сдвигается при каждом чтении файла → указывать фиксированную дату.
+- `catchup=True` по умолчанию → включили DAG с давним `start_date` и получили сотни запусков, которые нагрузили и Airflow, и внешний API → ставить `catchup=False`, а прошлые периоды пересчитывать через `backfill`.
+- Неполный адрес Asset (`Asset('postgres://warehouse/todo_stats')`) → ошибка импорта DAG `URI format postgres:// must contain database, schema, and table names` → указывать полный адрес `postgres://хост:порт/база/схема/таблица`.
+- Примеры для Airflow 2 (`from airflow.decorators import dag, task`, `schedule_interval`, `execution_date`) → код не импортируется или ведёт себя не так, как описано → в Airflow 3 использовать `from airflow.sdk import dag, task`, `schedule` и `logical_date`.
+
+## Когда не использовать
+
+XCom не подходит как канал для самих данных: таблицы, файлы и выгрузки API живут в хранилище ([S3](../../../backend/databases/s3/README.md), база данных), а между задачами передаётся только ссылка на них. Если задачи обмениваются большими объёмами постоянно, стоит пересмотреть границы задач: возможно, это одна задача, а не три.
+
+Расписание Airflow лишнее для одиночной периодической функции внутри приложения: такой случай проще закрыть [Celery beat](../../../backend/frameworks/celery/retries_beat_canvas.md) или системным cron. Airflow окупается, когда задач много, они зависят друг от друга и нужны перезапуски за прошлые даты.
 
 ## Связанные темы
 
 - [Первый DAG](first_dag.md)
+- [Apache Airflow](README.md) — обзор раздела
 - [S3](../../../backend/databases/s3/README.md) — где хранить большие промежуточные данные
 - [Celery: расписание](../../../backend/frameworks/celery/retries_beat_canvas.md)

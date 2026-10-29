@@ -41,6 +41,6 @@ console.log(activeNames) // ['Анна']
 
 ## Связанные разделы
 
-- [Vue.js](../vue/README.md) — компонентный frontend-фреймворк
+- [Vue.js](../../frontend/vue/README.md) — компонентный frontend-фреймворк
 - [HTTP](../../backend/web/http/README.md) — протокол, используемый `fetch` и другими клиентами
 - [Веб-безопасность](../../backend/web/security/README.md) — XSS, CSRF, CORS и защитные заголовки

@@ -1,3 +1,30 @@
+# Установка модулей
+
+Голый Vue-проект умеет только отрисовывать компоненты. Как только появляются несколько страниц, общие данные для разных компонентов и готовые элементы интерфейса, к проекту подключают Vue Router, Pinia и Vuetify. Здесь — команды установки и минимальное подключение каждого модуля в `main.js`; подробный разбор работы с ними — в отдельных заметках.
+
+## Минимальный пример
+
+```bash
+npm install vue-router pinia
+```
+
+```js
+// src/main.js
+import { createApp } from 'vue'
+import { createPinia } from 'pinia'
+import App from './App.vue'
+import router from './router'
+
+const app = createApp(App)
+app.use(createPinia())   // хранилища доступны через useXStore() в любом компоненте
+app.use(router)          // <router-view> и <router-link> доступны в шаблонах
+app.mount('#app')
+```
+
+Плагины подключают до `app.mount`: после монтирования добавить их уже нельзя.
+
+## Как это работает
+
 ### Установка Vue Router
 
 **Vue Router** — это официальный маршрутизатор (router) для Vue.js, который позволяет создавать одностраничные приложения (SPA) с разными “страницами” и навигацией по ним без перезагрузки браузера.
@@ -55,7 +82,9 @@ export const routes = [
 ]
 ```
 
-Попробуй использовать в компоненте `App.vue`:
+Функция `isLoggedIn` в `meta.middlewares` — проверка доступа к маршруту; как её написать и подключить, разобрано в заметке [Добавление Middleware](middleware.md).
+
+Попробуйте использовать в компоненте `App.vue`:
 
 ```vue
 <template>
@@ -68,9 +97,10 @@ export const routes = [
   </div>
 </template>
 ```
+
 ### Установка Pinia
 
-**Pinia** — это современный менеджер состояния (state management library) для **Vue.js** (аналог Vuex, но проще и современнее). С помощью Pinia ты можешь удобно хранить и изменять общие данные, к которым обращаются разные компоненты твоего приложения.
+**Pinia** — это современный менеджер состояния (state management library) для **Vue.js** (аналог Vuex, но проще и современнее). С помощью Pinia можно удобно хранить и изменять общие данные, к которым обращаются разные компоненты приложения.
 
 Подробное описание state, getters, actions и Setup Store находится в разделе [Pinia: управление общим состоянием во Vue](pinia.md).
 
@@ -132,29 +162,30 @@ const counter = useCounterStore()
   </div>
 </template>
 ```
+
 ### Установка Vuetify
 
 **Vuetify** — это популярная библиотека компонентов для фреймворка **Vue.js**, которая реализует стиль и принципы Material Design от Google.
 
-Установи фреймворк vuetify:
+Установите фреймворк vuetify:
 
 ```sh
 npm install vuetify
 ```
 
-Установи плагин:
+Установите плагин:
 
 ```sh
 npm install vite-plugin-vuetify
 ```
 
-Установи пакет для иконок MDI:
+Установите пакет для иконок MDI:
 
 ```sh
 npm install @mdi/font
 ```
 
-Добавь импорты в `main.js`:
+Добавьте импорты в `main.js`:
 
 ```js
 import 'vuetify/styles'
@@ -163,7 +194,7 @@ import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
 ```
 
-Добавь создание объекта в main.js:
+Добавьте создание объекта в main.js:
 
 ```js
 const vuetify = createVuetify({
@@ -235,7 +266,7 @@ export default defineConfig({
 })
 ```
 
-Попробуй использовать компонент:
+Попробуйте использовать компонент:
 
 ```vue
 <template>
@@ -248,3 +279,25 @@ export default defineConfig({
   </v-app>
 </template>
 ```
+
+## Частые ошибки
+
+- `app.use(router)` вызван после `app.mount('#app')` → `<router-view>` остаётся пустым, в консоли `Failed to resolve component: router-view` → подключать все плагины до `mount`.
+- `useCounterStore()` вызван на уровне модуля (например, в `routes.js` при импорте), а не внутри функции → `getActivePinia() was called but there was no active Pinia` → вызывать стор внутри `setup`, обработчика или navigation guard, когда Pinia уже подключена.
+- В `routes.js` используется `isLoggedIn`, но импорта нет → `ReferenceError: isLoggedIn is not defined` при загрузке приложения → импортировать функцию из файла с middleware.
+- Компоненты Vuetify используются без импорта `vuetify/styles` или вне `<v-app>` → кнопки и сетка отрисовываются без стилей, выпадающие списки «ломают» вёрстку → импортировать стили в `main.js` и обернуть корневой шаблон в `<v-app>`.
+- Иконки `mdi-*` показываются пустыми квадратами → не установлен `@mdi/font` или не импортирован `materialdesignicons.css` → поставить пакет, импортировать стили и указать `icons.defaultSet: 'mdi'`.
+
+## Когда не использовать
+
+Vue Router лишний в приложении из одного экрана: виджет, форма или дашборд без переходов обходятся условным рендерингом (`v-if`) и не нуждаются в URL для каждого состояния. Pinia лишняя, пока данные нужны только паре соседних компонентов: передачу «родитель → ребёнок» делайте через `props` и события, а для глубокой вложенности подойдёт `provide` / `inject`.
+
+Vuetify тянет большой набор компонентов и стилей и диктует Material Design. Для небольшого проекта с собственным дизайном проще написать несколько компонентов на обычном CSS или взять легковесную библиотеку без визуального каркаса.
+
+## Связанные темы
+
+- [Установка проекта](install_basic.md) — базовый проект, в который ставятся модули
+- [Vue Router](router.md) — маршруты, параметры и navigation guards
+- [Добавление Middleware](middleware.md) — проверки перед переходом по маршруту
+- [Pinia: управление общим состоянием](pinia.md) — state, getters, actions
+- [Дополнительные модули](extra_modules.md) — Axios, jwt-decode и VueUse
