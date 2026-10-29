@@ -7,6 +7,10 @@
 - [Атаки на браузер и пользователя](browser_attacks.md) — XSS, CSRF, CORS и clickjacking
 - [Атаки на сервер и HTTP-инфраструктуру](server_attacks.md) — SSRF, traversal, smuggling и отказ в обслуживании
 - [Защитные HTTP-заголовки](security_headers.md)
+- [Шифрование, хеширование и пароли](crypto.md) — кодирование, HMAC, AES и подписи, хранение паролей (argon2id, соль, перец)
+- [OAuth 2.0 и OpenID Connect](oauth.md) — вход через внешний сервис, Authorization Code + PKCE, `id_token`; [пример с Keycloak](examples/oauth/README.md)
+- [Двухфакторная аутентификация и капча](mfa.md) — TOTP, резервные коды, WebAuthn, проверка капчи на сервере
+- [Персональные данные](personal_data.md) — 152-ФЗ и GDPR для разработчика, причины утечек, маскирование логов
 
 ## Общий принцип
 

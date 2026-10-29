@@ -190,5 +190,6 @@ PostgreSQL строит граф ожидания, обнаруживает ци
 - [Транзакции и уровни изоляции](docs/transaction.ipynb)
 - [Дополнительные возможности](docs/extra.ipynb)
 - [Проектирование схемы](docs/schema_design.md) — схемы и search_path, bigint или uuid в ключе, timestamptz, text и varchar, внешние ключи, таблица связи многие-ко-многим, идемпотентный DDL-скрипт
+- [Партицирование таблиц](docs/partitioning.md) — RANGE, LIST, HASH, DEFAULT-партиция, отсечение партиций, DETACH и DROP вместо DELETE, ключи и индексы, SQLAlchemy и Alembic, замеры на 5 млн строк
 - [Быстрая загрузка данных](docs/bulk_load.md) — перенос из SQLite пачками, executemany, многострочный INSERT, ON CONFLICT, COPY, индексы при загрузке, замеры
 - [Практические задачи](docs/tasks.ipynb) — дубликаты, NOT IN и NULL, top-N в группе, индексы и EXPLAIN, keyset-пагинация, upsert, потерянные обновления, очередь на SKIP LOCKED, смена типа колонки без простоя

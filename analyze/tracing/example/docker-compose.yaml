@@ -1,0 +1,38 @@
+# docker compose -p kb-tracing up -d --build
+x-app: &app
+  build: .
+  environment: &otel
+    OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318
+    OTEL_TRACES_SAMPLER: parentbased_traceidratio
+    OTEL_TRACES_SAMPLER_ARG: ${SAMPLE_RATIO:-1.0}
+    OTEL_SEMCONV_STABILITY_OPT_IN: http  # новые имена атрибутов: http.request.method и т. д.
+  depends_on: [jaeger]
+
+services:
+  nginx:
+    image: nginx:1.31.8-alpine
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "58080:80"
+    depends_on: [tasks]
+
+  tasks:
+    <<: *app
+    command: uvicorn app.tasks:app --host 0.0.0.0 --port 8000 --no-access-log
+    environment:
+      <<: *otel
+      OTEL_SERVICE_NAME: tasks
+      USERS_URL: http://users:8000
+
+  users:
+    <<: *app
+    command: uvicorn app.users:app --host 0.0.0.0 --port 8000 --no-access-log
+    environment:
+      <<: *otel
+      OTEL_SERVICE_NAME: users
+
+  jaeger:
+    image: jaegertracing/jaeger:2.22.0
+    ports:
+      - "56686:16686"  # веб-интерфейс и HTTP API

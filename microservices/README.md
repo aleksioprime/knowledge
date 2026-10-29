@@ -24,5 +24,6 @@
 - [HTTPX](httpx/README.md) — синхронный/асинхронный HTTP-клиент
 - [API Gateway](api_gateway/README.md) — единая точка входа в систему
 - [Keycloak](keycloak/README.md) — OAuth2/OIDC сервер аутентификации
+- [Контракты между сервисами](contracts.md) — Code First и Design First, JSON Schema, OpenAPI, Protobuf, Avro, совместимость схем, Schema Registry, контрактные тесты
 
 Базовые принципы сетевого взаимодействия вынесены в раздел [Веб-протоколы и инфраструктура](../web/README.md): там описаны HTTP, безопасность, передача файлов и NGINX.

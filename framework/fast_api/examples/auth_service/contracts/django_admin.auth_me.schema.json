@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Что Django-админка ждёт от GET /auth/me",
+  "type": "object",
+  "properties": {
+    "id": {"type": "integer"},
+    "email": {"type": "string"},
+    "roles": {"type": "array", "items": {"type": "string"}}
+  },
+  "required": ["id", "email", "roles"]
+}
